@@ -1,9 +1,10 @@
 import { supabase } from "@/lib/auth/auth-context"
-import { ANALYSIS_RECORDS } from "@/lib/data/analysis-records"
 import type {
 	AnalysisRecord,
 	AuditResultDetail,
+	BrandAnalysisResult,
 	Competitor,
+	CompetitorMention,
 	Project,
 	ProjectPrompt,
 	ProjectSurface,
@@ -275,7 +276,13 @@ export class SupabaseDataService implements IDataService {
 					id, audit_run_id, prompt_id, prompt, surface, provider, model,
 					country, language, device, response, prompt_run_at, is_analysed,
 					collection_method, error_message, brand_mentioned, brand_position,
-					result_sources (id, title, url, domain, snippet, position, is_owned_domain, cited_text)
+					result_sources (id, title, url, domain, snippet, position, is_owned_domain, cited_text),
+					brand_analyses (
+						id, brand_mentioned, position, sentiment, recommendation_type,
+						recommendation_score, visibility_score, best_known_for,
+						pricing_perception, core_claims, differentiators, risks,
+						competitor_mentions (name, domain, mention_count, sentiment, visibility)
+					)
 				`)
 				.order("prompt_run_at", { ascending: false })
 				.limit(100)
@@ -286,6 +293,38 @@ export class SupabaseDataService implements IDataService {
 			return (data as unknown[]).map((row) => {
 				const r = row as Record<string, unknown>
 				const sources = (r.result_sources as Record<string, unknown>[]) || []
+				const baRows = (r.brand_analyses as Record<string, unknown>[]) || []
+				const baRow = baRows[0] || null
+
+				let brandAnalysis: BrandAnalysisResult | null = null
+				if (baRow) {
+					const competitors = (baRow.competitor_mentions as Record<string, unknown>[]) || []
+					brandAnalysis = {
+						brand_mentioned: baRow.brand_mentioned as boolean,
+						position: baRow.position as number | null,
+						sentiment: baRow.sentiment as number,
+						recommendation: {
+							type: baRow.recommendation_type as string,
+							score: baRow.recommendation_score as number,
+						},
+						visibility_score: baRow.visibility_score as number,
+						perception: {
+							bestKnownFor: (baRow.best_known_for as string) || null,
+							pricingPerception: baRow.pricing_perception as string,
+							coreClaims: (baRow.core_claims as string[]) || [],
+							differentiators: (baRow.differentiators as string[]) || [],
+						},
+						competitors: competitors.map((c): CompetitorMention => ({
+							name: c.name as string,
+							domain: (c.domain as string) || null,
+							mention_count: c.mention_count as number,
+							sentiment: c.sentiment as number,
+							visibility: c.visibility as number,
+						})),
+						risks: (baRow.risks as string[]) || [],
+					}
+				}
+
 				return {
 					id: r.id as string,
 					audit_run_id: r.audit_run_id as string,
@@ -315,7 +354,7 @@ export class SupabaseDataService implements IDataService {
 							position: s.position as number | null,
 						}),
 					),
-					brand_analysis: null,
+					brand_analysis: brandAnalysis,
 				}
 			})
 		} catch {

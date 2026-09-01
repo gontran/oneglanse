@@ -10,7 +10,6 @@ import { AppSidebar } from "@/components/layout/app-sidebar"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { isDatabaseMode } from "@/lib/auth/auth-context"
-import { ANALYSIS_RECORDS } from "@/lib/data/analysis-records"
 import { BRAND } from "@/lib/data/brand"
 import { PROMPTS } from "@/lib/data/prompts"
 import { dataService } from "@/lib/services"
@@ -24,7 +23,7 @@ import { useEffect, useMemo, useState } from "react"
 export function DashboardPage() {
 	const [surfaceFilter, setSurfaceFilter] = useState<string>(ALL_SURFACES)
 	const [timeFilter, setTimeFilter] = useState<TimeRange>("all")
-	const [records, setRecords] = useState<AnalysisRecord[]>(isDatabaseMode ? [] : ANALYSIS_RECORDS)
+	const [records, setRecords] = useState<AnalysisRecord[]>([])
 	const [loading, setLoading] = useState(isDatabaseMode)
 
 	useEffect(() => {
@@ -195,9 +194,8 @@ export function DashboardPage() {
 										</TooltipTrigger>
 										<TooltipContent side="right">
 											<p className="max-w-[280px]">
-												Indicateur interne de demonstration. Ne correspond pas a une norme
-												officielle. Calcule a partir de la presence, du sentiment, de la
-												recommendation et du rang.
+												Indicateur calcule a partir des audits. Base sur la presence,
+												le sentiment, la recommandation et le rang de la marque.
 											</p>
 										</TooltipContent>
 									</Tooltip>
