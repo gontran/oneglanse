@@ -1,5 +1,5 @@
-import { createClient, type Session, type User } from "@supabase/supabase-js"
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react"
+import { type Session, type User, createClient } from "@supabase/supabase-js"
+import { type ReactNode, createContext, useContext, useEffect, useState } from "react"
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string
@@ -23,7 +23,11 @@ interface AuthContextValue {
 	profile: { display_name: string | null } | null
 	org: OrgInfo | null
 	loading: boolean
-	signUp: (email: string, password: string, displayName: string) => Promise<{ error: string | null }>
+	signUp: (
+		email: string,
+		password: string,
+		displayName: string,
+	) => Promise<{ error: string | null }>
 	signIn: (email: string, password: string) => Promise<{ error: string | null }>
 	signOut: () => Promise<void>
 	updateDisplayName: (name: string) => Promise<{ error: string | null }>
@@ -119,7 +123,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 			display_name: displayName || null,
 		})
 		if (rpcError) {
-			return { error: "Compte cree mais l'organisation n'a pas pu etre initialisee. Reessayez en vous reconnectant." }
+			return {
+				error:
+					"Compte cree mais l'organisation n'a pas pu etre initialisee. Reessayez en vous reconnectant.",
+			}
 		}
 		const result = rpcData as { organization_id: string; organization_name: string }[]
 		if (result && result.length > 0) {
@@ -154,10 +161,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 	const updateOrganizationName: AuthContextValue["updateOrganizationName"] = async (name) => {
 		if (!org) return { error: "Aucune organisation." }
-		const { error } = await supabase
-			.from("organizations")
-			.update({ name })
-			.eq("id", org.id)
+		const { error } = await supabase.from("organizations").update({ name }).eq("id", org.id)
 		if (error) return { error: error.message }
 		setOrg({ ...org, name })
 		return { error: null }
@@ -165,7 +169,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 	return (
 		<AuthContext.Provider
-			value={{ session, user, profile, org, loading, signUp, signIn, signOut, updateDisplayName, updateOrganizationName }}
+			value={{
+				session,
+				user,
+				profile,
+				org,
+				loading,
+				signUp,
+				signIn,
+				signOut,
+				updateDisplayName,
+				updateOrganizationName,
+			}}
 		>
 			{children}
 		</AuthContext.Provider>

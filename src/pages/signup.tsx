@@ -1,7 +1,7 @@
 import { Favicon } from "@/components/ui/favicon"
-import { BRAND } from "@/lib/data/brand"
 import { isDatabaseMode, useAuth } from "@/lib/auth/auth-context"
-import { Loader2 } from "lucide-react"
+import { BRAND } from "@/lib/data/brand"
+import { Loader as Loader2 } from "lucide-react"
 import { useState } from "react"
 import { Link, Navigate, useNavigate } from "react-router-dom"
 
@@ -43,14 +43,21 @@ export function SignupPage() {
 			<div className="w-full max-w-sm space-y-6">
 				<div className="flex flex-col items-center gap-2">
 					<Favicon domain={BRAND.domain} name={BRAND.name} size="h-10 w-10" />
-					<span className="text-lg font-bold tracking-tight text-gray-950 dark:text-gray-50">PlayVOD</span>
+					<span className="text-lg font-bold tracking-tight text-gray-950 dark:text-gray-50">
+						PlayVOD
+					</span>
 				</div>
 
 				<div className="rounded-[var(--app-radius)] border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-neutral-900">
-					<h1 className="mb-4 text-base font-semibold text-gray-900 dark:text-gray-100">Creer un compte</h1>
+					<h1 className="mb-4 text-base font-semibold text-gray-900 dark:text-gray-100">
+						Creer un compte
+					</h1>
 					<form onSubmit={handleSubmit} className="space-y-3">
 						<div className="space-y-1.5">
-							<label htmlFor="display-name" className="text-[13px] font-medium text-gray-700 dark:text-gray-300">
+							<label
+								htmlFor="display-name"
+								className="text-[13px] font-medium text-gray-700 dark:text-gray-300"
+							>
 								Nom affiche (facultatif)
 							</label>
 							<input
@@ -63,7 +70,10 @@ export function SignupPage() {
 							/>
 						</div>
 						<div className="space-y-1.5">
-							<label htmlFor="signup-email" className="text-[13px] font-medium text-gray-700 dark:text-gray-300">
+							<label
+								htmlFor="signup-email"
+								className="text-[13px] font-medium text-gray-700 dark:text-gray-300"
+							>
 								Email
 							</label>
 							<input
@@ -76,7 +86,10 @@ export function SignupPage() {
 							/>
 						</div>
 						<div className="space-y-1.5">
-							<label htmlFor="signup-password" className="text-[13px] font-medium text-gray-700 dark:text-gray-300">
+							<label
+								htmlFor="signup-password"
+								className="text-[13px] font-medium text-gray-700 dark:text-gray-300"
+							>
 								Mot de passe
 							</label>
 							<input
@@ -90,7 +103,10 @@ export function SignupPage() {
 							/>
 						</div>
 						<div className="space-y-1.5">
-							<label htmlFor="confirm-password" className="text-[13px] font-medium text-gray-700 dark:text-gray-300">
+							<label
+								htmlFor="confirm-password"
+								className="text-[13px] font-medium text-gray-700 dark:text-gray-300"
+							>
 								Confirmer le mot de passe
 							</label>
 							<input

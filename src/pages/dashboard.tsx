@@ -18,15 +18,13 @@ import { filterAnalysisRecords } from "@/lib/utils/filter"
 import { computeDashboardMetrics } from "@/lib/utils/metrics"
 import { ALL_SURFACES, type AnalysisRecord } from "@/types/analysis"
 import type { TimeRange } from "@/types/dashboard"
-import { Info, Loader2 } from "lucide-react"
+import { Info, Loader as Loader2 } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
 
 export function DashboardPage() {
 	const [surfaceFilter, setSurfaceFilter] = useState<string>(ALL_SURFACES)
 	const [timeFilter, setTimeFilter] = useState<TimeRange>("all")
-	const [records, setRecords] = useState<AnalysisRecord[]>(
-		isDatabaseMode ? [] : ANALYSIS_RECORDS,
-	)
+	const [records, setRecords] = useState<AnalysisRecord[]>(isDatabaseMode ? [] : ANALYSIS_RECORDS)
 	const [loading, setLoading] = useState(isDatabaseMode)
 
 	useEffect(() => {
@@ -43,7 +41,9 @@ export function DashboardPage() {
 			}
 		}
 		load()
-		return () => { cancelled = true }
+		return () => {
+			cancelled = true
+		}
 	}, [])
 
 	const metrics = useMemo(() => {

@@ -10,9 +10,18 @@ import {
 	SidebarMenuButton,
 	SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { BRAND } from "@/lib/data/brand"
 import { isDatabaseMode, useAuth } from "@/lib/auth/auth-context"
-import { Globe, LayoutGrid, LogOut, MessageSquare, Settings, TrendingUp, User, Users } from "lucide-react"
+import { BRAND } from "@/lib/data/brand"
+import {
+	Globe,
+	LayoutGrid,
+	LogOut,
+	MessageSquare,
+	Settings,
+	TrendingUp,
+	User,
+	Users,
+} from "lucide-react"
 import { Link, useLocation, useNavigate } from "react-router-dom"
 
 const navItems = [

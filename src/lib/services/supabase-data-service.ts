@@ -281,16 +281,18 @@ export class SupabaseDataService implements IDataService {
 					collection_method: r.collection_method as string | undefined,
 					brand_mentioned: r.brand_mentioned as boolean | null | undefined,
 					brand_position: r.brand_position as number | null | undefined,
-					sources: sources.map((s): SourceRef => ({
-						title: s.title as string,
-						url: s.url as string,
-						cited_text: (s.cited_text as string) || undefined,
-						is_owned_domain: s.is_owned_domain as boolean,
-						is_fictional: false,
-						domain: (s.domain as string) || null,
-						snippet: (s.snippet as string) || null,
-						position: s.position as number | null,
-					})),
+					sources: sources.map(
+						(s): SourceRef => ({
+							title: s.title as string,
+							url: s.url as string,
+							cited_text: (s.cited_text as string) || undefined,
+							is_owned_domain: s.is_owned_domain as boolean,
+							is_fictional: false,
+							domain: (s.domain as string) || null,
+							snippet: (s.snippet as string) || null,
+							position: s.position as number | null,
+						}),
+					),
 					brand_analysis: null,
 				}
 			})
@@ -356,7 +358,10 @@ export class SupabaseDataService implements IDataService {
 		}
 	}
 
-	async runPerplexityAudit(projectId: string, promptId: string): Promise<{ auditRunId: string; auditResultId: string }> {
+	async runPerplexityAudit(
+		projectId: string,
+		promptId: string,
+	): Promise<{ auditRunId: string; auditResultId: string }> {
 		const { data: sessionData } = await supabase.auth.getSession()
 		const token = sessionData.session?.access_token
 		if (!token) throw new Error("Non authentifie.")

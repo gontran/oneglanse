@@ -1,7 +1,7 @@
+import { Favicon } from "@/components/ui/favicon"
 import { isDatabaseMode, useAuth } from "@/lib/auth/auth-context"
 import { BRAND } from "@/lib/data/brand"
-import { Favicon } from "@/components/ui/favicon"
-import { Loader2 } from "lucide-react"
+import { Loader as Loader2 } from "lucide-react"
 import { useState } from "react"
 import { Link, Navigate, useNavigate } from "react-router-dom"
 
@@ -33,14 +33,21 @@ export function LoginPage() {
 			<div className="w-full max-w-sm space-y-6">
 				<div className="flex flex-col items-center gap-2">
 					<Favicon domain={BRAND.domain} name={BRAND.name} size="h-10 w-10" />
-					<span className="text-lg font-bold tracking-tight text-gray-950 dark:text-gray-50">PlayVOD</span>
+					<span className="text-lg font-bold tracking-tight text-gray-950 dark:text-gray-50">
+						PlayVOD
+					</span>
 				</div>
 
 				<div className="rounded-[var(--app-radius)] border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-neutral-900">
-					<h1 className="mb-4 text-base font-semibold text-gray-900 dark:text-gray-100">Connexion</h1>
+					<h1 className="mb-4 text-base font-semibold text-gray-900 dark:text-gray-100">
+						Connexion
+					</h1>
 					<form onSubmit={handleSubmit} className="space-y-3">
 						<div className="space-y-1.5">
-							<label htmlFor="email" className="text-[13px] font-medium text-gray-700 dark:text-gray-300">
+							<label
+								htmlFor="email"
+								className="text-[13px] font-medium text-gray-700 dark:text-gray-300"
+							>
 								Email
 							</label>
 							<input
@@ -53,7 +60,10 @@ export function LoginPage() {
 							/>
 						</div>
 						<div className="space-y-1.5">
-							<label htmlFor="password" className="text-[13px] font-medium text-gray-700 dark:text-gray-300">
+							<label
+								htmlFor="password"
+								className="text-[13px] font-medium text-gray-700 dark:text-gray-300"
+							>
 								Mot de passe
 							</label>
 							<input

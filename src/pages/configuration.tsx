@@ -54,9 +54,9 @@ export function ConfigurationPage() {
 					<h1 className="truncate text-[0.95rem] font-medium tracking-[-0.01em] text-gray-950 dark:text-gray-50">
 						Configuration
 					</h1>
-						<div className="ml-auto">
-							<AuditButton />
-						</div>
+					<div className="ml-auto">
+						<AuditButton />
+					</div>
 				</header>
 
 				<div className="web-app-scroll">

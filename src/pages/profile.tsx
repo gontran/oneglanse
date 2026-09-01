@@ -2,7 +2,7 @@ import { AppSidebar } from "@/components/layout/app-sidebar"
 import { Button } from "@/components/ui/button"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { isDatabaseMode, useAuth } from "@/lib/auth/auth-context"
-import { Check, Loader2, LogOut } from "lucide-react"
+import { Check, Loader as Loader2, LogOut } from "lucide-react"
 import { useState } from "react"
 import { Navigate } from "react-router-dom"
 
@@ -68,11 +68,15 @@ export function ProfilePage() {
 									</h2>
 									<div className="space-y-3">
 										<div className="space-y-1">
-											<span className="text-[11px] font-medium uppercase tracking-wide text-gray-400">Email</span>
+											<span className="text-[11px] font-medium uppercase tracking-wide text-gray-400">
+												Email
+											</span>
 											<p className="text-sm text-gray-700 dark:text-gray-300">{user.email}</p>
 										</div>
 										<div className="space-y-1.5">
-											<span className="text-[11px] font-medium uppercase tracking-wide text-gray-400">Nom affiche</span>
+											<span className="text-[11px] font-medium uppercase tracking-wide text-gray-400">
+												Nom affiche
+											</span>
 											<div className="flex gap-2">
 												<input
 													type="text"
@@ -81,7 +85,11 @@ export function ProfilePage() {
 													className="flex-1 rounded-[var(--app-radius)] border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800 outline-none focus:border-gray-400 dark:border-gray-700 dark:bg-neutral-900 dark:text-gray-200"
 												/>
 												<Button onClick={handleSaveName} disabled={savingName}>
-													{savingName ? <Loader2 className="size-4 animate-spin" /> : nameSaved ? <Check className="size-4 text-green-500" /> : null}
+													{savingName ? (
+														<Loader2 className="size-4 animate-spin" />
+													) : nameSaved ? (
+														<Check className="size-4 text-green-500" />
+													) : null}
 													{nameSaved ? "OK" : "Enregistrer"}
 												</Button>
 											</div>
@@ -95,14 +103,18 @@ export function ProfilePage() {
 									</h2>
 									<div className="space-y-3">
 										<div className="space-y-1">
-											<span className="text-[11px] font-medium uppercase tracking-wide text-gray-400">Role</span>
+											<span className="text-[11px] font-medium uppercase tracking-wide text-gray-400">
+												Role
+											</span>
 											<p className="text-sm text-gray-700 dark:text-gray-300">
 												{isOwner ? "Proprietaire" : "Membre"}
 											</p>
 										</div>
 										{isOwner && (
 											<div className="space-y-1.5">
-												<span className="text-[11px] font-medium uppercase tracking-wide text-gray-400">Nom de l'organisation</span>
+												<span className="text-[11px] font-medium uppercase tracking-wide text-gray-400">
+													Nom de l'organisation
+												</span>
 												<div className="flex gap-2">
 													<input
 														type="text"
@@ -111,7 +123,11 @@ export function ProfilePage() {
 														className="flex-1 rounded-[var(--app-radius)] border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800 outline-none focus:border-gray-400 dark:border-gray-700 dark:bg-neutral-900 dark:text-gray-200"
 													/>
 													<Button onClick={handleSaveOrg} disabled={savingOrg}>
-														{savingOrg ? <Loader2 className="size-4 animate-spin" /> : orgSaved ? <Check className="size-4 text-green-500" /> : null}
+														{savingOrg ? (
+															<Loader2 className="size-4 animate-spin" />
+														) : orgSaved ? (
+															<Check className="size-4 text-green-500" />
+														) : null}
 														{orgSaved ? "OK" : "Enregistrer"}
 													</Button>
 												</div>
@@ -119,7 +135,9 @@ export function ProfilePage() {
 										)}
 										{!isOwner && org && (
 											<div className="space-y-1">
-												<span className="text-[11px] font-medium uppercase tracking-wide text-gray-400">Nom</span>
+												<span className="text-[11px] font-medium uppercase tracking-wide text-gray-400">
+													Nom
+												</span>
 												<p className="text-sm text-gray-700 dark:text-gray-300">{org.name}</p>
 											</div>
 										)}
@@ -131,8 +149,8 @@ export function ProfilePage() {
 								<Button
 									variant="outline"
 									onClick={() => {
-						void signOut()
-					}}
+										void signOut()
+									}}
 								>
 									<LogOut className="size-4" />
 									Se deconnecter

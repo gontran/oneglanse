@@ -14,7 +14,10 @@ export interface IDataService {
 
 	getCompetitors(): Promise<Competitor[]>
 	addCompetitor(name: string, domain: string | null): Promise<Competitor>
-	updateCompetitor(id: string, patch: { name?: string; domain?: string | null }): Promise<Competitor>
+	updateCompetitor(
+		id: string,
+		patch: { name?: string; domain?: string | null },
+	): Promise<Competitor>
 	removeCompetitor(id: string): Promise<void>
 
 	getPrompts(): Promise<ProjectPrompt[]>
@@ -28,7 +31,10 @@ export interface IDataService {
 
 	getAnalysisRecords(): Promise<AnalysisRecord[]>
 	getAuditResult(resultId: string): Promise<AuditResultDetail | null>
-	runPerplexityAudit(projectId: string, promptId: string): Promise<{ auditRunId: string; auditResultId: string }>
+	runPerplexityAudit(
+		projectId: string,
+		promptId: string,
+	): Promise<{ auditRunId: string; auditResultId: string }>
 }
 
 export type AuditRunStatusType = AuditRunStatus

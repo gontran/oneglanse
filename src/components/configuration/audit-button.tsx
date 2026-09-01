@@ -1,6 +1,6 @@
-import { isDatabaseMode, useAuth } from "@/lib/auth/auth-context"
 import { Button } from "@/components/ui/button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import { isDatabaseMode, useAuth } from "@/lib/auth/auth-context"
 import { Play } from "lucide-react"
 
 export function AuditButton({ onClick }: { onClick?: () => void }) {
@@ -11,7 +11,12 @@ export function AuditButton({ onClick }: { onClick?: () => void }) {
 		return (
 			<Tooltip>
 				<TooltipTrigger asChild>
-					<Button disabled variant="default" size="default" className="cursor-not-allowed opacity-60">
+					<Button
+						disabled
+						variant="default"
+						size="default"
+						className="cursor-not-allowed opacity-60"
+					>
 						<Play className="size-4" />
 						Lancer un audit
 					</Button>

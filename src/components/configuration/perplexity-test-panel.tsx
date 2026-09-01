@@ -2,7 +2,15 @@ import { Button } from "@/components/ui/button"
 import { SearchableSelect } from "@/components/ui/searchable-select"
 import { dataService } from "@/lib/services"
 import type { ProjectPrompt } from "@/types/analysis"
-import { AlertTriangle, ArrowRight, CheckCircle2, ExternalLink, Info, Loader2, Play } from "lucide-react"
+import {
+	TriangleAlert as AlertTriangle,
+	ArrowRight,
+	CircleCheck as CheckCircle2,
+	ExternalLink,
+	Info,
+	Loader as Loader2,
+	Play,
+} from "lucide-react"
 import { useState } from "react"
 import { Link } from "react-router-dom"
 
@@ -49,7 +57,9 @@ export function PerplexityTestPanel({ projectId, prompts }: PerplexityTestPanelP
 			</div>
 
 			<div className="space-y-1.5">
-				<span className="text-[13px] font-medium text-gray-700 dark:text-gray-300">Prompt a tester</span>
+				<span className="text-[13px] font-medium text-gray-700 dark:text-gray-300">
+					Prompt a tester
+				</span>
 				{activePrompts.length === 0 ? (
 					<p className="text-sm text-gray-400">Aucun prompt actif. Activez au moins un prompt.</p>
 				) : (
@@ -115,7 +125,8 @@ export function PerplexityTestPanel({ projectId, prompts }: PerplexityTestPanelP
 								Audit complete avec succes
 							</p>
 							<p className="text-[11px] text-green-600 dark:text-green-500">
-								Resultat collecte via l'API Perplexity Sonar. Le contenu peut differe de l'interface grand public.
+								Resultat collecte via l'API Perplexity Sonar. Le contenu peut differe de l'interface
+								grand public.
 							</p>
 						</div>
 					</div>

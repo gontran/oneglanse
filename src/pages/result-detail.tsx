@@ -5,7 +5,7 @@ import { SidebarTrigger } from "@/components/ui/sidebar"
 import { dataService } from "@/lib/services"
 import { formatDateFr } from "@/lib/utils/format"
 import type { AuditResultDetail } from "@/types/analysis"
-import { ArrowLeft, ExternalLink, Info, Loader2 } from "lucide-react"
+import { ArrowLeft, ExternalLink, Info, Loader as Loader2 } from "lucide-react"
 import { useEffect, useState } from "react"
 import { Link, useParams } from "react-router-dom"
 
@@ -32,7 +32,9 @@ export function ResultDetailPage() {
 			}
 		}
 		load()
-		return () => { cancelled = true }
+		return () => {
+			cancelled = true
+		}
 	}, [resultId])
 
 	return (
@@ -71,13 +73,15 @@ export function ResultDetailPage() {
 													API
 												</span>
 											)}
-											<span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-semibold ${
-												result.run_status === "completed"
-													? "bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-400"
-													: result.run_status === "failed"
-														? "bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-400"
-														: "bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400"
-											}`}>
+											<span
+												className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-semibold ${
+													result.run_status === "completed"
+														? "bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-400"
+														: result.run_status === "failed"
+															? "bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-400"
+															: "bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400"
+												}`}
+											>
 												{result.run_status}
 											</span>
 										</div>
@@ -86,25 +90,34 @@ export function ResultDetailPage() {
 											<div className="flex items-start gap-2 rounded-[var(--app-radius)] border border-amber-200 bg-amber-50/60 p-3 dark:border-amber-900/50 dark:bg-amber-950/20">
 												<Info className="mt-0.5 size-4 shrink-0 text-amber-500" />
 												<p className="text-[13px] text-amber-700 dark:text-amber-400">
-													Resultat collecte via l'API Perplexity Sonar. Le contenu peut differe de l'interface grand public.
+													Resultat collecte via l'API Perplexity Sonar. Le contenu peut differe de
+													l'interface grand public.
 												</p>
 											</div>
 										)}
 
 										{result.error_message && (
 											<div className="rounded-[var(--app-radius)] border border-red-200 bg-red-50/60 p-4 dark:border-red-900/50 dark:bg-red-950/20">
-												<p className="text-[13px] font-medium text-red-700 dark:text-red-400">Erreur</p>
-												<p className="mt-1 text-[13px] text-red-600 dark:text-red-500">{result.error_message}</p>
+												<p className="text-[13px] font-medium text-red-700 dark:text-red-400">
+													Erreur
+												</p>
+												<p className="mt-1 text-[13px] text-red-600 dark:text-red-500">
+													{result.error_message}
+												</p>
 											</div>
 										)}
 
 										<section className="rounded-[var(--app-radius)] border border-transparent bg-white p-5 shadow-[0_12px_34px_-24px_rgba(0,0,0,0.22)] dark:bg-neutral-950 dark:shadow-[0_14px_36px_-24px_rgba(0,0,0,0.52)] sm:p-6">
-											<h2 className="mb-3 text-[0.95rem] font-semibold text-gray-950 dark:text-gray-50">Prompt</h2>
+											<h2 className="mb-3 text-[0.95rem] font-semibold text-gray-950 dark:text-gray-50">
+												Prompt
+											</h2>
 											<p className="text-sm text-gray-700 dark:text-gray-300">{result.prompt}</p>
 										</section>
 
 										<section className="rounded-[var(--app-radius)] border border-transparent bg-white p-5 shadow-[0_12px_34px_-24px_rgba(0,0,0,0.22)] dark:bg-neutral-950 dark:shadow-[0_14px_36px_-24px_rgba(0,0,0,0.52)] sm:p-6">
-											<h2 className="mb-3 text-[0.95rem] font-semibold text-gray-950 dark:text-gray-50">Reponse</h2>
+											<h2 className="mb-3 text-[0.95rem] font-semibold text-gray-950 dark:text-gray-50">
+												Reponse
+											</h2>
 											{result.response ? (
 												<MarkdownRenderer content={result.response} />
 											) : (
@@ -113,34 +126,58 @@ export function ResultDetailPage() {
 										</section>
 
 										<section className="rounded-[var(--app-radius)] border border-transparent bg-white p-5 shadow-[0_12px_34px_-24px_rgba(0,0,0,0.22)] dark:bg-neutral-950 dark:shadow-[0_14px_36px_-24px_rgba(0,0,0,0.52)] sm:p-6">
-											<h2 className="mb-3 text-[0.95rem] font-semibold text-gray-950 dark:text-gray-50">Informations</h2>
+											<h2 className="mb-3 text-[0.95rem] font-semibold text-gray-950 dark:text-gray-50">
+												Informations
+											</h2>
 											<div className="grid grid-cols-2 gap-3 text-sm">
 												<div>
-													<span className="text-[11px] font-medium uppercase tracking-wide text-gray-400">Date</span>
-													<p className="text-gray-700 dark:text-gray-300">{formatDateFr(result.prompt_run_at)}</p>
-												</div>
-												<div>
-													<span className="text-[11px] font-medium uppercase tracking-wide text-gray-400">Fournisseur</span>
-													<p className="text-gray-700 dark:text-gray-300">{result.provider}</p>
-												</div>
-												<div>
-													<span className="text-[11px] font-medium uppercase tracking-wide text-gray-400">Modele</span>
-													<p className="text-gray-700 dark:text-gray-300">{result.model}</p>
-												</div>
-												<div>
-													<span className="text-[11px] font-medium uppercase tracking-wide text-gray-400">Methode</span>
-													<p className="text-gray-700 dark:text-gray-300">{result.collection_method}</p>
-												</div>
-												<div>
-													<span className="text-[11px] font-medium uppercase tracking-wide text-gray-400">PlayVOD present</span>
+													<span className="text-[11px] font-medium uppercase tracking-wide text-gray-400">
+														Date
+													</span>
 													<p className="text-gray-700 dark:text-gray-300">
-														{result.brand_mentioned === null ? "Non analyse" : result.brand_mentioned ? "Oui" : "Non"}
+														{formatDateFr(result.prompt_run_at)}
 													</p>
 												</div>
 												<div>
-													<span className="text-[11px] font-medium uppercase tracking-wide text-gray-400">Position</span>
+													<span className="text-[11px] font-medium uppercase tracking-wide text-gray-400">
+														Fournisseur
+													</span>
+													<p className="text-gray-700 dark:text-gray-300">{result.provider}</p>
+												</div>
+												<div>
+													<span className="text-[11px] font-medium uppercase tracking-wide text-gray-400">
+														Modele
+													</span>
+													<p className="text-gray-700 dark:text-gray-300">{result.model}</p>
+												</div>
+												<div>
+													<span className="text-[11px] font-medium uppercase tracking-wide text-gray-400">
+														Methode
+													</span>
 													<p className="text-gray-700 dark:text-gray-300">
-														{result.brand_position === null ? "Non calculable" : result.brand_position}
+														{result.collection_method}
+													</p>
+												</div>
+												<div>
+													<span className="text-[11px] font-medium uppercase tracking-wide text-gray-400">
+														PlayVOD present
+													</span>
+													<p className="text-gray-700 dark:text-gray-300">
+														{result.brand_mentioned === null
+															? "Non analyse"
+															: result.brand_mentioned
+																? "Oui"
+																: "Non"}
+													</p>
+												</div>
+												<div>
+													<span className="text-[11px] font-medium uppercase tracking-wide text-gray-400">
+														Position
+													</span>
+													<p className="text-gray-700 dark:text-gray-300">
+														{result.brand_position === null
+															? "Non calculable"
+															: result.brand_position}
 													</p>
 												</div>
 											</div>
@@ -148,7 +185,9 @@ export function ResultDetailPage() {
 
 										{result.usage_data && (
 											<section className="rounded-[var(--app-radius)] border border-transparent bg-white p-5 shadow-[0_12px_34px_-24px_rgba(0,0,0,0.22)] dark:bg-neutral-950 dark:shadow-[0_14px_36px_-24px_rgba(0,0,0,0.52)] sm:p-6">
-												<h2 className="mb-3 text-[0.95rem] font-semibold text-gray-950 dark:text-gray-50">Usage et cout</h2>
+												<h2 className="mb-3 text-[0.95rem] font-semibold text-gray-950 dark:text-gray-50">
+													Usage et cout
+												</h2>
 												<pre className="overflow-x-auto rounded-[var(--app-radius)] bg-stone-50 p-3 text-xs text-gray-600 dark:bg-neutral-900 dark:text-gray-400">
 													{JSON.stringify(result.usage_data, null, 2)}
 												</pre>
@@ -161,10 +200,15 @@ export function ResultDetailPage() {
 													Citations ({result.sources.length})
 												</h2>
 												<div className="space-y-2">
-													{result.sources.map((source, i) => (
-														<div key={i} className="rounded-[var(--app-radius)] border border-gray-100 p-3 dark:border-gray-800">
+													{result.sources.map((source, index) => (
+														<div
+															key={source.url}
+															className="rounded-[var(--app-radius)] border border-gray-100 p-3 dark:border-gray-800"
+														>
 															<div className="flex items-center justify-between gap-2">
-																<span className="text-xs font-medium text-gray-500">#{source.position ?? i + 1}</span>
+																<span className="text-xs font-medium text-gray-500">
+																	#{source.position ?? index + 1}
+																</span>
 																{source.is_owned_domain && (
 																	<span className="rounded-full bg-green-100 px-2 py-0.5 text-[9px] font-semibold text-green-700 dark:bg-green-950/40 dark:text-green-400">
 																		Domaine propre
@@ -181,7 +225,9 @@ export function ResultDetailPage() {
 																<ExternalLink className="size-3 shrink-0" />
 															</a>
 															{source.snippet && (
-																<p className="mt-1 text-xs text-gray-500 dark:text-gray-400">{source.snippet}</p>
+																<p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+																	{source.snippet}
+																</p>
 															)}
 														</div>
 													))}
