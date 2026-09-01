@@ -1,4 +1,4 @@
-import { DashboardBrowserPreview } from "@/components/previews/dashboard-browser-preview";
+import { DashboardBrowserPreview } from "@/components/previews/dashboard-browser-preview"
 
 export function HeroSection(): React.JSX.Element {
 	return (
@@ -9,9 +9,9 @@ export function HeroSection(): React.JSX.Element {
 						The Open-Source AI Visibility & GEO Tracker.
 					</h1>
 					<p className="mt-4 max-w-xl text-sm leading-6 text-muted-foreground sm:text-base">
-						Free and open source. Track how your brand appears inside ChatGPT,
-						Gemini, Perplexity, Claude, and Google AI Overview while using your
-						own accounts, on your own infrastructure.
+						Free and open source. Track how your brand appears inside ChatGPT, Gemini, Perplexity,
+						Claude, and Google AI Overview while using your own accounts, on your own
+						infrastructure.
 					</p>
 				</div>
 
@@ -20,5 +20,5 @@ export function HeroSection(): React.JSX.Element {
 				</div>
 			</div>
 		</section>
-	);
+	)
 }

@@ -1,4 +1,4 @@
-import { BaseError } from "./BaseError.js";
+import { BaseError } from "./BaseError.js"
 
 export class EnvError extends BaseError {
 	constructor(
@@ -10,6 +10,6 @@ export class EnvError extends BaseError {
 			code: "ENV_ERROR",
 			status: 500,
 			meta: { variable, ...meta },
-		});
+		})
 	}
 }

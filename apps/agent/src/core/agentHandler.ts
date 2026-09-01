@@ -1,15 +1,11 @@
-import type {
-	AskPromptResult,
-	PromptPayload,
-	Provider,
-} from "@oneglanse/types";
+import type { AskPromptResult, PromptPayload, Provider } from "@oneglanse/types"
 import {
 	type AgentFactory,
 	type AttemptExecutor,
 	type BrowserAttempt,
 	runWithRetryCycles,
-} from "../lib/browser/proxy/runner.js";
-import { runWithProvider } from "../lib/providerContext.js";
+} from "../lib/browser/proxy/runner.js"
+import { runWithProvider } from "../lib/providerContext.js"
 
 export async function agentHandler(
 	label: string,
@@ -17,11 +13,11 @@ export async function agentHandler(
 	payload: PromptPayload,
 	provider: Provider,
 	options?: {
-		executor?: AttemptExecutor;
-		signal?: AbortSignal;
-		onAttemptStart?: (attempt: BrowserAttempt) => void | Promise<void>;
-		onAttemptComplete?: () => void | Promise<void>;
-		onPromptProgress?: (current: number, total: number) => Promise<void>;
+		executor?: AttemptExecutor
+		signal?: AbortSignal
+		onAttemptStart?: (attempt: BrowserAttempt) => void | Promise<void>
+		onAttemptComplete?: () => void | Promise<void>
+		onPromptProgress?: (current: number, total: number) => Promise<void>
 	},
 ): Promise<AskPromptResult[]> {
 	return runWithProvider(provider, async () => {
@@ -31,6 +27,6 @@ export async function agentHandler(
 			onAttemptStart: options?.onAttemptStart,
 			onAttemptComplete: options?.onAttemptComplete,
 			onPromptProgress: options?.onPromptProgress,
-		});
-	});
+		})
+	})
 }

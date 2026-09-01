@@ -1,4 +1,4 @@
-import { clickhouse } from "@oneglanse/db";
+import { clickhouse } from "@oneglanse/db"
 
 /**
  * Clears derived analysis data for a workspace while preserving raw prompt responses.
@@ -6,9 +6,9 @@ import { clickhouse } from "@oneglanse/db";
  * - Resets analytics.prompt_responses.is_analysed to false
  */
 export async function resetWorkspaceAnalysis(args: {
-	workspaceId: string;
+	workspaceId: string
 }): Promise<void> {
-	const { workspaceId } = args;
+	const { workspaceId } = args
 
 	await clickhouse.command({
 		query: `
@@ -16,7 +16,7 @@ export async function resetWorkspaceAnalysis(args: {
             DELETE WHERE workspace_id = {workspaceId:String}
         `,
 		query_params: { workspaceId },
-	});
+	})
 
 	await clickhouse.command({
 		query: `
@@ -25,5 +25,5 @@ export async function resetWorkspaceAnalysis(args: {
             WHERE workspace_id = {workspaceId:String}
         `,
 		query_params: { workspaceId },
-	});
+	})
 }

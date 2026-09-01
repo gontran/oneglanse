@@ -1,10 +1,6 @@
-import type { Source } from "@oneglanse/types";
-import type { Locator, Page } from "playwright";
-import {
-	type RawSource,
-	buildSources,
-	clickButtonViaDispatch,
-} from "../../_shared/sourceUtils.js";
+import type { Source } from "@oneglanse/types"
+import type { Locator, Page } from "playwright"
+import { type RawSource, buildSources, clickButtonViaDispatch } from "../../_shared/sourceUtils.js"
 
 export const GEMINI_RAW_SOURCES_DOM_EXTRACTOR = String.raw`(_helpers) => {
 	const results = [];
@@ -54,7 +50,7 @@ export const GEMINI_RAW_SOURCES_DOM_EXTRACTOR = String.raw`(_helpers) => {
 	}
 
 	return results;
-}`;
+}`
 
 export async function extractSourcesFromGemini(
 	page: Page,
@@ -62,10 +58,10 @@ export async function extractSourcesFromGemini(
 ): Promise<Source[]> {
 	const rawSources = (await page.runDomOp("raw-sources", {
 		provider: "gemini",
-	})) as RawSource[];
+	})) as RawSource[]
 
-	if (!(await clickButtonViaDispatch(page, sourcesButton))) return [];
-	await page.waitForTimeout(300);
+	if (!(await clickButtonViaDispatch(page, sourcesButton))) return []
+	await page.waitForTimeout(300)
 
-	return buildSources(rawSources, { provider: "gemini" });
+	return buildSources(rawSources, { provider: "gemini" })
 }

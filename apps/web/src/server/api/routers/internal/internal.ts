@@ -1,9 +1,9 @@
-import "server-only";
+import "server-only"
 
-import { createTRPCRouter } from "@/server/api/trpc";
-import { z } from "zod";
-import { internalProcedure } from "../../procedures";
-import { submitAgentRun } from "../_shared/submitAgentRun";
+import { createTRPCRouter } from "@/server/api/trpc"
+import { z } from "zod"
+import { internalProcedure } from "../../procedures"
+import { submitAgentRun } from "../_shared/submitAgentRun"
 
 export const internalRouter = createTRPCRouter({
 	runPrompts: internalProcedure
@@ -14,7 +14,7 @@ export const internalRouter = createTRPCRouter({
 			}),
 		)
 		.mutation(async ({ input }) => {
-			const { workspaceId, userId } = input;
-			return submitAgentRun({ workspaceId, userId });
+			const { workspaceId, userId } = input
+			return submitAgentRun({ workspaceId, userId })
 		}),
-});
+})

@@ -1,14 +1,14 @@
-import { z } from "zod";
+import { z } from "zod"
 
 const asNumber = (fallback: number) =>
 	z.preprocess((value) => {
-		if (typeof value === "number") return value;
-		if (typeof value !== "string") return fallback;
-		const trimmed = value.trim();
-		if (!trimmed) return fallback;
-		const parsed = Number(trimmed);
-		return Number.isFinite(parsed) ? parsed : fallback;
-	}, z.number());
+		if (typeof value === "number") return value
+		if (typeof value !== "string") return fallback
+		const trimmed = value.trim()
+		if (!trimmed) return fallback
+		const parsed = Number(trimmed)
+		return Number.isFinite(parsed) ? parsed : fallback
+	}, z.number())
 
 const ServicesEnvSchema = z.object({
 	REDIS_HOST: z.string().trim().default("redis"),
@@ -19,6 +19,6 @@ const ServicesEnvSchema = z.object({
 	OPENAI_API_KEY: z.string().optional(),
 	ANTHROPIC_API_KEY: z.string().optional(),
 	ANALYSIS_LLM_PROVIDER: z.enum(["openai", "claude"]).default("openai"),
-});
+})
 
-export const env = ServicesEnvSchema.parse(process.env);
+export const env = ServicesEnvSchema.parse(process.env)

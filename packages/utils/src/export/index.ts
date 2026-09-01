@@ -1,4 +1,4 @@
 export {
 	buildAnalysisCsvRow,
 	buildDetailedAnalysisCsvRow,
-} from "./buildAnalysisCsvRow.js";
+} from "./buildAnalysisCsvRow.js"

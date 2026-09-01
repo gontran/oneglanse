@@ -1,21 +1,20 @@
-import "server-only";
+import "server-only"
 
-import { timingSafeEqual } from "crypto";
-import { AuthError } from "@oneglanse/errors";
-import { env } from "@/env";
-import { t } from "../trpc";
+import { timingSafeEqual } from "node:crypto"
+import { env } from "@/env"
+import { AuthError } from "@oneglanse/errors"
+import { t } from "../trpc"
 
 export const isInternal = t.middleware(({ next, ctx }) => {
-	const secret = env.INTERNAL_CRON_SECRET;
-	if (!secret) throw new Error("INTERNAL_CRON_SECRET not configured");
+	const secret = env.INTERNAL_CRON_SECRET
+	if (!secret) throw new Error("INTERNAL_CRON_SECRET not configured")
 
-	const auth = ctx.headers.get("Authorization")?.trim() ?? "";
-	const expected = `Bearer ${secret}`;
+	const auth = ctx.headers.get("Authorization")?.trim() ?? ""
+	const expected = `Bearer ${secret}`
 
 	const match =
-		auth.length === expected.length &&
-		timingSafeEqual(Buffer.from(auth), Buffer.from(expected));
+		auth.length === expected.length && timingSafeEqual(Buffer.from(auth), Buffer.from(expected))
 
-	if (!match) throw new AuthError("Cron Secret is missing or invalid.");
-	return next();
-});
+	if (!match) throw new AuthError("Cron Secret is missing or invalid.")
+	return next()
+})

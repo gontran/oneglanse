@@ -1,7 +1,7 @@
-import type { AnalysisInputSingle } from "@oneglanse/types";
+import type { AnalysisInputSingle } from "@oneglanse/types"
 
 export function analysisPrompt(input: AnalysisInputSingle): string {
-	const { prompt, response, brandDomain, brandName } = input;
+	const { prompt, response, brandDomain, brandName } = input
 
 	return `
 You are a precision instrument for Generative Engine Optimization (GEO) analysis. Your task: analyze exactly how "${brandName}" (${brandDomain}) appears in an LLM-generated response. You must produce perfectly calibrated, evidence-backed metrics.
@@ -437,5 +437,5 @@ Respond with ONLY valid JSON. No markdown code fences. No preamble. No trailing 
         ]
     }
 }
-`;
+`
 }

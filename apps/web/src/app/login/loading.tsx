@@ -1,5 +1,5 @@
-import { AuthPageLoading } from "@/components/auth/auth-page-loading";
+import { AuthPageLoading } from "@/components/auth/auth-page-loading"
 
 export default function Loading() {
-	return <AuthPageLoading />;
+	return <AuthPageLoading />
 }

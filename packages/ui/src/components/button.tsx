@@ -1,11 +1,11 @@
-"use client";
+"use client"
 
-import { Slot } from "@radix-ui/react-slot";
-import { cva } from "class-variance-authority";
-import type { VariantProps } from "class-variance-authority";
-import type * as React from "react";
+import { Slot } from "@radix-ui/react-slot"
+import { cva } from "class-variance-authority"
+import type { VariantProps } from "class-variance-authority"
+import type * as React from "react"
 
-import { cn } from "@oneglanse/utils";
+import { cn } from "@oneglanse/utils"
 
 const buttonVariants = cva(
 	"cursor-pointer inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[var(--app-radius)] border text-sm font-medium transition-[box-shadow,background-color,color,border-color,opacity] duration-200 ease-out disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none aria-invalid:border-destructive motion-reduce:transition-none",
@@ -25,8 +25,7 @@ const buttonVariants = cva(
 				link: "text-primary underline-offset-4 hover:underline hover:translate-y-0",
 			},
 			size: {
-				default:
-					"h-8 px-3 py-2 text-[13px] has-[>svg]:px-2.5 sm:h-9 sm:px-3.5 sm:text-sm",
+				default: "h-8 px-3 py-2 text-[13px] has-[>svg]:px-2.5 sm:h-9 sm:px-3.5 sm:text-sm",
 				sm: "h-7 gap-1.5 px-2.5 text-[13px] has-[>svg]:px-2 sm:h-8 sm:px-3 sm:text-sm",
 				lg: "h-8 px-4 text-[13px] has-[>svg]:px-3 sm:h-9 sm:px-4.5 sm:text-sm",
 				icon: "size-7 sm:size-8",
@@ -37,7 +36,7 @@ const buttonVariants = cva(
 			size: "default",
 		},
 	},
-);
+)
 
 function Button({
 	className,
@@ -47,9 +46,9 @@ function Button({
 	...props
 }: React.ComponentProps<"button"> &
 	VariantProps<typeof buttonVariants> & {
-		asChild?: boolean;
+		asChild?: boolean
 	}) {
-	const Comp = asChild ? Slot : "button";
+	const Comp = asChild ? Slot : "button"
 
 	return (
 		<Comp
@@ -57,7 +56,7 @@ function Button({
 			className={cn(buttonVariants({ variant, size, className }))}
 			{...props}
 		/>
-	);
+	)
 }
 
-export { Button, buttonVariants };
+export { Button, buttonVariants }

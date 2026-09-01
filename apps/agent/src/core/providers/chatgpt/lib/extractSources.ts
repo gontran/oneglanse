@@ -1,10 +1,6 @@
-import type { Source } from "@oneglanse/types";
-import type { Locator, Page } from "playwright";
-import {
-	type RawSource,
-	buildSources,
-	clickButtonViaDispatch,
-} from "../../_shared/sourceUtils.js";
+import type { Source } from "@oneglanse/types"
+import type { Locator, Page } from "playwright"
+import { type RawSource, buildSources, clickButtonViaDispatch } from "../../_shared/sourceUtils.js"
 
 export const CHATGPT_RAW_SOURCES_DOM_EXTRACTOR = String.raw`(_helpers) => {
 	const results = [];
@@ -55,7 +51,7 @@ export const CHATGPT_RAW_SOURCES_DOM_EXTRACTOR = String.raw`(_helpers) => {
 	}
 
 	return results;
-}`;
+}`
 
 export async function extractSourcesFromChatgpt(
 	page: Page,
@@ -63,10 +59,10 @@ export async function extractSourcesFromChatgpt(
 ): Promise<Source[]> {
 	const rawSources = (await page.runDomOp("raw-sources", {
 		provider: "chatgpt",
-	})) as RawSource[];
+	})) as RawSource[]
 
-	if (!(await clickButtonViaDispatch(page, sourcesButton))) return [];
-	await page.waitForTimeout(300);
+	if (!(await clickButtonViaDispatch(page, sourcesButton))) return []
+	await page.waitForTimeout(300)
 
-	return buildSources(rawSources, { provider: "chatgpt" });
+	return buildSources(rawSources, { provider: "chatgpt" })
 }

@@ -4,7 +4,7 @@
  * `err instanceof Error` is not guaranteed inside catch blocks.
  */
 export function toErrorMessage(err: unknown): string {
-	if (err instanceof Error) return err.message;
-	if (typeof err === "string") return err;
-	return String(err);
+	if (err instanceof Error) return err.message
+	if (typeof err === "string") return err
+	return String(err)
 }

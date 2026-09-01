@@ -1,12 +1,12 @@
-import "./globals.css";
-import { Analytics } from "@vercel/analytics/next";
-import type { Metadata } from "next";
-import { Geist } from "next/font/google";
+import "./globals.css"
+import { Analytics } from "@vercel/analytics/next"
+import type { Metadata } from "next"
+import { Geist } from "next/font/google"
 
 const geist = Geist({
 	subsets: ["latin"],
 	variable: "--font-geist-sans",
-});
+})
 
 export const metadata: Metadata = {
 	metadataBase: new URL("https://oneglanse.com"),
@@ -82,7 +82,7 @@ export const metadata: Metadata = {
 			"OneGlanse is the open-source GEO tracker that monitors how your brand appears in ChatGPT, Gemini, Perplexity, Claude, and Google AI Overview. Self-hosted, free to run, your data stays on your machine.",
 		images: ["/twitter-image"],
 	},
-};
+}
 
 const jsonLd = {
 	"@context": "https://schema.org",
@@ -108,7 +108,7 @@ const jsonLd = {
 	},
 	keywords:
 		"GEO, generative engine optimization, AI visibility, AI tracking, ChatGPT tracking, open source, self-hosted",
-};
+}
 
 export default function RootLayout({
 	children,
@@ -125,5 +125,5 @@ export default function RootLayout({
 				<Analytics />
 			</body>
 		</html>
-	);
+	)
 }

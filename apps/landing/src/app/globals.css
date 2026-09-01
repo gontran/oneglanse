@@ -10,8 +10,8 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-	--font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif,
-		"Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+	--font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
+		"Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 }
 
 @theme inline {
@@ -96,19 +96,13 @@
 	body {
 		@apply bg-background text-foreground;
 		margin: 0;
-		background: radial-gradient(
-				circle at top,
-				rgba(241, 245, 249, 0.9),
-				transparent 42%
-			), linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+		background: radial-gradient(circle at top, rgba(241, 245, 249, 0.9), transparent 42%),
+			linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
 	}
 
 	.dark body {
-		background: radial-gradient(
-				circle at top,
-				rgba(38, 38, 38, 0.65),
-				transparent 34%
-			), linear-gradient(180deg, #111111 0%, #0a0a0a 100%);
+		background: radial-gradient(circle at top, rgba(38, 38, 38, 0.65), transparent 34%),
+			linear-gradient(180deg, #111111 0%, #0a0a0a 100%);
 	}
 }
 

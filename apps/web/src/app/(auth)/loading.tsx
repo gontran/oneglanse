@@ -1,4 +1,4 @@
-import { Skeleton } from "@oneglanse/ui";
+import { Skeleton } from "@oneglanse/ui"
 
 const CARD_SKELETON_KEYS = [
 	"card-skeleton-1",
@@ -7,7 +7,7 @@ const CARD_SKELETON_KEYS = [
 	"card-skeleton-4",
 	"card-skeleton-5",
 	"card-skeleton-6",
-] as const;
+] as const
 
 export default function Loading() {
 	return (
@@ -23,12 +23,9 @@ export default function Loading() {
 			</div>
 			<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
 				{CARD_SKELETON_KEYS.map((key) => (
-					<Skeleton
-						key={key}
-						className="h-40 w-full rounded-[var(--app-radius)]"
-					/>
+					<Skeleton key={key} className="h-40 w-full rounded-[var(--app-radius)]" />
 				))}
 			</div>
 		</div>
-	);
+	)
 }

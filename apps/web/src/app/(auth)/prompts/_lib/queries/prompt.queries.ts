@@ -1,4 +1,4 @@
-import { api } from "@/trpc/react";
+import { api } from "@/trpc/react"
 
 export function useUserPrompts(workspaceId: string) {
 	return api.prompt.fetchUserPrompts.useQuery(
@@ -9,7 +9,7 @@ export function useUserPrompts(workspaceId: string) {
 			gcTime: 10 * 60 * 1000,
 			refetchOnWindowFocus: true,
 		},
-	);
+	)
 }
 
 export function usePromptSources(workspaceId: string) {
@@ -22,7 +22,7 @@ export function usePromptSources(workspaceId: string) {
 			gcTime: 10 * 60 * 1000,
 			refetchOnWindowFocus: true,
 		},
-	);
+	)
 }
 
 export function useFetchAnalysedPrompts(workspaceId: string) {
@@ -36,5 +36,5 @@ export function useFetchAnalysedPrompts(workspaceId: string) {
 			refetchInterval: 60000, // Poll every 60s — users expect live analysis results
 			refetchIntervalInBackground: false,
 		},
-	);
+	)
 }

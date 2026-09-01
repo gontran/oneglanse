@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata } from "next"
 
 export const appIcons: Metadata["icons"] = {
 	icon: [
@@ -25,4 +25,4 @@ export const appIcons: Metadata["icons"] = {
 			type: "image/png",
 		},
 	],
-};
+}

@@ -3,8 +3,8 @@ import {
 	PREVIEW_BRAND_METRICS,
 	PREVIEW_COMPETITORS,
 	PREVIEW_TOTAL_RESPONSES,
-} from "@/lib/preview-data";
-import { BrandComparisonChart } from "@oneglanse/ui";
+} from "@/lib/preview-data"
+import { BrandComparisonChart } from "@oneglanse/ui"
 
 export function AiVisibilityPreview(): React.JSX.Element {
 	return (
@@ -19,5 +19,5 @@ export function AiVisibilityPreview(): React.JSX.Element {
 				brandAvgRank={PREVIEW_BRAND_METRICS.avgRank}
 			/>
 		</div>
-	);
+	)
 }

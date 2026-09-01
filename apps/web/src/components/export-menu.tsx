@@ -1,14 +1,14 @@
-"use client";
+"use client"
 
-import { formToolbarButtonClassName } from "@/components/forms/auth-form-chrome";
+import { formToolbarButtonClassName } from "@/components/forms/auth-form-chrome"
 import {
 	Button,
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuTrigger,
-} from "@oneglanse/ui";
-import { Download } from "lucide-react";
+} from "@oneglanse/ui"
+import { Download } from "lucide-react"
 
 export function ExportMenu({
 	onExportJson,
@@ -16,10 +16,10 @@ export function ExportMenu({
 	disabled = false,
 	className,
 }: {
-	onExportJson: () => void;
-	onExportCsv: () => void;
-	disabled?: boolean;
-	className?: string;
+	onExportJson: () => void
+	onExportCsv: () => void
+	disabled?: boolean
+	className?: string
 }) {
 	return (
 		<DropdownMenu>
@@ -42,5 +42,5 @@ export function ExportMenu({
 				<DropdownMenuItem onClick={onExportCsv}>Export CSV</DropdownMenuItem>
 			</DropdownMenuContent>
 		</DropdownMenu>
-	);
+	)
 }

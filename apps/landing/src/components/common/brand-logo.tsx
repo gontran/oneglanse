@@ -1,11 +1,11 @@
-import { cn } from "@oneglanse/utils";
+import { cn } from "@oneglanse/utils"
 
 type BrandLogoProps = {
-	alt?: string;
-	className?: string;
-	darkClassName?: string;
-	lightClassName?: string;
-};
+	alt?: string
+	className?: string
+	darkClassName?: string
+	lightClassName?: string
+}
 
 export function BrandLogo({
 	alt = "OneGlanse",
@@ -23,12 +23,8 @@ export function BrandLogo({
 			<img
 				src="/logo-dark.png"
 				alt={alt}
-				className={cn(
-					"hidden object-contain dark:block",
-					className,
-					darkClassName,
-				)}
+				className={cn("hidden object-contain dark:block", className, darkClassName)}
 			/>
 		</>
-	);
+	)
 }

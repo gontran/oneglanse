@@ -1,5 +1,5 @@
-import typography from "@tailwindcss/typography";
-import type { Config } from "tailwindcss";
+import typography from "@tailwindcss/typography"
+import type { Config } from "tailwindcss"
 
 const config: Config = {
 	darkMode: "class",
@@ -12,6 +12,6 @@ const config: Config = {
 		extend: {},
 	},
 	plugins: [typography],
-};
+}
 
-export default config;
+export default config

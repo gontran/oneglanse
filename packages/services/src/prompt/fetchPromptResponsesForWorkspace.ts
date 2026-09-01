@@ -1,13 +1,10 @@
-import { clickhouse } from "@oneglanse/db";
-import type {
-	FetchPromptResponsesForWorkspaceArgs,
-	PromptResponse,
-} from "@oneglanse/types";
+import { clickhouse } from "@oneglanse/db"
+import type { FetchPromptResponsesForWorkspaceArgs, PromptResponse } from "@oneglanse/types"
 
 export async function fetchPromptResponsesForWorkspace(
 	args: FetchPromptResponsesForWorkspaceArgs,
 ): Promise<PromptResponse[]> {
-	const { workspaceId } = args;
+	const { workspaceId } = args
 
 	const result = await clickhouse.query({
 		query: `
@@ -17,8 +14,8 @@ export async function fetchPromptResponsesForWorkspace(
       `,
 		query_params: { workspaceId },
 		format: "JSONEachRow",
-	});
+	})
 
-	const responses: PromptResponse[] = (await result.json()) as PromptResponse[];
-	return responses;
+	const responses: PromptResponse[] = (await result.json()) as PromptResponse[]
+	return responses
 }

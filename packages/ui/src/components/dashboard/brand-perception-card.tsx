@@ -1,5 +1,5 @@
-import { BadgeDollarSign, Lightbulb, Tags } from "lucide-react";
-import { Card } from "../card.js";
+import { BadgeDollarSign, Lightbulb, Tags } from "lucide-react"
+import { Card } from "../card.js"
 
 const pricingLabels: Record<string, string> = {
 	premium: "Premium",
@@ -7,7 +7,7 @@ const pricingLabels: Record<string, string> = {
 	budget: "Budget",
 	free: "Free",
 	not_mentioned: "Not mentioned",
-};
+}
 
 export function BrandPerceptionCard({
 	bestKnownFor,
@@ -15,10 +15,10 @@ export function BrandPerceptionCard({
 	coreClaims,
 	differentiators,
 }: {
-	bestKnownFor: string | null;
-	pricingPerception: string;
-	coreClaims: string[];
-	differentiators: string[];
+	bestKnownFor: string | null
+	pricingPerception: string
+	coreClaims: string[]
+	differentiators: string[]
 }) {
 	return (
 		<Card className="flex h-full min-w-0 flex-col p-5 lg:p-6">
@@ -26,9 +26,7 @@ export function BrandPerceptionCard({
 				<h1 className="mt-2 text-base font-semibold leading-none tracking-tight text-gray-900 sm:text-lg dark:text-gray-100">
 					AI Perception
 				</h1>
-				<p className="mt-2 text-xs text-muted-foreground">
-					What large models say most about you.
-				</p>
+				<p className="mt-2 text-xs text-muted-foreground">What large models say most about you.</p>
 			</div>
 
 			<div className="flex min-w-0 flex-1 flex-col gap-3.5">
@@ -97,5 +95,5 @@ export function BrandPerceptionCard({
 				)}
 			</div>
 		</Card>
-	);
+	)
 }

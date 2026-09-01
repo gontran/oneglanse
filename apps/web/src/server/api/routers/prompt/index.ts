@@ -1,1 +1,1 @@
-export { promptRouter } from "./prompt";
+export { promptRouter } from "./prompt"

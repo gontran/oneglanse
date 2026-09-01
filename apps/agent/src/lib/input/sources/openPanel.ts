@@ -1,5 +1,5 @@
-import type { Locator, Page } from "playwright";
-import { clickButtonViaDispatch } from "../../extraction/sourceUtils.js";
+import type { Locator, Page } from "playwright"
+import { clickButtonViaDispatch } from "../../extraction/sourceUtils.js"
 
 /**
  * Clicks the sources button to open the panel, then waits for it to animate in.
@@ -12,10 +12,10 @@ export async function openSourcesPanel(page: Page, btn: Locator): Promise<void> 
 		.scrollIntoViewIfNeeded()
 		.then(() => btn.click({ timeout: 3000 }))
 		.then(() => true)
-		.catch(() => false);
+		.catch(() => false)
 
 	if (!clicked) {
-		if (!(await clickButtonViaDispatch(page, btn))) return;
+		if (!(await clickButtonViaDispatch(page, btn))) return
 	}
-	await page.waitForTimeout(500);
+	await page.waitForTimeout(500)
 }

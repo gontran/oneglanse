@@ -1,5 +1,5 @@
-import { AggregateStatsRow } from "@oneglanse/ui";
-import { PREVIEW_AGGREGATE_STATS } from "@/lib/preview-data";
+import { PREVIEW_AGGREGATE_STATS } from "@/lib/preview-data"
+import { AggregateStatsRow } from "@oneglanse/ui"
 
 export function DashboardBrowserPreview(): React.JSX.Element {
 	return (
@@ -13,5 +13,5 @@ export function DashboardBrowserPreview(): React.JSX.Element {
 				className="grid-cols-1 sm:grid-cols-2 xl:grid-cols-2"
 			/>
 		</div>
-	);
+	)
 }

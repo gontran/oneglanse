@@ -1,13 +1,10 @@
-import { clickhouse } from "@oneglanse/db";
-import type {
-	FetchUserPromptsForWorkspaceArgs,
-	UserPrompt,
-} from "@oneglanse/types";
+import { clickhouse } from "@oneglanse/db"
+import type { FetchUserPromptsForWorkspaceArgs, UserPrompt } from "@oneglanse/types"
 
 export async function fetchUserPromptsForWorkspace(
 	args: FetchUserPromptsForWorkspaceArgs,
 ): Promise<UserPrompt[]> {
-	const { workspaceId } = args;
+	const { workspaceId } = args
 
 	const result = await clickhouse.query({
 		query: `
@@ -17,8 +14,8 @@ export async function fetchUserPromptsForWorkspace(
       `,
 		query_params: { workspaceId },
 		format: "JSONEachRow",
-	});
+	})
 
-	const data: UserPrompt[] = (await result.json()) as UserPrompt[];
-	return data;
+	const data: UserPrompt[] = (await result.json()) as UserPrompt[]
+	return data
 }

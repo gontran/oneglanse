@@ -1,5 +1,5 @@
-import { BrandLogo } from "@/components/common/brand-logo";
-import { FOOTER_LINKS } from "@/lib/landing-content";
+import { BrandLogo } from "@/components/common/brand-logo"
+import { FOOTER_LINKS } from "@/lib/landing-content"
 
 export function SiteFooter(): React.JSX.Element {
 	return (
@@ -27,5 +27,5 @@ export function SiteFooter(): React.JSX.Element {
 				</nav>
 			</div>
 		</footer>
-	);
+	)
 }

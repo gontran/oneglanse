@@ -1,4 +1,4 @@
-import { createClient } from "@clickhouse/client";
-import { clickhouseConfig } from "../config/clickhouse.js";
+import { createClient } from "@clickhouse/client"
+import { clickhouseConfig } from "../config/clickhouse.js"
 
-export const clickhouse = createClient(clickhouseConfig);
+export const clickhouse = createClient(clickhouseConfig)

@@ -9,10 +9,10 @@ export default function InternalServerErrorPage() {
 					Something went wrong while loading this page.
 				</h1>
 				<p className="mx-auto mt-4 max-w-md text-sm leading-6 text-gray-500 dark:text-gray-400 sm:text-base">
-					The app hit an unexpected server error. Refresh and try again. If it
-					keeps happening, wait a moment and retry once the deploy settles.
+					The app hit an unexpected server error. Refresh and try again. If it keeps happening, wait
+					a moment and retry once the deploy settles.
 				</p>
 			</div>
 		</main>
-	);
+	)
 }

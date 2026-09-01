@@ -1,4 +1,4 @@
-import { BaseError } from "./BaseError.js";
+import { BaseError } from "./BaseError.js"
 
 export class ExternalServiceError extends BaseError {
 	constructor(
@@ -13,6 +13,6 @@ export class ExternalServiceError extends BaseError {
 			status,
 			meta,
 			cause,
-		});
+		})
 	}
 }

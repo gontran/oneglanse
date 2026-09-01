@@ -1,10 +1,10 @@
-import "../styles/globals.css";
-import { appIcons } from "@/lib/app-metadata";
-import { TRPCReactProvider } from "@/trpc/react";
-import { Toaster } from "@oneglanse/ui";
-import type { Metadata } from "next";
-import { ThemeProvider } from "next-themes";
-import { Geist } from "next/font/google";
+import "../styles/globals.css"
+import { appIcons } from "@/lib/app-metadata"
+import { TRPCReactProvider } from "@/trpc/react"
+import { Toaster } from "@oneglanse/ui"
+import type { Metadata } from "next"
+import { ThemeProvider } from "next-themes"
+import { Geist } from "next/font/google"
 
 export const metadata: Metadata = {
 	metadataBase: new URL(process.env.APP_URL ?? "https://app.oneglanse.com"),
@@ -30,12 +30,12 @@ export const metadata: Metadata = {
 			"Track how your brand appears in ChatGPT, Gemini, Perplexity, Claude, and AI Overview.",
 		images: ["/twitter-image"],
 	},
-};
+}
 
 const geist = Geist({
 	subsets: ["latin"],
 	variable: "--font-geist-sans",
-});
+})
 
 export default async function RootLayout({
 	children,
@@ -51,5 +51,5 @@ export default async function RootLayout({
 				</ThemeProvider>
 			</body>
 		</html>
-	);
+	)
 }

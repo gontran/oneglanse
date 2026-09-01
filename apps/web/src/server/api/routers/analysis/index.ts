@@ -1,1 +1,1 @@
-export { analysisRouter } from "./analysis";
+export { analysisRouter } from "./analysis"

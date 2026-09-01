@@ -1,1 +1,1 @@
-export * from "./joinCode.js";
+export * from "./joinCode.js"

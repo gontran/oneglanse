@@ -12,13 +12,13 @@
  * Self-hosters configure nothing; this runs automatically.
  */
 
-import { createHash } from "node:crypto";
+import { createHash } from "node:crypto"
 
-const POSTHOG_KEY = "phc_u5esrkrxNLU7DjmSymdoCPQWxxWd68EtQSDWhfVV36Xk";
-const POSTHOG_HOST = "https://app.posthog.com/capture/";
+const POSTHOG_KEY = "phc_u5esrkrxNLU7DjmSymdoCPQWxxWd68EtQSDWhfVV36Xk"
+const POSTHOG_HOST = "https://app.posthog.com/capture/"
 
 function anonymousId(userId: string): string {
-	return createHash("sha256").update(userId).digest("hex");
+	return createHash("sha256").update(userId).digest("hex")
 }
 
 async function capture(event: string, userId: string): Promise<void> {
@@ -31,19 +31,19 @@ async function capture(event: string, userId: string): Promise<void> {
 				event,
 				distinct_id: anonymousId(userId),
 			}),
-		});
+		})
 		if (!res.ok) {
-			console.error("[telemetry] PostHog responded", res.status);
+			console.error("[telemetry] PostHog responded", res.status)
 		}
 	} catch (err) {
-		console.error("[telemetry] fetch failed", err);
+		console.error("[telemetry] fetch failed", err)
 	}
 }
 
 export async function trackUserSignup(userId: string): Promise<void> {
-	await capture("user_signed_up", userId);
+	await capture("user_signed_up", userId)
 }
 
 export async function trackUserActive(userId: string): Promise<void> {
-	await capture("user_active", userId);
+	await capture("user_active", userId)
 }

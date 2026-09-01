@@ -1,4 +1,4 @@
-import { boolean, pgTable, text, timestamp } from "drizzle-orm/pg-core";
+import { boolean, pgTable, text, timestamp } from "drizzle-orm/pg-core"
 
 export const user = pgTable("user", {
 	id: text("id").primaryKey(),
@@ -11,7 +11,7 @@ export const user = pgTable("user", {
 		.defaultNow()
 		.$onUpdate(() => /* @__PURE__ */ new Date())
 		.notNull(),
-});
+})
 
 export const session = pgTable("session", {
 	id: text("id").primaryKey(),
@@ -27,7 +27,7 @@ export const session = pgTable("session", {
 		.notNull()
 		.references(() => user.id, { onDelete: "cascade" }),
 	activeOrganizationId: text("active_organization_id"),
-});
+})
 
 export const account = pgTable("account", {
 	id: text("id").primaryKey(),
@@ -47,7 +47,7 @@ export const account = pgTable("account", {
 	updatedAt: timestamp("updated_at")
 		.$onUpdate(() => /* @__PURE__ */ new Date())
 		.notNull(),
-});
+})
 
 export const verification = pgTable("verification", {
 	id: text("id").primaryKey(),
@@ -59,7 +59,7 @@ export const verification = pgTable("verification", {
 		.defaultNow()
 		.$onUpdate(() => /* @__PURE__ */ new Date())
 		.notNull(),
-});
+})
 
 export const organization = pgTable("organization", {
 	id: text("id").primaryKey(),
@@ -68,7 +68,7 @@ export const organization = pgTable("organization", {
 	logo: text("logo"),
 	createdAt: timestamp("created_at").defaultNow().notNull(),
 	metadata: text("metadata"),
-});
+})
 
 export const member = pgTable("member", {
 	id: text("id").primaryKey(),
@@ -80,7 +80,7 @@ export const member = pgTable("member", {
 		.references(() => user.id, { onDelete: "cascade" }),
 	role: text("role").default("member").notNull(),
 	createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+})
 
 export const invitation = pgTable("invitation", {
 	id: text("id").primaryKey(),
@@ -95,4 +95,4 @@ export const invitation = pgTable("invitation", {
 		.notNull()
 		.references(() => user.id, { onDelete: "cascade" }),
 	createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+})

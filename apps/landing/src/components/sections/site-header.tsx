@@ -1,8 +1,8 @@
-import { BrandLogo } from "@/components/common/brand-logo";
-import { ThemeToggle } from "@/components/common/theme-toggle";
-import { SITE_URLS } from "@/lib/landing-content";
-import { Button } from "@oneglanse/ui";
-import { Github, Server } from "lucide-react";
+import { BrandLogo } from "@/components/common/brand-logo"
+import { ThemeToggle } from "@/components/common/theme-toggle"
+import { SITE_URLS } from "@/lib/landing-content"
+import { Button } from "@oneglanse/ui"
+import { Github, Server } from "lucide-react"
 
 export function SiteHeader(): React.JSX.Element {
 	return (
@@ -20,11 +20,7 @@ export function SiteHeader(): React.JSX.Element {
 
 				<div className="flex shrink-0 items-center gap-2">
 					<Button asChild variant="outline">
-						<a
-							href={SITE_URLS.github}
-							target="_blank"
-							rel="noreferrer noopener"
-						>
+						<a href={SITE_URLS.github} target="_blank" rel="noreferrer noopener">
 							<Github className="h-4 w-4" aria-hidden="true" />
 							<span className="hidden sm:inline">GitHub</span>
 						</a>
@@ -39,5 +35,5 @@ export function SiteHeader(): React.JSX.Element {
 				</div>
 			</div>
 		</header>
-	);
+	)
 }

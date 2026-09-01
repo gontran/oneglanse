@@ -1,13 +1,10 @@
-import "server-only";
+import "server-only"
 
-import { createTRPCRouter } from "@/server/api/trpc";
-import {
-	analysePromptsForWorkspace,
-	fetchAnalysedPrompts,
-} from "@oneglanse/services";
-import { z } from "zod";
-import { createRateLimiter } from "../../middleware/rateLimit";
-import { authorizedWorkspaceProcedure } from "../../procedures";
+import { createTRPCRouter } from "@/server/api/trpc"
+import { analysePromptsForWorkspace, fetchAnalysedPrompts } from "@oneglanse/services"
+import { z } from "zod"
+import { createRateLimiter } from "../../middleware/rateLimit"
+import { authorizedWorkspaceProcedure } from "../../procedures"
 
 export const analysisRouter = createTRPCRouter({
 	analyzeMetrics: authorizedWorkspaceProcedure
@@ -21,10 +18,10 @@ export const analysisRouter = createTRPCRouter({
 			return analysePromptsForWorkspace({
 				workspaceId: ctx.workspaceId,
 				analyzeAll: input.analyzeAll ?? true,
-			});
+			})
 		}),
 
 	fetchAnalysis: authorizedWorkspaceProcedure.query(async ({ ctx }) => {
-		return fetchAnalysedPrompts({ workspaceId: ctx.workspaceId });
+		return fetchAnalysedPrompts({ workspaceId: ctx.workspaceId })
 	}),
-});
+})

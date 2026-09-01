@@ -1,10 +1,10 @@
-import type { Config } from "drizzle-kit";
+import type { Config } from "drizzle-kit"
 
-const databaseUrl = process.env.DATABASE_URL;
-const isDrizzleCliRun = process.argv.some((arg) => arg.includes("drizzle-kit"));
+const databaseUrl = process.env.DATABASE_URL
+const isDrizzleCliRun = process.argv.some((arg) => arg.includes("drizzle-kit"))
 
 if (isDrizzleCliRun && !databaseUrl) {
-	throw new Error("DATABASE_URL environment variable is required for migrations");
+	throw new Error("DATABASE_URL environment variable is required for migrations")
 }
 
 export default {
@@ -16,4 +16,4 @@ export default {
 		// DATABASE_URL. Real drizzle-kit executions still enforce DATABASE_URL above.
 		url: databaseUrl ?? "postgresql://placeholder:placeholder@localhost:5432/placeholder",
 	},
-} satisfies Config;
+} satisfies Config

@@ -1,5 +1,5 @@
-import { Skeleton } from "@oneglanse/ui";
-import { AuthPageShell } from "./auth-page-shell";
+import { Skeleton } from "@oneglanse/ui"
+import { AuthPageShell } from "./auth-page-shell"
 
 export function AuthPageLoading(): React.JSX.Element {
 	return (
@@ -15,5 +15,5 @@ export function AuthPageLoading(): React.JSX.Element {
 				</div>
 			</div>
 		</AuthPageShell>
-	);
+	)
 }

@@ -11,11 +11,12 @@ import {
 	SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import { BRAND } from "@/lib/data/brand"
-import { Globe, LayoutGrid, MessageSquare, TrendingUp, Users } from "lucide-react"
+import { Globe, LayoutGrid, MessageSquare, Settings, TrendingUp, Users } from "lucide-react"
 import { Link, useLocation } from "react-router-dom"
 
 const navItems = [
 	{ title: "Tableau de bord", url: "/dashboard", icon: LayoutGrid, active: true },
+	{ title: "Configuration", url: "/configuration", icon: Settings, active: true },
 	{ title: "Prompts", url: "#", icon: MessageSquare, active: false, badge: "Bientot disponible" },
 	{ title: "Sources", url: "#", icon: Globe, active: false, badge: "Bientot disponible" },
 	{ title: "Concurrents", url: "#", icon: Users, active: false, badge: "Bientot disponible" },

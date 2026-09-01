@@ -1,6 +1,6 @@
-import { PREVIEW_PERCEPTION } from "@/lib/preview-data";
-import { BrandPerceptionCard } from "@oneglanse/ui";
-import { CheckCircle2 } from "lucide-react";
+import { PREVIEW_PERCEPTION } from "@/lib/preview-data"
+import { BrandPerceptionCard } from "@oneglanse/ui"
+import { CheckCircle2 } from "lucide-react"
 
 export function AiPerceptionSection(): React.JSX.Element {
 	return (
@@ -19,36 +19,31 @@ export function AiPerceptionSection(): React.JSX.Element {
 							AI Perception
 						</h2>
 						<p className="mt-2 max-w-xl text-sm font-medium leading-6 text-muted-foreground sm:text-base">
-							See exactly how leading LLMs frame your brand, pricing position,
-							and core differentiation in real answers.
+							See exactly how leading LLMs frame your brand, pricing position, and core
+							differentiation in real answers.
 						</p>
 					</div>
 
 					<ul className="mt-6 space-y-3">
 						<li className="flex items-start gap-2.5 text-sm text-gray-800 dark:text-gray-200">
 							<CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
-							Narrative themes extracted from real provider outputs, not
-							synthetic summaries
+							Narrative themes extracted from real provider outputs, not synthetic summaries
 						</li>
 						<li className="flex items-start gap-2.5 text-sm text-gray-800 dark:text-gray-200">
 							<CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
-							Pricing and positioning signals translated into decision-ready
-							insights
+							Pricing and positioning signals translated into decision-ready insights
 						</li>
 						<li className="flex items-start gap-2.5 text-sm text-gray-800 dark:text-gray-200">
 							<CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
-							Recurring brand claims tracked across providers to identify
-							consistency vs drift
+							Recurring brand claims tracked across providers to identify consistency vs drift
 						</li>
 						<li className="flex items-start gap-2.5 text-sm text-gray-800 dark:text-gray-200">
 							<CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
-							Differentiators surfaced in language your buyers actually see in
-							AI answers
+							Differentiators surfaced in language your buyers actually see in AI answers
 						</li>
 						<li className="flex items-start gap-2.5 text-sm text-gray-800 dark:text-gray-200">
 							<CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
-							High-signal perception shifts highlighted before they affect
-							demand generation
+							High-signal perception shifts highlighted before they affect demand generation
 						</li>
 					</ul>
 				</div>
@@ -63,5 +58,5 @@ export function AiPerceptionSection(): React.JSX.Element {
 				</div>
 			</div>
 		</section>
-	);
+	)
 }

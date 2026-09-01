@@ -1,5 +1,5 @@
-import { createEnv } from "@t3-oss/env-nextjs";
-import { z } from "zod";
+import { createEnv } from "@t3-oss/env-nextjs"
+import { z } from "zod"
 
 export const env = createEnv({
 	server: {
@@ -10,22 +10,17 @@ export const env = createEnv({
 		BETTER_AUTH_SECRET: z.string().min(1).optional(),
 		GOOGLE_CLIENT_ID: z.string().min(1).optional(),
 		GOOGLE_CLIENT_SECRET: z.string().min(1).optional(),
-		NODE_ENV: z
-			.enum(["development", "test", "production"])
-			.default("development"),
+		NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
 	},
 	client: {
-		NEXT_PUBLIC_ONEGLANSE_APP_MODE: z
-			.enum(["self-host", "local"])
-			.optional(),
+		NEXT_PUBLIC_ONEGLANSE_APP_MODE: z.enum(["self-host", "local"]).optional(),
 	},
 	runtimeEnv: {
 		APP_URL: process.env.APP_URL,
 		API_BASE_URL: process.env.API_BASE_URL,
 		ONEGLANSE_APP_MODE: process.env.ONEGLANSE_APP_MODE,
 		NEXT_PUBLIC_ONEGLANSE_APP_MODE:
-			process.env.NEXT_PUBLIC_ONEGLANSE_APP_MODE ??
-			process.env.ONEGLANSE_APP_MODE,
+			process.env.NEXT_PUBLIC_ONEGLANSE_APP_MODE ?? process.env.ONEGLANSE_APP_MODE,
 		INTERNAL_CRON_SECRET: process.env.INTERNAL_CRON_SECRET,
 		BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET,
 		GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
@@ -34,4 +29,4 @@ export const env = createEnv({
 	},
 	skipValidation: !!process.env.SKIP_ENV_VALIDATION,
 	emptyStringAsUndefined: true,
-});
+})

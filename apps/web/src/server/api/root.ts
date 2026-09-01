@@ -1,11 +1,11 @@
-import "server-only";
+import "server-only"
 
-import { createTRPCRouter } from "@/server/api/trpc";
-import { agentRouter } from "./routers/agent";
-import { analysisRouter } from "./routers/analysis";
-import { internalRouter } from "./routers/internal";
-import { promptRouter } from "./routers/prompt";
-import { workspaceRouter } from "./routers/workspace";
+import { createTRPCRouter } from "@/server/api/trpc"
+import { agentRouter } from "./routers/agent"
+import { analysisRouter } from "./routers/analysis"
+import { internalRouter } from "./routers/internal"
+import { promptRouter } from "./routers/prompt"
+import { workspaceRouter } from "./routers/workspace"
 
 export const appRouter = createTRPCRouter({
 	workspace: workspaceRouter,
@@ -13,6 +13,6 @@ export const appRouter = createTRPCRouter({
 	analysis: analysisRouter,
 	agent: agentRouter,
 	internal: internalRouter,
-});
+})
 
-export type AppRouter = typeof appRouter;
+export type AppRouter = typeof appRouter

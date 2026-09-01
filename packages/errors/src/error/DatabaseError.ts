@@ -1,4 +1,4 @@
-import { BaseError } from "./BaseError.js";
+import { BaseError } from "./BaseError.js"
 
 export class DatabaseError extends BaseError {
 	constructor(
@@ -12,6 +12,6 @@ export class DatabaseError extends BaseError {
 			isOperational: false,
 			meta,
 			cause,
-		});
+		})
 	}
 }

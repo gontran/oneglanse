@@ -1,10 +1,10 @@
-import { api } from "@/trpc/react";
+import { api } from "@/trpc/react"
 
 export function useStorePrompt() {
-	const utils = api.useUtils();
+	const utils = api.useUtils()
 	return api.prompt.store.useMutation({
 		onSuccess: () => {
-			void utils.prompt.fetchUserPrompts.invalidate();
+			void utils.prompt.fetchUserPrompts.invalidate()
 		},
-	});
+	})
 }

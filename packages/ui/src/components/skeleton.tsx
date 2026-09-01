@@ -1,16 +1,13 @@
-import { cn } from "@oneglanse/utils";
+import { cn } from "@oneglanse/utils"
 
 function Skeleton({ className, ...props }: React.ComponentProps<"div">) {
 	return (
 		<div
 			data-slot="skeleton"
-			className={cn(
-				"bg-accent animate-pulse rounded-[var(--app-radius)]",
-				className,
-			)}
+			className={cn("bg-accent animate-pulse rounded-[var(--app-radius)]", className)}
 			{...props}
 		/>
-	);
+	)
 }
 
-export { Skeleton };
+export { Skeleton }

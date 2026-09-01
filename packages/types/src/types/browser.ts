@@ -8,11 +8,11 @@ export type FailureType =
 	| "extraction_failed"
 	| "timeout"
 	| "browser_crash"
-	| "unknown";
+	| "unknown"
 
 export type HealthCheckResult = {
-	healthy: boolean;
-	reason?: string;
-	failureType?: FailureType;
-	userMessage?: string; // User-friendly error message
-};
+	healthy: boolean
+	reason?: string
+	failureType?: FailureType
+	userMessage?: string // User-friendly error message
+}

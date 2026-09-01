@@ -1,9 +1,7 @@
-import { getModelFavicon, modelSelectors } from "@oneglanse/utils";
-import { CheckCircle2 } from "lucide-react";
+import { getModelFavicon, modelSelectors } from "@oneglanse/utils"
+import { CheckCircle2 } from "lucide-react"
 
-const PROVIDER_ITEMS = modelSelectors.filter(
-	(item) => item.value !== "All Models",
-);
+const PROVIDER_ITEMS = modelSelectors.filter((item) => item.value !== "All Models")
 
 export function SupportedProvidersSection(): React.JSX.Element {
 	return (
@@ -20,8 +18,8 @@ export function SupportedProvidersSection(): React.JSX.Element {
 					Supported Providers
 				</h2>
 				<p className="mt-2 max-w-2xl text-sm font-medium leading-6 text-muted-foreground sm:text-base">
-					Unified tracking across all LLM providers with consistent metrics and
-					source-level evidence.
+					Unified tracking across all LLM providers with consistent metrics and source-level
+					evidence.
 				</p>
 			</div>
 
@@ -51,5 +49,5 @@ export function SupportedProvidersSection(): React.JSX.Element {
 				))}
 			</div>
 		</section>
-	);
+	)
 }
