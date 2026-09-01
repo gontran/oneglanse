@@ -96,6 +96,7 @@ Deno.serve(async (req: Request) => {
 			.maybeSingle()
 
 		if (runError || !auditRun) {
+			console.error("audit_runs insert failed:", runError)
 			return json({ error: "Echec de la creation de l'audit" }, 500)
 		}
 
@@ -229,6 +230,7 @@ Deno.serve(async (req: Request) => {
 			.maybeSingle()
 
 		if (resultError || !auditResult) {
+			console.error("audit_results insert failed:", resultError)
 			await admin.from("audit_runs").update({ status: "failed" }).eq("id", auditRunId)
 			return json({ error: "Echec de l'enregistrement du resultat" }, 500)
 		}
