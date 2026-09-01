@@ -1,2 +1,2 @@
 [functions.run-perplexity-audit]
-verify_jwt = true
+verify_jwt = false

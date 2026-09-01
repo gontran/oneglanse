@@ -48,14 +48,18 @@ Deno.serve(async (req: Request) => {
 			return json({ error: "Projet introuvable" }, 404)
 		}
 
-		const { data: membership } = await supabase
+		const { data: membership, error: memberError } = await supabase
 			.from("organization_members")
 			.select("id, role")
 			.eq("organization_id", project.organization_id)
 			.eq("user_id", userId)
 			.maybeSingle()
 
+		if (memberError) {
+			console.error("membership query error:", memberError)
+		}
 		if (!membership) {
+			console.error("access denied: user", userId, "not member of org", project.organization_id)
 			return json({ error: "Acces refuse" }, 403)
 		}
 
@@ -252,6 +256,7 @@ Deno.serve(async (req: Request) => {
 
 		return json({ audit_run_id: auditRunId, audit_result_id: auditResult.id }, 200)
 	} catch (err) {
+		console.error("run-perplexity-audit error:", err)
 		return json({ error: "Erreur interne du serveur" }, 500)
 	}
 })
