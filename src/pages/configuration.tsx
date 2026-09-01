@@ -9,7 +9,7 @@ import { isDatabaseMode } from "@/lib/auth/auth-context"
 import { dataService } from "@/lib/services"
 import type { Competitor, Project, ProjectPrompt } from "@/types/analysis"
 import { FlaskConical, MessageSquare, Settings, Users } from "lucide-react"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 
 export function ConfigurationPage() {
 	const [project, setProject] = useState<Project | null>(null)
@@ -17,6 +17,11 @@ export function ConfigurationPage() {
 	const [prompts, setPrompts] = useState<ProjectPrompt[]>([])
 	const [loading, setLoading] = useState(true)
 	const [error, setError] = useState<string | null>(null)
+	const testSectionRef = useRef<HTMLDivElement>(null)
+
+	const scrollToTestPanel = () => {
+		testSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "center" })
+	}
 
 	useEffect(() => {
 		let cancelled = false
@@ -55,7 +60,7 @@ export function ConfigurationPage() {
 						Configuration
 					</h1>
 					<div className="ml-auto">
-						<AuditButton />
+						<AuditButton onClick={scrollToTestPanel} />
 					</div>
 				</header>
 
@@ -135,13 +140,15 @@ export function ConfigurationPage() {
 									</ConfigSection>
 
 									{isDatabaseMode && project && (
-										<ConfigSection
-											icon={FlaskConical}
-											title="Test Perplexity"
-											description="Envoyez un prompt a l'API Perplexity Sonar pour un audit reel."
-										>
-											<PerplexityTestPanel projectId={project.id} prompts={prompts} />
-										</ConfigSection>
+										<div ref={testSectionRef}>
+											<ConfigSection
+												icon={FlaskConical}
+												title="Test Perplexity"
+												description="Envoyez un prompt a l'API Perplexity Sonar pour un audit reel."
+											>
+												<PerplexityTestPanel projectId={project.id} prompts={prompts} />
+											</ConfigSection>
+										</div>
 									)}
 								</div>
 							) : null}
