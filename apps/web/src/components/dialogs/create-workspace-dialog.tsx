@@ -9,7 +9,7 @@ import {
 } from "@/components/forms/auth-form-chrome"
 import { api } from "@/trpc/react"
 import { Button, Input, Label, toast } from "@oneglanse/ui"
-import { Loader2 } from "lucide-react"
+import { Loader as Loader2 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 

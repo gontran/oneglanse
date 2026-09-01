@@ -1,5 +1,5 @@
 import { Button, EmptyStatePanel, Skeleton, WorkspaceRequiredState } from "@oneglanse/ui"
-import { BarChart3, Building2, Link2, Trophy, Users } from "lucide-react"
+import { ChartBar as BarChart3, Building2, Link2, Trophy, Users } from "lucide-react"
 import Link from "next/link"
 
 const DASHBOARD_SKELETON_KEYS = [

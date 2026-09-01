@@ -22,7 +22,7 @@ import {
 	toast,
 } from "@oneglanse/ui"
 import { cn } from "@oneglanse/utils"
-import { ArrowRight, Loader2 } from "lucide-react"
+import { ArrowRight, Loader as Loader2 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 

@@ -18,7 +18,7 @@ import { api } from "@/trpc/react"
 import { resolveAppMode } from "@oneglanse/types"
 import { Button, Card, CardContent, CardHeader, Label, Textarea, toast } from "@oneglanse/ui"
 import { cn, getFaviconUrls } from "@oneglanse/utils"
-import { ChevronDown, ChevronUp, Loader2, Plus, Sparkles, X } from "lucide-react"
+import { ChevronDown, ChevronUp, Loader as Loader2, Plus, Sparkles, X } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useEffect, useMemo, useRef, useState } from "react"
 

@@ -29,7 +29,7 @@ import {
 	toast,
 } from "@oneglanse/ui"
 import { cn, getModelFavicon } from "@oneglanse/utils"
-import { AlertTriangle, ArrowRight, CheckCircle2, Loader2, RotateCcw, RotateCw } from "lucide-react"
+import { TriangleAlert as AlertTriangle, ArrowRight, CircleCheck as CheckCircle2, Loader as Loader2, RotateCcw, RotateCw } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useEffect, useRef, useState } from "react"
 

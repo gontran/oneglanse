@@ -8,7 +8,7 @@ import {
 	getModelFavicon,
 	getUrlPath,
 } from "@oneglanse/utils"
-import { BarChart3, ChevronRight, ExternalLink, Globe2, Link2, SearchX } from "lucide-react"
+import { ChartBar as BarChart3, ChevronRight, ExternalLink, Globe as Globe2, Link2, SearchX } from "lucide-react"
 import { Fragment, useMemo, useState } from "react"
 import { useSortState } from "../../hooks/use-sort-state.js"
 import { Card } from "../card.js"

@@ -24,7 +24,7 @@ import {
 	getUrlPath,
 	joinCitedTexts,
 } from "@oneglanse/utils"
-import { AlertTriangle, FileText, Globe2, Link2, SearchX } from "lucide-react"
+import { TriangleAlert as AlertTriangle, FileText, Globe as Globe2, Link2, SearchX } from "lucide-react"
 import Link from "next/link"
 import { useMemo, useState } from "react"
 import { usePromptSources } from "../prompts/_lib/queries/prompt.queries"

@@ -30,7 +30,7 @@ import {
 	toast,
 } from "@oneglanse/ui"
 import { cn } from "@oneglanse/utils"
-import { Building2, Loader2, Pencil, Plus, Trash2, Users, X } from "lucide-react"
+import { Building2, Loader as Loader2, Pencil, Plus, Trash2, Users, X } from "lucide-react"
 import { useEffect, useState } from "react"
 import { useLayoutWorkspace } from "../workspace-context"
 

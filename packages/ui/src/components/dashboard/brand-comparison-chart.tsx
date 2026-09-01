@@ -1,5 +1,5 @@
 "use client"
-import { LineChart } from "lucide-react"
+import { ChartLine as LineChart } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 import { Card } from "../card.js"
 import type { DashboardCompetitorData } from "./types.js"

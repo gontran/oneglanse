@@ -66,18 +66,7 @@ import {
 	modelSelectors,
 } from "@oneglanse/utils"
 import { cn } from "@oneglanse/utils"
-import {
-	Bot,
-	BriefcaseBusiness,
-	ChevronDown,
-	FilterX,
-	FolderKanban,
-	MessageSquareOff,
-	Pencil,
-	Plus,
-	ReceiptText,
-	Trash2,
-} from "lucide-react"
+import { Bot, BriefcaseBusiness, ChevronDown, ListFilter as FilterX, FolderKanban, MessageSquareOff, Pencil, Plus, ReceiptText, Trash2 } from "lucide-react"
 import Link from "next/link"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useStorePrompt } from "./_lib/mutations/prompt.mutations"

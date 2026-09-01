@@ -31,7 +31,7 @@ import {
 	toast,
 } from "@oneglanse/ui"
 import { cn } from "@oneglanse/utils"
-import { Calendar, Check, Loader2, PlayCircle, SlidersHorizontal } from "lucide-react"
+import { Calendar, Check, Loader as Loader2, CirclePlay as PlayCircle, SlidersHorizontal } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 
 function localHourToUTC(localHour: number): number {

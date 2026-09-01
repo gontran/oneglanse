@@ -35,7 +35,7 @@ import {
 	joinCitedTexts,
 } from "@oneglanse/utils"
 import { cn } from "@oneglanse/utils"
-import { Download, Loader2 } from "lucide-react"
+import { Download, Loader as Loader2 } from "lucide-react"
 import { useState } from "react"
 import { useDashboardData } from "../dashboard/_hooks/use-dashboard-data"
 import type { DashboardMetrics } from "../dashboard/_utils/types"

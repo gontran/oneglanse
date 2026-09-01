@@ -32,7 +32,7 @@ import {
 	toast,
 } from "@oneglanse/ui"
 import { cn } from "@oneglanse/utils"
-import { ChevronUp, Loader2, User2 } from "lucide-react"
+import { ChevronUp, Loader as Loader2, User as User2 } from "lucide-react"
 import { usePathname, useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { WorkspaceProvider } from "./workspace-context"

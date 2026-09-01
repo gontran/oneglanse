@@ -1,6 +1,6 @@
 import { PREVIEW_PERCEPTION } from "@/lib/preview-data"
 import { BrandPerceptionCard } from "@oneglanse/ui"
-import { CheckCircle2 } from "lucide-react"
+import { CircleCheck as CheckCircle2 } from "lucide-react"
 
 export function AiPerceptionSection(): React.JSX.Element {
 	return (

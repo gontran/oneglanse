@@ -2,7 +2,7 @@ import { formToolbarSelectClassName } from "@/components/forms/auth-form-chrome"
 import { useSafeSearchParams } from "@/lib/navigation/use-safe-search-params"
 import { Button, ProviderModelSelect, Separator, TimeRangeSelect } from "@oneglanse/ui"
 import { cn, getFaviconUrls } from "@oneglanse/utils"
-import { FilterX } from "lucide-react"
+import { ListFilter as FilterX } from "lucide-react"
 import { useRouter } from "next/navigation"
 
 export function DashboardFilters({

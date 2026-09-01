@@ -27,22 +27,7 @@ import {
 	toast,
 } from "@oneglanse/ui"
 import { cn, getFaviconUrls } from "@oneglanse/utils"
-import {
-	Check,
-	ChevronDown,
-	ChevronUp,
-	Clock,
-	Globe,
-	LayoutGrid,
-	Loader2,
-	MessageSquare,
-	Plug,
-	Plus,
-	Settings,
-	User2,
-	UserPlus,
-	Users,
-} from "lucide-react"
+import { Check, ChevronDown, ChevronUp, Clock, Globe, LayoutGrid, Loader as Loader2, MessageSquare, Plug, Plus, Settings, User as User2, UserPlus, Users } from "lucide-react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { useEffect, useMemo, useState } from "react"

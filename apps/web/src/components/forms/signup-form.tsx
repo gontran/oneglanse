@@ -21,7 +21,7 @@ import {
 	toast,
 	useForm,
 } from "@oneglanse/ui"
-import { Loader2 } from "lucide-react"
+import { Loader as Loader2 } from "lucide-react"
 import { useSearchParams } from "next/navigation"
 import { useState } from "react"
 import { z } from "zod"

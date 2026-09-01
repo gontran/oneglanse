@@ -14,7 +14,7 @@ import {
 	TopSources,
 } from "@oneglanse/ui"
 import { filterAnalysisRecords } from "@oneglanse/utils"
-import { AlertTriangle } from "lucide-react"
+import { TriangleAlert as AlertTriangle } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useMemo } from "react"
 import { useFetchAnalysedPrompts, usePromptSources } from "../prompts/_lib/queries/prompt.queries"

@@ -1,5 +1,5 @@
 import { getModelFavicon, modelSelectors } from "@oneglanse/utils"
-import { CheckCircle2 } from "lucide-react"
+import { CircleCheck as CheckCircle2 } from "lucide-react"
 
 const PROVIDER_ITEMS = modelSelectors.filter((item) => item.value !== "All Models")
 
