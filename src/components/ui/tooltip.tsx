@@ -1,5 +1,3 @@
-"use client"
-
 import { cn } from "@/lib/utils/cn"
 import * as TooltipPrimitive from "@radix-ui/react-tooltip"
 import type * as React from "react"

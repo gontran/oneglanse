@@ -1,5 +1,3 @@
-"use client"
-
 import { Favicon } from "@/components/ui/favicon"
 import { cn } from "@/lib/utils/cn"
 import { getDomain } from "@/lib/utils/favicon"

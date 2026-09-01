@@ -1,5 +1,3 @@
-"use client"
-
 import { SentimentMetricCell } from "@/components/ui/cell"
 import { Favicon } from "@/components/ui/favicon"
 import { SortableHeader } from "@/components/ui/sortable-header"

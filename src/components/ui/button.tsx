@@ -1,5 +1,3 @@
-"use client"
-
 import { cn } from "@/lib/utils/cn"
 import { Slot } from "@radix-ui/react-slot"
 import { cva } from "class-variance-authority"

@@ -1,5 +1,3 @@
-"use client"
-
 import { getDomain, getFaviconUrls } from "@/lib/utils/favicon"
 import { useState } from "react"
 

@@ -1,5 +1,3 @@
-"use client"
-
 import { PositionMetricCell, SentimentMetricCell } from "@/components/ui/cell"
 import { MarkdownRenderer } from "@/components/ui/markdown-renderer"
 import { cn } from "@/lib/utils/cn"

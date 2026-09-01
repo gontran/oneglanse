@@ -1,5 +1,3 @@
-"use client"
-
 import type { DashboardCompetitorData } from "@/types/dashboard"
 
 interface RadarAxis {

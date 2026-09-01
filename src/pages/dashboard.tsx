@@ -1,5 +1,3 @@
-"use client"
-
 import { AggregateStatsRow } from "@/components/dashboard/aggregate-stats-row"
 import { BrandComparisonChart } from "@/components/dashboard/brand-comparison-chart"
 import { BrandPerceptionCard } from "@/components/dashboard/brand-perception-card"
@@ -21,7 +19,7 @@ import type { TimeRange } from "@/types/dashboard"
 import { Info } from "lucide-react"
 import { useMemo, useState } from "react"
 
-export function DashboardClient() {
+export function DashboardPage() {
 	const [surfaceFilter, setSurfaceFilter] = useState<string>(ALL_SURFACES)
 	const [timeFilter, setTimeFilter] = useState<TimeRange>("all")
 

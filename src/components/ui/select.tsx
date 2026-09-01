@@ -1,5 +1,3 @@
-"use client"
-
 import { cn } from "@/lib/utils/cn"
 import * as SelectPrimitive from "@radix-ui/react-select"
 import {

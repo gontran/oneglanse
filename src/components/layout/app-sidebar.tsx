@@ -1,5 +1,3 @@
-"use client"
-
 import { Favicon } from "@/components/ui/favicon"
 import {
 	Sidebar,
@@ -14,8 +12,7 @@ import {
 } from "@/components/ui/sidebar"
 import { BRAND } from "@/lib/data/brand"
 import { Globe, LayoutGrid, MessageSquare, TrendingUp, Users } from "lucide-react"
-import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { Link, useLocation } from "react-router-dom"
 
 const navItems = [
 	{ title: "Tableau de bord", url: "/dashboard", icon: LayoutGrid, active: true },
@@ -26,7 +23,8 @@ const navItems = [
 ]
 
 export function AppSidebar() {
-	const pathname = usePathname()
+	const location = useLocation()
+	const pathname = location.pathname
 
 	return (
 		<Sidebar className="flex h-full min-h-full flex-col self-stretch bg-white dark:bg-neutral-950">
@@ -78,7 +76,7 @@ export function AppSidebar() {
 											isActive={isActive}
 											className="h-11 rounded-[var(--app-radius)] px-4 text-[13px] font-medium"
 										>
-											<Link href={item.url}>
+											<Link to={item.url}>
 												<item.icon />
 												<span>{item.title}</span>
 											</Link>

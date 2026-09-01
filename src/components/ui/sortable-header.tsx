@@ -1,5 +1,3 @@
-"use client"
-
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react"
 
 export function SortableHeader<C extends string>({

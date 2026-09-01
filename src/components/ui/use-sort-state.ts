@@ -1,5 +1,3 @@
-"use client"
-
 import { useState } from "react"
 
 export function useSortState<C extends string>(initialDirection: "asc" | "desc" = "asc") {

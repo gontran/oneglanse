@@ -1,5 +1,3 @@
-"use client"
-
 import { Button } from "@/components/ui/button"
 import { Favicon } from "@/components/ui/favicon"
 import {

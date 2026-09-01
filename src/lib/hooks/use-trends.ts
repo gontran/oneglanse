@@ -1,5 +1,3 @@
-"use client"
-
 import { AUDIT_RUNS } from "@/lib/data/analysis-records"
 import { computeDailyMetricsFromRecords } from "@/lib/utils/metrics"
 import type { AnalysisRecord } from "@/types/analysis"

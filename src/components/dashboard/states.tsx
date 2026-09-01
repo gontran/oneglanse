@@ -1,5 +1,3 @@
-"use client"
-
 import { EmptyStatePanel } from "@/components/ui/empty-state"
 import { Skeleton } from "@/components/ui/skeleton"
 

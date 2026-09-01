@@ -1,5 +1,3 @@
-"use client"
-
 import { BRAND } from "@/lib/data/brand"
 import { filterAnalysisRecords } from "@/lib/utils/filter"
 import { computeDashboardMetrics } from "@/lib/utils/metrics"

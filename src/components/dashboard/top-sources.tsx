@@ -1,5 +1,3 @@
-"use client"
-
 import { Card } from "@/components/ui/card"
 import { Favicon } from "@/components/ui/favicon"
 import { formatCitationLabel } from "@/lib/utils/format"

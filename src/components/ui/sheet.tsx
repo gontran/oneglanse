@@ -1,5 +1,3 @@
-"use client"
-
 import { cn } from "@/lib/utils/cn"
 import * as SheetPrimitive from "@radix-ui/react-dialog"
 import { Bone as XIcon } from "lucide-react"
