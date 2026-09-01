@@ -19,11 +19,18 @@ Deno.serve(async (req: Request) => {
 
 		const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? ""
 		const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY") ?? ""
-		const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+		const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+
+		// Auth client: verify the user's JWT
+		const authClient = createClient(supabaseUrl, supabaseAnonKey, {
 			global: { headers: { Authorization: authHeader } },
 		})
 
-		const { data: userData, error: userError } = await supabase.auth.getUser()
+		// Service client: bypass RLS for internal DB operations
+		// (the function does its own auth/membership checks above)
+		const admin = createClient(supabaseUrl, serviceRoleKey)
+
+		const { data: userData, error: userError } = await authClient.auth.getUser()
 		if (userError || !userData.user) {
 			return json({ error: "Non authentifie" }, 401)
 		}
@@ -37,8 +44,8 @@ Deno.serve(async (req: Request) => {
 			return json({ error: "project_id et prompt_id sont requis" }, 400)
 		}
 
-		// Verify project exists and user is org member
-		const { data: project, error: projectError } = await supabase
+		// Verify project exists
+		const { data: project, error: projectError } = await admin
 			.from("projects")
 			.select("id, organization_id, domain")
 			.eq("id", projectId)
@@ -48,23 +55,20 @@ Deno.serve(async (req: Request) => {
 			return json({ error: "Projet introuvable" }, 404)
 		}
 
-		const { data: membership, error: memberError } = await supabase
+		// Verify user is org member
+		const { data: membership } = await admin
 			.from("organization_members")
 			.select("id, role")
 			.eq("organization_id", project.organization_id)
 			.eq("user_id", userId)
 			.maybeSingle()
 
-		if (memberError) {
-			console.error("membership query error:", memberError)
-		}
 		if (!membership) {
-			console.error("access denied: user", userId, "not member of org", project.organization_id)
 			return json({ error: "Acces refuse" }, 403)
 		}
 
 		// Verify prompt belongs to project and is active
-		const { data: prompt, error: promptError } = await supabase
+		const { data: prompt, error: promptError } = await admin
 			.from("project_prompts")
 			.select("id, text, is_active")
 			.eq("id", promptId)
@@ -79,7 +83,7 @@ Deno.serve(async (req: Request) => {
 		}
 
 		// Create audit_run with status pending
-		const { data: auditRun, error: runError } = await supabase
+		const { data: auditRun, error: runError } = await admin
 			.from("audit_runs")
 			.insert({
 				organization_id: project.organization_id,
@@ -98,13 +102,13 @@ Deno.serve(async (req: Request) => {
 		const auditRunId = auditRun.id
 
 		// Set status to running
-		await supabase.from("audit_runs").update({ status: "running" }).eq("id", auditRunId)
+		await admin.from("audit_runs").update({ status: "running" }).eq("id", auditRunId)
 
 		// Call Perplexity API
 		const perplexityKey = Deno.env.get("PERPLEXITY_API_KEY")
 		if (!perplexityKey) {
-			await supabase.from("audit_runs").update({ status: "failed" }).eq("id", auditRunId)
-			await supabase.from("audit_results").insert({
+			await admin.from("audit_runs").update({ status: "failed" }).eq("id", auditRunId)
+			await admin.from("audit_results").insert({
 				audit_run_id: auditRunId,
 				organization_id: project.organization_id,
 				project_id: projectId,
@@ -140,10 +144,10 @@ Deno.serve(async (req: Request) => {
 			})
 		} catch (err) {
 			clearTimeout(timeout)
-			await supabase.from("audit_runs").update({ status: "failed" }).eq("id", auditRunId)
+			await admin.from("audit_runs").update({ status: "failed" }).eq("id", auditRunId)
 			const isTimeout = err instanceof DOMException && err.name === "AbortError"
 			const errorMsg = isTimeout ? "Delai depasse" : "Erreur de connexion au fournisseur IA"
-			await supabase.from("audit_results").insert({
+			await admin.from("audit_results").insert({
 				audit_run_id: auditRunId,
 				organization_id: project.organization_id,
 				project_id: projectId,
@@ -162,8 +166,8 @@ Deno.serve(async (req: Request) => {
 		clearTimeout(timeout)
 
 		if (!perplexityResponse.ok) {
-			await supabase.from("audit_runs").update({ status: "failed" }).eq("id", auditRunId)
-			await supabase.from("audit_results").insert({
+			await admin.from("audit_runs").update({ status: "failed" }).eq("id", auditRunId)
+			await admin.from("audit_results").insert({
 				audit_run_id: auditRunId,
 				organization_id: project.organization_id,
 				project_id: projectId,
@@ -203,7 +207,7 @@ Deno.serve(async (req: Request) => {
 		}
 
 		// Create audit_result
-		const { data: auditResult, error: resultError } = await supabase
+		const { data: auditResult, error: resultError } = await admin
 			.from("audit_results")
 			.insert({
 				audit_run_id: auditRunId,
@@ -225,7 +229,7 @@ Deno.serve(async (req: Request) => {
 			.maybeSingle()
 
 		if (resultError || !auditResult) {
-			await supabase.from("audit_runs").update({ status: "failed" }).eq("id", auditRunId)
+			await admin.from("audit_runs").update({ status: "failed" }).eq("id", auditRunId)
 			return json({ error: "Echec de l'enregistrement du resultat" }, 500)
 		}
 
@@ -248,11 +252,11 @@ Deno.serve(async (req: Request) => {
 					is_owned_domain: projectDomain ? domain === projectDomain : false,
 				}
 			})
-			await supabase.from("result_sources").insert(sourceRows)
+			await admin.from("result_sources").insert(sourceRows)
 		}
 
 		// Set audit_run status to completed
-		await supabase.from("audit_runs").update({ status: "completed" }).eq("id", auditRunId)
+		await admin.from("audit_runs").update({ status: "completed" }).eq("id", auditRunId)
 
 		return json({ audit_run_id: auditRunId, audit_result_id: auditResult.id }, 200)
 	} catch (err) {
