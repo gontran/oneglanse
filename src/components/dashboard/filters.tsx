@@ -13,7 +13,7 @@ import { Separator } from "@/components/ui/separator"
 import { getSurfaceFavicon } from "@/lib/utils/favicon"
 import { ALL_SURFACES, SURFACES } from "@/types/analysis"
 import type { TimeRange } from "@/types/dashboard"
-import { FilterX } from "lucide-react"
+import { ListFilter as FilterX } from "lucide-react"
 
 export function DashboardFilters({
 	brandName,
