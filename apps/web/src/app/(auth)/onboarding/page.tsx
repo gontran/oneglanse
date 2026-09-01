@@ -1,41 +1,26 @@
-"use client";
+"use client"
 
 import {
 	formLabelClassName,
 	formPrimaryButtonClassName,
 	formSecondaryButtonClassName,
 	formSurfaceClassName,
-} from "@/components/forms/auth-form-chrome";
+} from "@/components/forms/auth-form-chrome"
 import {
 	clearActiveProviderRun,
 	handleAgentRunResult,
 	persistActiveProviderRun,
-} from "@/components/provider-run-toast";
-import { env } from "@/env";
-import { useSafeSearchParams } from "@/lib/navigation/use-safe-search-params";
-import { useProviderConnections } from "@/lib/provider-connections/client";
-import { api } from "@/trpc/react";
-import { resolveAppMode } from "@oneglanse/types";
-import {
-	Button,
-	Card,
-	CardContent,
-	CardHeader,
-	Label,
-	Textarea,
-	toast,
-} from "@oneglanse/ui";
-import { cn, getFaviconUrls } from "@oneglanse/utils";
-import {
-	ChevronDown,
-	ChevronUp,
-	Loader2,
-	Plus,
-	Sparkles,
-	X,
-} from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
+} from "@/components/provider-run-toast"
+import { env } from "@/env"
+import { useSafeSearchParams } from "@/lib/navigation/use-safe-search-params"
+import { useProviderConnections } from "@/lib/provider-connections/client"
+import { api } from "@/trpc/react"
+import { resolveAppMode } from "@oneglanse/types"
+import { Button, Card, CardContent, CardHeader, Label, Textarea, toast } from "@oneglanse/ui"
+import { cn, getFaviconUrls } from "@oneglanse/utils"
+import { ChevronDown, ChevronUp, Loader2, Plus, Sparkles, X } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { useEffect, useMemo, useRef, useState } from "react"
 
 const SUGGESTED_PROMPT_TEMPLATES = [
 	"What are the best alternatives to {brand} for buyers comparing options in this category?",
@@ -48,251 +33,231 @@ const SUGGESTED_PROMPT_TEMPLATES = [
 	"How is {brand} positioned in the market compared with similar brands?",
 	"What factors should a buyer consider before choosing {brand}?",
 	"Who is the ideal customer for {brand}, and who may be better served by another option?",
-];
+]
 
 function pickRandomItem<T>(items: T[]) {
-	if (items.length === 0) return null;
-	const item = items[Math.floor(Math.random() * items.length)];
-	return item ?? null;
+	if (items.length === 0) return null
+	const item = items[Math.floor(Math.random() * items.length)]
+	return item ?? null
 }
 
 export default function FirstWorkspaceOnboardingPage() {
-	const router = useRouter();
-	const searchParams = useSafeSearchParams();
-	const workspaceId = searchParams.get("workspace") ?? "";
-	const appMode = resolveAppMode(env.NEXT_PUBLIC_ONEGLANSE_APP_MODE);
+	const router = useRouter()
+	const searchParams = useSafeSearchParams()
+	const workspaceId = searchParams.get("workspace") ?? ""
+	const appMode = resolveAppMode(env.NEXT_PUBLIC_ONEGLANSE_APP_MODE)
 
-	const [prompts, setPrompts] = useState<string[]>([]);
-	const [inputValue, setInputValue] = useState("");
-	const [faviconError, setFaviconError] = useState(false);
-	const [isStartingRun, setIsStartingRun] = useState(false);
-	const [isSuggestedPromptsExpanded, setIsSuggestedPromptsExpanded] =
-		useState(true);
-	const [suggestedPromptsHeight, setSuggestedPromptsHeight] = useState(0);
-	const [currentSuggestedPrompt, setCurrentSuggestedPrompt] = useState<
-		string | null
-	>(null);
+	const [prompts, setPrompts] = useState<string[]>([])
+	const [inputValue, setInputValue] = useState("")
+	const [faviconError, setFaviconError] = useState(false)
+	const [isStartingRun, setIsStartingRun] = useState(false)
+	const [isSuggestedPromptsExpanded, setIsSuggestedPromptsExpanded] = useState(true)
+	const [suggestedPromptsHeight, setSuggestedPromptsHeight] = useState(0)
+	const [currentSuggestedPrompt, setCurrentSuggestedPrompt] = useState<string | null>(null)
 	const [suggestedPromptAnimation, setSuggestedPromptAnimation] = useState<
 		"idle" | "slide-left" | "slide-right"
-	>("idle");
-	const inputRef = useRef<HTMLTextAreaElement>(null);
-	const suggestedPromptsRef = useRef<HTMLDivElement>(null);
-	const suggestedPromptAnimationTimeoutRef = useRef<ReturnType<
-		typeof setTimeout
-	> | null>(null);
+	>("idle")
+	const inputRef = useRef<HTMLTextAreaElement>(null)
+	const suggestedPromptsRef = useRef<HTMLDivElement>(null)
+	const suggestedPromptAnimationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-	const workspaceQuery = api.workspace.getById.useQuery(
-		{ workspaceId },
-		{ enabled: !!workspaceId },
-	);
-	const providerConnectionsQuery = useProviderConnections();
-	const storePrompts = api.prompt.store.useMutation();
-	const runAgent = api.agent.run.useMutation();
+	const workspaceQuery = api.workspace.getById.useQuery({ workspaceId }, { enabled: !!workspaceId })
+	const providerConnectionsQuery = useProviderConnections()
+	const storePrompts = api.prompt.store.useMutation()
+	const runAgent = api.agent.run.useMutation()
 
-	const brandName = workspaceQuery.data?.name ?? "your brand";
-	const brandDomain = workspaceQuery.data?.domain ?? "";
+	const brandName = workspaceQuery.data?.name ?? "your brand"
+	const brandDomain = workspaceQuery.data?.domain ?? ""
 
 	const faviconUrl = useMemo(() => {
-		if (!brandDomain) return null;
-		return getFaviconUrls(brandDomain)[0] ?? null;
-	}, [brandDomain]);
+		if (!brandDomain) return null
+		return getFaviconUrls(brandDomain)[0] ?? null
+	}, [brandDomain])
 
 	const suggestedPrompts = useMemo(
-		() =>
-			SUGGESTED_PROMPT_TEMPLATES.map((p) =>
-				p.replaceAll("{brand}", brandName || "your brand"),
-			),
+		() => SUGGESTED_PROMPT_TEMPLATES.map((p) => p.replaceAll("{brand}", brandName || "your brand")),
 		[brandName],
-	);
+	)
 	const availableSuggestedPrompts = useMemo(
 		() =>
 			suggestedPrompts.filter(
-				(prompt) =>
-					!prompts.some((addedPrompt) => addedPrompt.trim() === prompt.trim()),
+				(prompt) => !prompts.some((addedPrompt) => addedPrompt.trim() === prompt.trim()),
 			),
 		[suggestedPrompts, prompts],
-	);
+	)
 	const hasProviderAuth =
-		providerConnectionsQuery.data?.cards.some(
-			(card) => card.status.connected,
-		) ?? false;
+		providerConnectionsQuery.data?.cards.some((card) => card.status.connected) ?? false
 	const isLoadingProviderConnections =
-		providerConnectionsQuery.isLoading && !providerConnectionsQuery.data;
+		providerConnectionsQuery.isLoading && !providerConnectionsQuery.data
 
-	const addPrompt = (
-		value: string,
-		options?: { source?: "manual" | "suggested" },
-	) => {
-		const trimmed = value.trim();
-		if (!trimmed) return;
-		if (prompts.some((p) => p.trim() === trimmed)) return;
-		setPrompts((prev) => [...prev, trimmed]);
+	const addPrompt = (value: string, options?: { source?: "manual" | "suggested" }) => {
+		const trimmed = value.trim()
+		if (!trimmed) return
+		if (prompts.some((p) => p.trim() === trimmed)) return
+		setPrompts((prev) => [...prev, trimmed])
 		if (options?.source === "manual") {
-			setIsSuggestedPromptsExpanded(false);
+			setIsSuggestedPromptsExpanded(false)
 		} else if (options?.source === "suggested") {
-			setIsSuggestedPromptsExpanded(true);
+			setIsSuggestedPromptsExpanded(true)
 		}
-		setInputValue("");
-		inputRef.current?.focus();
-	};
+		setInputValue("")
+		inputRef.current?.focus()
+	}
 
 	const transitionSuggestedPrompt = (args: {
-		direction: "slide-left" | "slide-right";
-		nextPrompt: string | null;
+		direction: "slide-left" | "slide-right"
+		nextPrompt: string | null
 	}) => {
 		if (suggestedPromptAnimationTimeoutRef.current) {
-			clearTimeout(suggestedPromptAnimationTimeoutRef.current);
+			clearTimeout(suggestedPromptAnimationTimeoutRef.current)
 		}
 
-		setSuggestedPromptAnimation(args.direction);
+		setSuggestedPromptAnimation(args.direction)
 		suggestedPromptAnimationTimeoutRef.current = setTimeout(() => {
-			setCurrentSuggestedPrompt(args.nextPrompt);
-			setSuggestedPromptAnimation("idle");
-		}, 180);
-	};
+			setCurrentSuggestedPrompt(args.nextPrompt)
+			setSuggestedPromptAnimation("idle")
+		}, 180)
+	}
 
 	const removePrompt = (index: number) => {
-		setPrompts((prev) => prev.filter((_, i) => i !== index));
-	};
+		setPrompts((prev) => prev.filter((_, i) => i !== index))
+	}
 
 	const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
 		if (e.key === "Enter" && !e.shiftKey) {
-			e.preventDefault();
-			addPrompt(inputValue, { source: "manual" });
+			e.preventDefault()
+			addPrompt(inputValue, { source: "manual" })
 		}
-	};
+	}
 
 	const handleStart = async () => {
 		if (!workspaceId) {
-			toast.error("Workspace is missing.");
-			return;
+			toast.error("Workspace is missing.")
+			return
 		}
 		if (prompts.length === 0) {
-			toast.error("Add at least one prompt to continue.");
-			return;
+			toast.error("Add at least one prompt to continue.")
+			return
 		}
 
-		setIsStartingRun(true);
+		setIsStartingRun(true)
 		try {
-			await storePrompts.mutateAsync({ workspaceId, prompts });
+			await storePrompts.mutateAsync({ workspaceId, prompts })
 			if (!hasProviderAuth) {
-				toast.success("Prompts saved.");
-				router.replace(`/dashboard?workspace=${workspaceId}`);
-				return;
+				toast.success("Prompts saved.")
+				router.replace(`/dashboard?workspace=${workspaceId}`)
+				return
 			}
-			const run = await runAgent.mutateAsync({ workspaceId });
+			const run = await runAgent.mutateAsync({ workspaceId })
 			if (
 				!handleAgentRunResult(run, {
 					onDone: () => setIsStartingRun(false),
 				})
 			) {
-				return;
+				return
 			}
-			const { jobId } = run;
-			persistActiveProviderRun({ workspaceId, jobId });
-			router.replace(`/dashboard?workspace=${workspaceId}&jobId=${jobId}`);
+			const { jobId } = run
+			persistActiveProviderRun({ workspaceId, jobId })
+			router.replace(`/dashboard?workspace=${workspaceId}&jobId=${jobId}`)
 		} catch {
-			setIsStartingRun(false);
-			clearActiveProviderRun();
-			toast.error("Failed to start. Please try again.");
+			setIsStartingRun(false)
+			clearActiveProviderRun()
+			toast.error("Failed to start. Please try again.")
 		}
-	};
+	}
 
 	if (!workspaceId) {
 		return (
 			<div className="flex min-h-full items-center justify-center">
 				<p className="text-sm text-muted-foreground">No workspace selected.</p>
 			</div>
-		);
+		)
 	}
 
-	const isPending =
-		isStartingRun || storePrompts.isPending || runAgent.isPending;
+	const isPending = isStartingRun || storePrompts.isPending || runAgent.isPending
 
 	useEffect(() => {
 		if (prompts.length === 0) {
-			setIsSuggestedPromptsExpanded(true);
+			setIsSuggestedPromptsExpanded(true)
 		}
-	}, [prompts.length]);
+	}, [prompts.length])
 
 	useEffect(() => {
 		if (availableSuggestedPrompts.length === 0) {
 			if (suggestedPromptAnimationTimeoutRef.current) {
-				clearTimeout(suggestedPromptAnimationTimeoutRef.current);
+				clearTimeout(suggestedPromptAnimationTimeoutRef.current)
 			}
-			setCurrentSuggestedPrompt(null);
-			setSuggestedPromptAnimation("idle");
-			return;
+			setCurrentSuggestedPrompt(null)
+			setSuggestedPromptAnimation("idle")
+			return
 		}
 
 		setCurrentSuggestedPrompt((currentPrompt) => {
 			if (currentPrompt && availableSuggestedPrompts.includes(currentPrompt)) {
-				return currentPrompt;
+				return currentPrompt
 			}
 
-			return pickRandomItem(availableSuggestedPrompts);
-		});
-	}, [availableSuggestedPrompts]);
+			return pickRandomItem(availableSuggestedPrompts)
+		})
+	}, [availableSuggestedPrompts])
 
 	const dismissSuggestedPrompt = () => {
 		const remainingPrompts = availableSuggestedPrompts.filter(
 			(prompt) => prompt !== currentSuggestedPrompt,
-		);
+		)
 		transitionSuggestedPrompt({
 			direction: "slide-left",
 			nextPrompt: pickRandomItem(remainingPrompts),
-		});
-	};
+		})
+	}
 
 	const addSuggestedPrompt = () => {
-		if (!currentSuggestedPrompt) return;
-		const selectedPrompt = currentSuggestedPrompt;
-		const remainingPrompts = availableSuggestedPrompts.filter(
-			(prompt) => prompt !== selectedPrompt,
-		);
-		addPrompt(selectedPrompt, { source: "suggested" });
+		if (!currentSuggestedPrompt) return
+		const selectedPrompt = currentSuggestedPrompt
+		const remainingPrompts = availableSuggestedPrompts.filter((prompt) => prompt !== selectedPrompt)
+		addPrompt(selectedPrompt, { source: "suggested" })
 		transitionSuggestedPrompt({
 			direction: "slide-left",
 			nextPrompt: pickRandomItem(remainingPrompts),
-		});
-	};
+		})
+	}
 
 	useEffect(() => {
-		const element = suggestedPromptsRef.current;
-		if (!element) return;
+		const element = suggestedPromptsRef.current
+		if (!element) return
 
 		const updateHeight = () => {
-			setSuggestedPromptsHeight(element.scrollHeight + 8);
-		};
+			setSuggestedPromptsHeight(element.scrollHeight + 8)
+		}
 
-		updateHeight();
+		updateHeight()
 
 		const observer = new ResizeObserver(() => {
-			updateHeight();
-		});
-		observer.observe(element);
+			updateHeight()
+		})
+		observer.observe(element)
 
 		return () => {
-			observer.disconnect();
-		};
-	}, []);
+			observer.disconnect()
+		}
+	}, [])
 
 	useEffect(() => {
-		const element = inputRef.current;
-		if (!element) return;
+		const element = inputRef.current
+		if (!element) return
 
-		element.style.height = "0px";
-		const nextHeight = Math.min(element.scrollHeight, 160);
-		element.style.height = `${Math.max(nextHeight, 44)}px`;
-	});
+		element.style.height = "0px"
+		const nextHeight = Math.min(element.scrollHeight, 160)
+		element.style.height = `${Math.max(nextHeight, 44)}px`
+	})
 
 	useEffect(() => {
 		return () => {
 			if (suggestedPromptAnimationTimeoutRef.current) {
-				clearTimeout(suggestedPromptAnimationTimeoutRef.current);
+				clearTimeout(suggestedPromptAnimationTimeoutRef.current)
 			}
-		};
-	}, []);
+		}
+	}, [])
 
 	return (
 		<div className="web-centered-page">
@@ -361,10 +326,7 @@ export default function FirstWorkspaceOnboardingPage() {
 									</span>
 								</Label>
 								<div
-									className={cn(
-										"space-y-2",
-										prompts.length > 3 && "max-h-56 overflow-y-auto pr-2",
-									)}
+									className={cn("space-y-2", prompts.length > 3 && "max-h-56 overflow-y-auto pr-2")}
 								>
 									{prompts.map((prompt, index) => (
 										<div
@@ -394,9 +356,7 @@ export default function FirstWorkspaceOnboardingPage() {
 								<Label className={formLabelClassName}>Suggested prompts</Label>
 								<button
 									type="button"
-									onClick={() =>
-										setIsSuggestedPromptsExpanded((current) => !current)
-									}
+									onClick={() => setIsSuggestedPromptsExpanded((current) => !current)}
 									className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--app-radius)] bg-transparent text-gray-600 transition hover:bg-stone-50 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100 xl:h-10 xl:w-10"
 									aria-expanded={isSuggestedPromptsExpanded}
 									aria-controls="suggested-prompts-list"
@@ -422,16 +382,11 @@ export default function FirstWorkspaceOnboardingPage() {
 										: "pointer-events-none opacity-0 -translate-y-1",
 								)}
 								style={{
-									maxHeight: isSuggestedPromptsExpanded
-										? `${suggestedPromptsHeight}px`
-										: "0px",
+									maxHeight: isSuggestedPromptsExpanded ? `${suggestedPromptsHeight}px` : "0px",
 								}}
 								aria-hidden={!isSuggestedPromptsExpanded}
 							>
-								<div
-									ref={suggestedPromptsRef}
-									className="space-y-2 pt-0.5 xl:space-y-2.5"
-								>
+								<div ref={suggestedPromptsRef} className="space-y-2 pt-0.5 xl:space-y-2.5">
 									{currentSuggestedPrompt ? (
 										<div
 											className={cn(
@@ -471,8 +426,8 @@ export default function FirstWorkspaceOnboardingPage() {
 										</div>
 									) : (
 										<div className="rounded-[var(--app-radius)] border border-dashed border-gray-200/80 px-3 py-3 text-[11px] leading-5 text-gray-500 dark:border-gray-800 dark:text-gray-400 xl:px-4 xl:text-[13px] xl:leading-6">
-											All suggested prompts are currently in your list. Remove
-											one to bring it back here.
+											All suggested prompts are currently in your list. Remove one to bring it back
+											here.
 										</div>
 									)}
 								</div>
@@ -490,11 +445,7 @@ export default function FirstWorkspaceOnboardingPage() {
 							) : null}
 							<Button
 								onClick={handleStart}
-								disabled={
-									prompts.length === 0 ||
-									isPending ||
-									isLoadingProviderConnections
-								}
+								disabled={prompts.length === 0 || isPending || isLoadingProviderConnections}
 								className={cn(
 									formPrimaryButtonClassName,
 									"min-w-[9rem] sm:min-w-[10rem] xl:min-w-[11rem]",
@@ -510,9 +461,7 @@ export default function FirstWorkspaceOnboardingPage() {
 							</Button>
 							<Button
 								variant="ghost"
-								onClick={() =>
-									router.replace(`/dashboard?workspace=${workspaceId}`)
-								}
+								onClick={() => router.replace(`/dashboard?workspace=${workspaceId}`)}
 								disabled={isPending}
 								className={cn(
 									formSecondaryButtonClassName,
@@ -526,5 +475,5 @@ export default function FirstWorkspaceOnboardingPage() {
 				</Card>
 			</div>
 		</div>
-	);
+	)
 }

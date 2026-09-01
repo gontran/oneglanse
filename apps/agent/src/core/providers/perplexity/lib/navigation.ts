@@ -1,18 +1,18 @@
-import type { ProviderConfig } from "../../types.js";
-import { resetProviderPage } from "../../_shared/resetProviderPage.js";
+import { resetProviderPage } from "../../_shared/resetProviderPage.js"
+import type { ProviderConfig } from "../../types.js"
 
-const PERPLEXITY_URL = "https://www.perplexity.ai/";
+const PERPLEXITY_URL = "https://www.perplexity.ai/"
 
 function isPerplexitySearchUrl(rawUrl: string): boolean {
 	try {
-		const url = new URL(rawUrl);
+		const url = new URL(rawUrl)
 		return (
 			url.hostname.endsWith("perplexity.ai") &&
 			url.pathname.startsWith("/search/") &&
 			url.pathname.length > "/search/".length
-		);
+		)
 	} catch {
-		return false;
+		return false
 	}
 }
 
@@ -21,25 +21,25 @@ export async function waitForPerplexitySearchUrl(
 	preSubmitUrl: string,
 ): Promise<boolean | undefined> {
 	if (isPerplexitySearchUrl(preSubmitUrl)) {
-		return undefined;
+		return undefined
 	}
 
-	const deadline = Date.now() + 4000;
+	const deadline = Date.now() + 4000
 	while (Date.now() < deadline) {
 		if (isPerplexitySearchUrl(await page.getUrl().catch(() => page.url()))) {
-			return true;
+			return true
 		}
-		await page.waitForTimeout(100);
+		await page.waitForTimeout(100)
 	}
 
-	return false;
+	return false
 }
 
 export async function perplexityPostNavigationHook(
 	page: Parameters<NonNullable<ProviderConfig["postNavigationHook"]>>[0],
 ): Promise<void> {
-	const delay = 1000 + Math.floor(Math.random() * 1000);
-	await page.waitForTimeout(delay);
+	const delay = 1000 + Math.floor(Math.random() * 1000)
+	await page.waitForTimeout(delay)
 }
 
 export async function resetPerplexityPage(
@@ -47,7 +47,7 @@ export async function resetPerplexityPage(
 ): Promise<void> {
 	await resetProviderPage(page, "perplexity", PERPLEXITY_URL, {
 		postNavigationHook: perplexityPostNavigationHook,
-	});
+	})
 }
 
-export { PERPLEXITY_URL };
+export { PERPLEXITY_URL }

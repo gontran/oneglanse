@@ -1,5 +1,5 @@
-import { auth } from "@/lib/auth/auth";
-import { ValidationError } from "@oneglanse/errors";
+import { auth } from "@/lib/auth/auth"
+import { ValidationError } from "@oneglanse/errors"
 import {
 	addWorkspaceToExistingOrg,
 	checkIsFirstWorkspace,
@@ -9,15 +9,15 @@ import {
 	getAllWorkspacesForUser,
 	getWorkspacesForUser,
 	joinWorkspaceByCode,
-} from "@oneglanse/services";
-import { createRateLimiter } from "../../../middleware/rateLimit";
-import { protectedProcedure } from "../../../procedures";
+} from "@oneglanse/services"
+import { createRateLimiter } from "../../../middleware/rateLimit"
+import { protectedProcedure } from "../../../procedures"
 import {
 	createInOrgInputSchema,
 	createWorkspaceInputSchema,
 	joinByCodeInputSchema,
 	listByOrgInputSchema,
-} from "../_schemas";
+} from "../_schemas"
 
 export const protectedWorkspaceRoutes = {
 	create: protectedProcedure
@@ -27,24 +27,24 @@ export const protectedWorkspaceRoutes = {
 			const {
 				user: { id: userId },
 				headers,
-			} = ctx;
-			const { organizationName, name, slug, domain } = input;
+			} = ctx
+			const { organizationName, name, slug, domain } = input
 
 			if (!name || !domain || !slug) {
-				throw new ValidationError("Please fill all the mandatory fields.");
+				throw new ValidationError("Please fill all the mandatory fields.")
 			}
 
-			const slugTaken = await checkSlugExistsForUser({ userId, slug });
+			const slugTaken = await checkSlugExistsForUser({ userId, slug })
 			if (slugTaken) {
 				throw new ValidationError(
 					"You already have a workspace with this slug. Please choose a different one.",
-				);
+				)
 			}
 
-			const isFirstWorkspace = await checkIsFirstWorkspace({ userId });
+			const isFirstWorkspace = await checkIsFirstWorkspace({ userId })
 			// Use a unique org slug so different users can track the same brand without
 			// hitting the global uniqueness constraint on better-auth's organization table.
-			const uniqueOrgSlug = `${slug}-${crypto.randomUUID().slice(0, 8)}`;
+			const uniqueOrgSlug = `${slug}-${crypto.randomUUID().slice(0, 8)}`
 			const org = await auth.api.createOrganization({
 				body: {
 					name: organizationName?.trim() || name,
@@ -52,10 +52,10 @@ export const protectedWorkspaceRoutes = {
 					keepCurrentActiveOrganization: true,
 				},
 				headers,
-			});
+			})
 
 			if (!org?.id) {
-				throw new ValidationError("Organization ID is undefined.");
+				throw new ValidationError("Organization ID is undefined.")
 			}
 
 			const workspace = await createWorkspaceForTenant({
@@ -64,63 +64,57 @@ export const protectedWorkspaceRoutes = {
 				domain,
 				tenantId: org.id,
 				userId,
-			});
+			})
 
-			return { workspace, org, isFirstWorkspace };
+			return { workspace, org, isFirstWorkspace }
 		}),
 
-	listByOrg: protectedProcedure
-		.input(listByOrgInputSchema)
-		.query(async ({ input, ctx }) => {
-			return getWorkspacesForUser({
-				tenantId: input.tenantId,
-				userId: ctx.user.id,
-			});
-		}),
-
-	listAllForUser: protectedProcedure.query(async ({ ctx }) => {
-		return getAllWorkspacesForUser({ userId: ctx.user.id });
+	listByOrg: protectedProcedure.input(listByOrgInputSchema).query(async ({ input, ctx }) => {
+		return getWorkspacesForUser({
+			tenantId: input.tenantId,
+			userId: ctx.user.id,
+		})
 	}),
 
-	createInOrg: protectedProcedure
-		.input(createInOrgInputSchema)
-		.mutation(async ({ input, ctx }) => {
-			const { name, slug, domain, tenantId } = input;
-			const userId = ctx.user.id;
+	listAllForUser: protectedProcedure.query(async ({ ctx }) => {
+		return getAllWorkspacesForUser({ userId: ctx.user.id })
+	}),
 
-			if (!name || !domain || !slug) {
-				throw new ValidationError("Please fill all the mandatory fields.");
-			}
+	createInOrg: protectedProcedure.input(createInOrgInputSchema).mutation(async ({ input, ctx }) => {
+		const { name, slug, domain, tenantId } = input
+		const userId = ctx.user.id
 
-			const slugTaken = await checkSlugExistsForUser({ userId, slug });
-			if (slugTaken) {
-				throw new ValidationError(
-					"You already have a workspace with this slug. Please choose a different one.",
-				);
-			}
+		if (!name || !domain || !slug) {
+			throw new ValidationError("Please fill all the mandatory fields.")
+		}
 
-			const isFirstWorkspace = await checkIsFirstWorkspace({ userId });
-			const res = await addWorkspaceToExistingOrg({
-				name,
-				slug,
-				domain,
-				userId,
-				tenantId,
-			});
+		const slugTaken = await checkSlugExistsForUser({ userId, slug })
+		if (slugTaken) {
+			throw new ValidationError(
+				"You already have a workspace with this slug. Please choose a different one.",
+			)
+		}
 
-			return { ...res, isFirstWorkspace };
-		}),
+		const isFirstWorkspace = await checkIsFirstWorkspace({ userId })
+		const res = await addWorkspaceToExistingOrg({
+			name,
+			slug,
+			domain,
+			userId,
+			tenantId,
+		})
+
+		return { ...res, isFirstWorkspace }
+	}),
 
 	joinByCode: protectedProcedure
 		.input(joinByCodeInputSchema)
-		.use(
-			createRateLimiter("workspace.joinByCode", { limit: 5, windowSecs: 900 }),
-		)
+		.use(createRateLimiter("workspace.joinByCode", { limit: 5, windowSecs: 900 }))
 		.mutation(async ({ input, ctx }) => {
-			return joinWorkspaceByCode({ code: input.code, userId: ctx.user.id });
+			return joinWorkspaceByCode({ code: input.code, userId: ctx.user.id })
 		}),
 
 	deleteAccount: protectedProcedure.mutation(async ({ ctx }) => {
-		await deleteUserAccount({ userId: ctx.user.id });
+		await deleteUserAccount({ userId: ctx.user.id })
 	}),
-};
+}

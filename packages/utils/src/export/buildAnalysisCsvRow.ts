@@ -1,5 +1,5 @@
-import type { AnalysisRecord } from "@oneglanse/types";
-import { joinCitedTexts, joinSourceUrls } from "../sources/index.js";
+import type { AnalysisRecord } from "@oneglanse/types"
+import { joinCitedTexts, joinSourceUrls } from "../sources/index.js"
 
 export function buildAnalysisCsvRow(
 	record: AnalysisRecord,
@@ -18,97 +18,92 @@ export function buildAnalysisCsvRow(
 		citations: record.sources?.length ?? 0,
 		source_urls: joinSourceUrls(record.sources ?? []),
 		cited_texts: joinCitedTexts(record.sources ?? []),
-	};
+	}
 }
 
-const csvListSeparator = " | ";
+const csvListSeparator = " | "
 
-function joinCsvList(
-	values: Array<string | number | boolean | null | undefined>,
-): string {
+function joinCsvList(values: Array<string | number | boolean | null | undefined>): string {
 	return values
 		.map((value) => (value == null ? "" : String(value).trim()))
 		.filter((value) => value.length > 0)
-		.join(csvListSeparator);
+		.join(csvListSeparator)
 }
 
-function joinUniqueCsvList(
-	values: Array<string | number | boolean | null | undefined>,
-): string {
-	return joinCsvList([...new Set(values)]);
+function joinUniqueCsvList(values: Array<string | number | boolean | null | undefined>): string {
+	return joinCsvList([...new Set(values)])
 }
 
 function getScoreBand(score: number | null | undefined): string {
-	if (score == null) return "N/A";
-	if (score >= 75) return "strong";
-	if (score >= 50) return "moderate";
-	if (score >= 25) return "weak";
-	return "critical";
+	if (score == null) return "N/A"
+	if (score >= 75) return "strong"
+	if (score >= 50) return "moderate"
+	if (score >= 25) return "weak"
+	return "critical"
 }
 
 function getExportRank(rank: number | null | undefined): number | "N/A" {
-	return rank == null || rank <= 0 ? "N/A" : rank;
+	return rank == null || rank <= 0 ? "N/A" : rank
 }
 
 function getRankBucket(rank: number | null | undefined): string {
-	if (rank == null || rank <= 0) return "N/A";
-	if (rank === 1) return "top_pick";
-	if (rank <= 3) return "top_3";
-	if (rank <= 10) return "top_10";
-	return "below_top_10";
+	if (rank == null || rank <= 0) return "N/A"
+	if (rank === 1) return "top_pick"
+	if (rank <= 3) return "top_3"
+	if (rank <= 10) return "top_10"
+	return "below_top_10"
 }
 
 function getLlmActionFields(args: {
-	brandAnalysis: AnalysisRecord["brand_analysis"];
-	riskCritical: number;
-	riskWarning: number;
-	citationCount: number;
+	brandAnalysis: AnalysisRecord["brand_analysis"]
+	riskCritical: number
+	riskWarning: number
+	citationCount: number
 }): Record<string, string> {
-	const { brandAnalysis, riskCritical, riskWarning, citationCount } = args;
-	const focus: string[] = [];
-	const reasons: string[] = [];
+	const { brandAnalysis, riskCritical, riskWarning, citationCount } = args
+	const focus: string[] = []
+	const reasons: string[] = []
 
 	if (!brandAnalysis) {
 		return {
 			llm_priority: "high",
 			llm_action_focus: "analysis_coverage",
-			llm_action_reasons:
-				"No parsed brand analysis is available for this response.",
-		};
+			llm_action_reasons: "No parsed brand analysis is available for this response.",
+		}
 	}
 
-	const geoScore = brandAnalysis.geoScore?.overall;
-	const visibility = brandAnalysis.presence?.visibility;
-	const sentiment = brandAnalysis.sentiment?.score;
-	const rank = brandAnalysis.position?.rankPosition;
-	const recommendation = brandAnalysis.recommendation?.type;
+	const geoScore = brandAnalysis.geoScore?.overall
+	const visibility = brandAnalysis.presence?.visibility
+	const sentiment = brandAnalysis.sentiment?.score
+	const rank = brandAnalysis.position?.rankPosition
+	const recommendation = brandAnalysis.recommendation?.type
 
 	if (!brandAnalysis.presence?.mentioned) {
-		focus.push("brand_presence");
-		reasons.push("Brand was not mentioned in the model response.");
+		focus.push("brand_presence")
+		reasons.push("Brand was not mentioned in the model response.")
 	}
 
 	if (geoScore != null && geoScore < 50) {
-		focus.push("geo_score");
-		reasons.push(`GEO score is ${geoScore}.`);
+		focus.push("geo_score")
+		reasons.push(`GEO score is ${geoScore}.`)
 	}
 
 	if (rank == null || rank <= 0) {
-		focus.push("ranking");
-		reasons.push("Brand has no rank position in the response.");
+		focus.push("ranking")
+		reasons.push("Brand has no rank position in the response.")
 	} else if (rank > 3) {
-		focus.push("ranking");
-		reasons.push(`Brand ranks at position ${rank}.`);
+		focus.push("ranking")
+		reasons.push(`Brand ranks at position ${rank}.`)
 	}
 
 	if (visibility != null && visibility < 50) {
-		focus.push("visibility");
-		reasons.push(`Visibility is ${visibility}%.`);
+		focus.push("visibility")
+		reasons.push(`Visibility is ${visibility}%.`)
 	}
 
 	if (sentiment != null && sentiment < 50) {
-		focus.push("sentiment");
-		reasons.push(`Sentiment score is ${sentiment}.`);
+		focus.push("sentiment")
+		reasons.push(`Sentiment score is ${sentiment}.`)
 	}
 
 	if (
@@ -116,69 +111,61 @@ function getLlmActionFields(args: {
 		recommendation === "not_mentioned" ||
 		recommendation === "mentioned_only"
 	) {
-		focus.push("recommendation");
-		reasons.push(`Recommendation status is ${recommendation}.`);
+		focus.push("recommendation")
+		reasons.push(`Recommendation status is ${recommendation}.`)
 	}
 
 	if (riskCritical > 0) {
-		focus.push("critical_risks");
-		reasons.push(`${riskCritical} critical risk signal(s) detected.`);
+		focus.push("critical_risks")
+		reasons.push(`${riskCritical} critical risk signal(s) detected.`)
 	}
 
 	if (riskWarning > 0) {
-		focus.push("warning_risks");
-		reasons.push(`${riskWarning} warning risk signal(s) detected.`);
+		focus.push("warning_risks")
+		reasons.push(`${riskWarning} warning risk signal(s) detected.`)
 	}
 
 	if (citationCount === 0) {
-		focus.push("citations");
-		reasons.push("No citation sources were captured for this response.");
+		focus.push("citations")
+		reasons.push("No citation sources were captured for this response.")
 	}
 
 	const priority =
-		riskCritical > 0 ||
-		!brandAnalysis.presence?.mentioned ||
-		(geoScore != null && geoScore < 40)
+		riskCritical > 0 || !brandAnalysis.presence?.mentioned || (geoScore != null && geoScore < 40)
 			? "high"
 			: focus.length > 0
 				? "medium"
-				: "low";
+				: "low"
 
 	return {
 		llm_priority: priority,
-		llm_action_focus: joinUniqueCsvList(
-			focus.length > 0 ? focus : ["maintain_and_expand"],
-		),
+		llm_action_focus: joinUniqueCsvList(focus.length > 0 ? focus : ["maintain_and_expand"]),
 		llm_action_reasons: joinCsvList(
-			reasons.length > 0
-				? reasons
-				: ["Current record has no immediate negative signal."],
+			reasons.length > 0 ? reasons : ["Current record has no immediate negative signal."],
 		),
-	};
+	}
 }
 
 /**
  * Full per-record row with every available metric for LLM ingestion.
  * Arrays are pipe-delimited strings; nested data is serialized as JSON.
  */
-export function buildDetailedAnalysisCsvRow(
-	record: AnalysisRecord,
-): Record<string, unknown> {
-	const ba = record.brand_analysis;
-	const risks = ba?.risks?.items ?? [];
-	const competitors = ba?.competitors ?? [];
-	const sources = record.sources ?? [];
-	const perception = ba?.perception;
-	const riskCritical = risks.filter((r) => r.severity === "critical").length;
-	const riskWarning = risks.filter((r) => r.severity === "warning").length;
-	const riskInfo = risks.filter((r) => r.severity === "info").length;
-	const citationCount = sources.length;
+export function buildDetailedAnalysisCsvRow(record: AnalysisRecord): Record<string, unknown> {
+	const ba = record.brand_analysis
+	const risks = ba?.risks?.items ?? []
+	const competitors = ba?.competitors ?? []
+	const sources = record.sources ?? []
+	const perception = ba?.perception
+	const riskCritical = risks.filter((r) => r.severity === "critical").length
+	const riskWarning = risks.filter((r) => r.severity === "warning").length
+	const riskInfo = risks.filter((r) => r.severity === "info").length
+	const citationCount = sources.length
 	const llmActionFields = getLlmActionFields({
 		brandAnalysis: ba,
 		riskCritical,
 		riskWarning,
 		citationCount,
-	});
+	})
 
 	return {
 		section: "analysis_records",
@@ -244,9 +231,7 @@ export function buildDetailedAnalysisCsvRow(
 		competitor_count: competitors.length,
 		competitor_names: joinCsvList(competitors.map((c) => c.name)),
 		competitor_domains: joinCsvList(competitors.map((c) => c.domain)),
-		competitor_rank_positions: joinCsvList(
-			competitors.map((c) => getExportRank(c.rankPosition)),
-		),
+		competitor_rank_positions: joinCsvList(competitors.map((c) => getExportRank(c.rankPosition))),
 		competitor_visibilities: joinCsvList(competitors.map((c) => c.visibility)),
 		competitor_sentiments: joinCsvList(competitors.map((c) => c.sentiment)),
 		recommended_competitors: joinCsvList(
@@ -255,8 +240,7 @@ export function buildDetailedAnalysisCsvRow(
 		top_ranked_competitor:
 			competitors
 				.filter((c) => c.rankPosition != null && c.rankPosition > 0)
-				.sort((a, b) => (a.rankPosition ?? 999) - (b.rankPosition ?? 999))[0]
-				?.name ?? "",
+				.sort((a, b) => (a.rankPosition ?? 999) - (b.rankPosition ?? 999))[0]?.name ?? "",
 		competitors,
 
 		// Sources and citations
@@ -272,5 +256,5 @@ export function buildDetailedAnalysisCsvRow(
 
 		// LLM action helpers
 		...llmActionFields,
-	};
+	}
 }

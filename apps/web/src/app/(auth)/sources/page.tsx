@@ -1,9 +1,9 @@
-"use client";
+"use client"
 
-import { ExportMenu } from "@/components/export-menu";
-import { downloadCsv, downloadJson } from "@/lib/export/download";
-import { useSafeSearchParams } from "@/lib/navigation/use-safe-search-params";
-import type { GroupedSource, SourceGroupResult } from "@oneglanse/types";
+import { ExportMenu } from "@/components/export-menu"
+import { downloadCsv, downloadJson } from "@/lib/export/download"
+import { useSafeSearchParams } from "@/lib/navigation/use-safe-search-params"
+import type { GroupedSource, SourceGroupResult } from "@oneglanse/types"
 import {
 	Button,
 	EmptyStatePanel,
@@ -16,119 +16,101 @@ import {
 	SourcesIntelligencePanel,
 	TemporaryIssueState,
 	WorkspaceRequiredState,
-} from "@oneglanse/ui";
+} from "@oneglanse/ui"
 import {
 	cleanCitedText,
 	getDomain,
 	getUniqueModelProviders,
 	getUrlPath,
 	joinCitedTexts,
-} from "@oneglanse/utils";
-import { AlertTriangle, FileText, Globe2, Link2, SearchX } from "lucide-react";
-import Link from "next/link";
-import { useMemo, useState } from "react";
-import { usePromptSources } from "../prompts/_lib/queries/prompt.queries";
+} from "@oneglanse/utils"
+import { AlertTriangle, FileText, Globe2, Link2, SearchX } from "lucide-react"
+import Link from "next/link"
+import { useMemo, useState } from "react"
+import { usePromptSources } from "../prompts/_lib/queries/prompt.queries"
 
 type DomainGroup = {
-	domain: string;
-	totalCitations: number;
-	urlCount: number;
-	providers: Set<string>;
-	urls: GroupedSource[];
-};
+	domain: string
+	totalCitations: number
+	urlCount: number
+	providers: Set<string>
+	urls: GroupedSource[]
+}
 
 const SOURCES_METRIC_SKELETON_KEYS = [
 	"sources-metric-a",
 	"sources-metric-b",
 	"sources-metric-c",
 	"sources-metric-d",
-] as const;
+] as const
 
 function getSourceConcentrationRisk(topDomainShare: number): string {
-	if (topDomainShare >= 45) return "high";
-	if (topDomainShare >= 30) return "moderate";
-	return "healthy";
+	if (topDomainShare >= 45) return "high"
+	if (topDomainShare >= 30) return "moderate"
+	return "healthy"
 }
 
 export default function SourcesPage(): React.JSX.Element {
-	const [selectedProvider, setSelectedProvider] =
-		useState<string>("All Models");
+	const [selectedProvider, setSelectedProvider] = useState<string>("All Models")
 
-	const searchParams = useSafeSearchParams();
-	const workspaceId = searchParams.get("workspace") ?? "";
-	const {
-		data: promptSources,
-		isLoading,
-		error,
-	} = usePromptSources(workspaceId);
+	const searchParams = useSafeSearchParams()
+	const workspaceId = searchParams.get("workspace") ?? ""
+	const { data: promptSources, isLoading, error } = usePromptSources(workspaceId)
 
 	const sourceStats = useMemo<SourceGroupResult | null>(() => {
-		const data = promptSources;
-		if (
-			!data ||
-			!data.sourceStats ||
-			!Array.isArray(data.sourceStats.combined)
-		) {
-			return null;
+		const data = promptSources
+		if (!data || !data.sourceStats || !Array.isArray(data.sourceStats.combined)) {
+			return null
 		}
-		return data.sourceStats as SourceGroupResult;
-	}, [promptSources]);
+		return data.sourceStats as SourceGroupResult
+	}, [promptSources])
 
 	const displayedSources = useMemo<GroupedSource[]>(() => {
-		if (!sourceStats) return [];
+		if (!sourceStats) return []
 		const rows =
 			selectedProvider === "All Models"
 				? sourceStats.combined
-				: (sourceStats.byModel[selectedProvider] ?? []);
-		return [...rows].sort(
-			(a, b) => (b.totalSources ?? 0) - (a.totalSources ?? 0),
-		);
-	}, [sourceStats, selectedProvider]);
+				: (sourceStats.byModel[selectedProvider] ?? [])
+		return [...rows].sort((a, b) => (b.totalSources ?? 0) - (a.totalSources ?? 0))
+	}, [sourceStats, selectedProvider])
 
 	const domainGroups = useMemo<DomainGroup[]>(() => {
-		const map = new Map<string, DomainGroup>();
+		const map = new Map<string, DomainGroup>()
 
 		for (const source of displayedSources) {
-			const domain = getDomain(source.url) || "unknown";
+			const domain = getDomain(source.url) || "unknown"
 			const existing = map.get(domain) ?? {
 				domain,
 				totalCitations: 0,
 				urlCount: 0,
 				providers: new Set<string>(),
 				urls: [],
-			};
+			}
 
-			existing.totalCitations += source.totalSources ?? 0;
-			existing.urlCount += 1;
+			existing.totalCitations += source.totalSources ?? 0
+			existing.urlCount += 1
 			for (const excerpt of source.excerpts) {
 				if (excerpt.model_provider) {
-					existing.providers.add(excerpt.model_provider);
+					existing.providers.add(excerpt.model_provider)
 				}
 			}
-			existing.urls.push(source);
+			existing.urls.push(source)
 
-			map.set(domain, existing);
+			map.set(domain, existing)
 		}
 
-		return [...map.values()].sort(
-			(a, b) => b.totalCitations - a.totalCitations,
-		);
-	}, [displayedSources]);
+		return [...map.values()].sort((a, b) => b.totalCitations - a.totalCitations)
+	}, [displayedSources])
 
 	const metrics = useMemo<SourcePanelMetrics>(() => {
-		const totalUrls = displayedSources.length;
-		const totalDomains = domainGroups.length;
-		const totalCitations = displayedSources.reduce(
-			(sum, s) => sum + (s.totalSources ?? 0),
-			0,
-		);
-		const avgCitationsPerUrl = totalUrls
-			? (totalCitations / totalUrls).toFixed(1)
-			: "0.0";
-		const topDomainCitations = domainGroups[0]?.totalCitations ?? 0;
+		const totalUrls = displayedSources.length
+		const totalDomains = domainGroups.length
+		const totalCitations = displayedSources.reduce((sum, s) => sum + (s.totalSources ?? 0), 0)
+		const avgCitationsPerUrl = totalUrls ? (totalCitations / totalUrls).toFixed(1) : "0.0"
+		const topDomainCitations = domainGroups[0]?.totalCitations ?? 0
 		const topDomainShare = totalCitations
 			? Math.round((topDomainCitations / totalCitations) * 100)
-			: 0;
+			: 0
 
 		return {
 			totalDomains,
@@ -137,23 +119,21 @@ export default function SourcesPage(): React.JSX.Element {
 			avgCitationsPerUrl,
 			topDomain: domainGroups[0]?.domain ?? "N/A",
 			topDomainShare,
-		};
-	}, [displayedSources, domainGroups]);
+		}
+	}, [displayedSources, domainGroups])
 
 	const domainRows = useMemo<SourcePanelDomainRow[]>(
 		() =>
 			domainGroups.map((group) => ({
 				domain: group.domain,
 				share:
-					metrics.totalCitations > 0
-						? (group.totalCitations / metrics.totalCitations) * 100
-						: 0,
+					metrics.totalCitations > 0 ? (group.totalCitations / metrics.totalCitations) * 100 : 0,
 				totalCitations: group.totalCitations,
 				urlCount: group.urlCount,
 				providers: [...group.providers],
 			})),
 		[domainGroups, metrics.totalCitations],
-	);
+	)
 
 	const citationDomains = useMemo<SourcePanelCitationDomain[]>(
 		() =>
@@ -169,14 +149,12 @@ export default function SourcesPage(): React.JSX.Element {
 					providers: [...getUniqueModelProviders(source.excerpts)],
 					excerpts: source.excerpts.map((excerpt) => ({
 						modelProvider: excerpt.model_provider ?? undefined,
-						citedText: excerpt.cited_text
-							? cleanCitedText(excerpt.cited_text)
-							: undefined,
+						citedText: excerpt.cited_text ? cleanCitedText(excerpt.cited_text) : undefined,
 					})),
 				})),
 			})),
 		[domainGroups],
-	);
+	)
 
 	if (!workspaceId) {
 		return (
@@ -185,7 +163,7 @@ export default function SourcesPage(): React.JSX.Element {
 				title="Pick a Workspace"
 				description="Open a workspace to inspect source influence."
 			/>
-		);
+		)
 	}
 
 	if (isLoading && !promptSources) {
@@ -195,16 +173,13 @@ export default function SourcesPage(): React.JSX.Element {
 					<Skeleton className="h-10 w-56" />
 					<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
 						{SOURCES_METRIC_SKELETON_KEYS.map((key) => (
-							<Skeleton
-								key={key}
-								className="h-28 rounded-[var(--app-radius)]"
-							/>
+							<Skeleton key={key} className="h-28 rounded-[var(--app-radius)]" />
 						))}
 					</div>
 					<Skeleton className="h-[280px] rounded-[var(--app-radius)] sm:h-[380px] lg:h-[480px]" />
 				</div>
 			</div>
-		);
+		)
 	}
 
 	if (error) {
@@ -214,7 +189,7 @@ export default function SourcesPage(): React.JSX.Element {
 				title="Sources Are Unavailable"
 				description="We couldn’t load citation data right now."
 			/>
-		);
+		)
 	}
 
 	if (!sourceStats) {
@@ -235,7 +210,7 @@ export default function SourcesPage(): React.JSX.Element {
 					</Button>
 				}
 			/>
-		);
+		)
 	}
 
 	if (displayedSources.length === 0) {
@@ -251,10 +226,10 @@ export default function SourcesPage(): React.JSX.Element {
 					{ icon: FileText, label: "Cited text by provider" },
 				]}
 			/>
-		);
+		)
 	}
 
-	const hasExportableData = displayedSources.length > 0;
+	const hasExportableData = displayedSources.length > 0
 
 	return (
 		<div className="web-page-wide">
@@ -271,9 +246,7 @@ export default function SourcesPage(): React.JSX.Element {
 								className="w-full sm:w-auto"
 								disabled={!hasExportableData}
 								onExportJson={() => {
-									const concentrationRisk = getSourceConcentrationRisk(
-										metrics.topDomainShare,
-									);
+									const concentrationRisk = getSourceConcentrationRisk(metrics.topDomainShare)
 									const citationRows = domainGroups.flatMap((group) =>
 										group.urls.flatMap((source) =>
 											(source.excerpts ?? []).map((excerpt) => ({
@@ -283,46 +256,32 @@ export default function SourcesPage(): React.JSX.Element {
 												urlPath: getUrlPath(source.url),
 												totalCitations: source.totalSources ?? 0,
 												modelProvider: excerpt.model_provider ?? "",
-												citedText: excerpt.cited_text
-													? cleanCitedText(excerpt.cited_text)
-													: "",
+												citedText: excerpt.cited_text ? cleanCitedText(excerpt.cited_text) : "",
 											})),
 										),
-									);
+									)
 									const topDomains = domainGroups.slice(0, 10).map((group) => ({
 										domain: group.domain,
 										totalCitations: group.totalCitations,
 										share:
 											metrics.totalCitations > 0
-												? Number(
-														(
-															(group.totalCitations / metrics.totalCitations) *
-															100
-														).toFixed(1),
-													)
+												? Number(((group.totalCitations / metrics.totalCitations) * 100).toFixed(1))
 												: 0,
 										urlCount: group.urlCount,
-									}));
+									}))
 									const domainMetricRows = domainGroups.map((group) => ({
 										domain: group.domain,
 										totalCitations: group.totalCitations,
 										citationShare:
 											metrics.totalCitations > 0
-												? Number(
-														(
-															(group.totalCitations / metrics.totalCitations) *
-															100
-														).toFixed(1),
-													)
+												? Number(((group.totalCitations / metrics.totalCitations) * 100).toFixed(1))
 												: 0,
 										urlCount: group.urlCount,
 										providerCount: group.providers.size,
 										providers: Array.from(group.providers),
-									}));
+									}))
 									const urlMetricRows = displayedSources.map((source) => {
-										const models = getUniqueModelProviders(
-											source.excerpts ?? [],
-										);
+										const models = getUniqueModelProviders(source.excerpts ?? [])
 
 										return {
 											url: source.url,
@@ -333,11 +292,9 @@ export default function SourcesPage(): React.JSX.Element {
 											citationShare:
 												metrics.totalCitations > 0
 													? Number(
-															(
-																((source.totalSources ?? 0) /
-																	metrics.totalCitations) *
-																100
-															).toFixed(1),
+															(((source.totalSources ?? 0) / metrics.totalCitations) * 100).toFixed(
+																1,
+															),
 														)
 													: 0,
 											providerCount: models.length,
@@ -346,8 +303,8 @@ export default function SourcesPage(): React.JSX.Element {
 											citedTexts: joinCitedTexts(source.excerpts ?? [], {
 												clean: true,
 											}),
-										};
-									});
+										}
+									})
 
 									downloadJson(`sources-${workspaceId}-${Date.now()}.json`, {
 										generatedAt: new Date().toISOString(),
@@ -375,12 +332,10 @@ export default function SourcesPage(): React.JSX.Element {
 											sources: urlMetricRows,
 											citations: citationRows,
 										},
-									});
+									})
 								}}
 								onExportCsv={() => {
-									const concentrationRisk = getSourceConcentrationRisk(
-										metrics.topDomainShare,
-									);
+									const concentrationRisk = getSourceConcentrationRisk(metrics.topDomainShare)
 									const rows = [
 										{
 											section: "overview",
@@ -424,11 +379,7 @@ export default function SourcesPage(): React.JSX.Element {
 											citation_share:
 												metrics.totalCitations > 0
 													? Number(
-															(
-																(group.totalCitations /
-																	metrics.totalCitations) *
-																100
-															).toFixed(1),
+															((group.totalCitations / metrics.totalCitations) * 100).toFixed(1),
 														)
 													: 0,
 											url_count: group.urlCount,
@@ -444,18 +395,14 @@ export default function SourcesPage(): React.JSX.Element {
 											citation_share:
 												metrics.totalCitations > 0
 													? Number(
-															(
-																((source.totalSources ?? 0) /
-																	metrics.totalCitations) *
-																100
-															).toFixed(1),
+															(((source.totalSources ?? 0) / metrics.totalCitations) * 100).toFixed(
+																1,
+															),
 														)
 													: 0,
 											domain: getDomain(source.url) || "",
 											excerpt_count: source.excerpts?.length ?? 0,
-											models: getUniqueModelProviders(
-												source.excerpts ?? [],
-											).join(", "),
+											models: getUniqueModelProviders(source.excerpts ?? []).join(", "),
 											cited_texts: joinCitedTexts(source.excerpts ?? [], {
 												clean: true,
 											}),
@@ -470,14 +417,12 @@ export default function SourcesPage(): React.JSX.Element {
 													title: source.title,
 													total_citations: source.totalSources ?? 0,
 													model_provider: excerpt.model_provider ?? "",
-													cited_text: excerpt.cited_text
-														? cleanCitedText(excerpt.cited_text)
-														: "",
+													cited_text: excerpt.cited_text ? cleanCitedText(excerpt.cited_text) : "",
 												})),
 											),
 										),
-									];
-									downloadCsv(`sources-${workspaceId}-${Date.now()}.csv`, rows);
+									]
+									downloadCsv(`sources-${workspaceId}-${Date.now()}.csv`, rows)
 								}}
 							/>
 							<ProviderModelSelect
@@ -500,5 +445,5 @@ export default function SourcesPage(): React.JSX.Element {
 				</div>
 			</div>
 		</div>
-	);
+	)
 }

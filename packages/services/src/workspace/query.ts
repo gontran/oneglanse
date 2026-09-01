@@ -1,6 +1,6 @@
-import { db, schema } from "@oneglanse/db";
-import type { Workspace } from "@oneglanse/db";
-import { NotFoundError, ValidationError } from "@oneglanse/errors";
+import { db, schema } from "@oneglanse/db"
+import type { Workspace } from "@oneglanse/db"
+import { NotFoundError, ValidationError } from "@oneglanse/errors"
 import type {
 	GetAllWorkspacesForUserArgs,
 	GetWorkspaceByIdArgs,
@@ -8,48 +8,39 @@ import type {
 	GetWorkspacesForUserArgs,
 	WorkspaceJoinInfo,
 	WorkspaceMemberWithUser,
-} from "@oneglanse/types";
-import { and, eq, isNull } from "drizzle-orm";
+} from "@oneglanse/types"
+import { and, eq, isNull } from "drizzle-orm"
 import type {
 	JoinByCodeOrganization,
 	JoinByCodeWorkspace,
 	OrganizationWorkspaceGroup,
-} from "./_internal/types.js";
+} from "./_internal/types.js"
 
-export async function getWorkspaceById(
-	args: GetWorkspaceByIdArgs,
-): Promise<Workspace> {
-	const { workspaceId } = args;
+export async function getWorkspaceById(args: GetWorkspaceByIdArgs): Promise<Workspace> {
+	const { workspaceId } = args
 
 	if (!workspaceId || workspaceId.trim() === "") {
-		throw new ValidationError("Workspace ID is undefined.");
+		throw new ValidationError("Workspace ID is undefined.")
 	}
 
 	const [workspace] = await db
 		.select()
 		.from(schema.workspaces)
-		.where(
-			and(
-				eq(schema.workspaces.id, workspaceId),
-				isNull(schema.workspaces.deletedAt),
-			),
-		)
-		.execute();
+		.where(and(eq(schema.workspaces.id, workspaceId), isNull(schema.workspaces.deletedAt)))
+		.execute()
 
 	if (!workspace) {
-		throw new NotFoundError(`Workspace with ID ${workspaceId} not found.`);
+		throw new NotFoundError(`Workspace with ID ${workspaceId} not found.`)
 	}
 
-	return workspace;
+	return workspace
 }
 
-export async function getWorkspacesForUser(
-	args: GetWorkspacesForUserArgs,
-): Promise<Workspace[]> {
-	const { tenantId, userId } = args;
+export async function getWorkspacesForUser(args: GetWorkspacesForUserArgs): Promise<Workspace[]> {
+	const { tenantId, userId } = args
 
 	if (!tenantId || tenantId.trim() === "") {
-		throw new ValidationError("Tenant ID is undefined.");
+		throw new ValidationError("Tenant ID is undefined.")
 	}
 
 	const workspaces = await db
@@ -74,24 +65,19 @@ export async function getWorkspacesForUser(
 				isNull(schema.workspaceMembers.deletedAt),
 			),
 		)
-		.where(
-			and(
-				eq(schema.workspaces.tenantId, tenantId),
-				isNull(schema.workspaces.deletedAt),
-			),
-		)
-		.execute();
+		.where(and(eq(schema.workspaces.tenantId, tenantId), isNull(schema.workspaces.deletedAt)))
+		.execute()
 
-	return workspaces;
+	return workspaces
 }
 
 export async function getWorkspaceMembersWithUsers(
 	args: GetWorkspaceMembersWithUsersArgs,
 ): Promise<WorkspaceMemberWithUser[]> {
-	const { workspaceId } = args;
+	const { workspaceId } = args
 
 	if (!workspaceId || workspaceId.trim() === "") {
-		throw new ValidationError("Workspace ID is undefined.");
+		throw new ValidationError("Workspace ID is undefined.")
 	}
 
 	const members = await db
@@ -112,15 +98,15 @@ export async function getWorkspaceMembersWithUsers(
 				isNull(schema.workspaceMembers.deletedAt),
 			),
 		)
-		.execute();
+		.execute()
 
-	return members;
+	return members
 }
 
 export async function getAllWorkspacesForUser(
 	args: GetAllWorkspacesForUserArgs,
 ): Promise<OrganizationWorkspaceGroup[]> {
-	const { userId } = args;
+	const { userId } = args
 
 	const rows = await db
 		.select({
@@ -150,59 +136,53 @@ export async function getAllWorkspacesForUser(
 				isNull(schema.workspaces.deletedAt),
 			),
 		)
-		.innerJoin(
-			schema.organization,
-			eq(schema.organization.id, schema.workspaces.tenantId),
-		)
+		.innerJoin(schema.organization, eq(schema.organization.id, schema.workspaces.tenantId))
 		.where(
-			and(
-				eq(schema.workspaceMembers.userId, userId),
-				isNull(schema.workspaceMembers.deletedAt),
-			),
+			and(eq(schema.workspaceMembers.userId, userId), isNull(schema.workspaceMembers.deletedAt)),
 		)
-		.execute();
+		.execute()
 
 	const orgMap = new Map<
 		string,
 		{
-			organization: { id: string; name: string; slug: string | null };
-			workspaces: (typeof rows)[number]["workspace"][];
+			organization: { id: string; name: string; slug: string | null }
+			workspaces: (typeof rows)[number]["workspace"][]
 		}
-	>();
+	>()
 
 	for (const row of rows) {
-		const orgId = row.organization.id;
+		const orgId = row.organization.id
 		if (!orgMap.has(orgId)) {
-			orgMap.set(orgId, { organization: row.organization, workspaces: [] });
+			orgMap.set(orgId, { organization: row.organization, workspaces: [] })
 		}
 		const orgEntry = orgMap.get(orgId) as {
-			organization: { id: string; name: string; slug: string | null };
-			workspaces: (typeof rows)[number]["workspace"][];
-		};
-		orgEntry.workspaces.push(row.workspace);
+			organization: { id: string; name: string; slug: string | null }
+			workspaces: (typeof rows)[number]["workspace"][]
+		}
+		orgEntry.workspaces.push(row.workspace)
 	}
 
-	return Array.from(orgMap.values());
+	return Array.from(orgMap.values())
 }
 
 export async function getWorkspaceJoinInfo(args: {
-	workspaceId: string;
+	workspaceId: string
 }): Promise<WorkspaceJoinInfo> {
-	const { workspaceId } = args;
-	const workspace = await getWorkspaceById({ workspaceId });
+	const { workspaceId } = args
+	const workspace = await getWorkspaceById({ workspaceId })
 
 	const organization = await db.query.organization.findFirst({
 		where: eq(schema.organization.id, workspace.tenantId),
-	});
+	})
 
 	if (!organization) {
-		throw new NotFoundError("Organization not found for this workspace.");
+		throw new NotFoundError("Organization not found for this workspace.")
 	}
 
 	// Use the workspace UUID as the join code — globally unique, no slug collision across orgs.
 	// joinWorkspaceByCode already handles the `workspace_` prefix via its first branch.
-	const orgCode = organization.slug ?? organization.id;
-	const workspaceCode = workspace.id;
+	const orgCode = organization.slug ?? organization.id
+	const workspaceCode = workspace.id
 
 	return {
 		orgCode,
@@ -213,7 +193,7 @@ export async function getWorkspaceJoinInfo(args: {
 			slug: organization.slug,
 		},
 		workspace: { id: workspace.id, name: workspace.name, slug: workspace.slug },
-	};
+	}
 }
 
-export type { JoinByCodeOrganization, JoinByCodeWorkspace };
+export type { JoinByCodeOrganization, JoinByCodeWorkspace }

@@ -1,17 +1,17 @@
-"use client";
+"use client"
 
-import { formatCitationLabel, getFaviconUrls } from "@oneglanse/utils";
-import { Card } from "../card.js";
-import type { DashboardSourceData } from "./types.js";
+import { formatCitationLabel, getFaviconUrls } from "@oneglanse/utils"
+import { Card } from "../card.js"
+import type { DashboardSourceData } from "./types.js"
 
 export function TopSources({
 	sources,
 	totalCitations = 1,
 }: {
-	sources: DashboardSourceData[];
-	totalCitations?: number;
+	sources: DashboardSourceData[]
+	totalCitations?: number
 }) {
-	const visibleSources = sources.slice(0, 5);
+	const visibleSources = sources.slice(0, 5)
 
 	return (
 		<Card className="flex h-full min-w-0 flex-col p-5 lg:p-6">
@@ -26,13 +26,9 @@ export function TopSources({
 
 			<div className="flex min-w-0 flex-1 flex-col gap-3">
 				{visibleSources.map((source, idx) => {
-					const faviconUrl =
-						source.favicon || getFaviconUrls(source.domain, "")[0];
+					const faviconUrl = source.favicon || getFaviconUrls(source.domain, "")[0]
 
-					const usagePercent = (
-						(source.citationCount / totalCitations) *
-						100
-					).toFixed(1);
+					const usagePercent = ((source.citationCount / totalCitations) * 100).toFixed(1)
 
 					return (
 						<div
@@ -46,8 +42,7 @@ export function TopSources({
 										alt=""
 										className="h-5 w-5 shrink-0 rounded-[var(--app-radius)] object-contain transition-transform duration-200 group-hover:scale-105"
 										onError={(e) => {
-											(e.target as HTMLImageElement).style.visibility =
-												"hidden";
+											;(e.target as HTMLImageElement).style.visibility = "hidden"
 										}}
 									/>
 								)}
@@ -78,9 +73,9 @@ export function TopSources({
 								{usagePercent}%
 							</div>
 						</div>
-					);
+					)
 				})}
 			</div>
 		</Card>
-	);
+	)
 }

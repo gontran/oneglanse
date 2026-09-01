@@ -1,6 +1,6 @@
-import { downloadCsv, downloadJson } from "@/lib/export/download";
-import { buildDetailedAnalysisCsvRow } from "@oneglanse/utils";
-import type { DashboardMetrics } from "./types";
+import { downloadCsv, downloadJson } from "@/lib/export/download"
+import { buildDetailedAnalysisCsvRow } from "@oneglanse/utils"
+import type { DashboardMetrics } from "./types"
 
 function getActionPriorities(metrics: DashboardMetrics): string[] {
 	const priorities = [
@@ -16,16 +16,14 @@ function getActionPriorities(metrics: DashboardMetrics): string[] {
 		metrics.impactMetrics.criticalRiskCount > 0
 			? "Resolve critical risk signals found in model answers."
 			: null,
-	].filter((priority): priority is string => priority !== null);
+	].filter((priority): priority is string => priority !== null)
 
 	return priorities.length > 0
 		? priorities
-		: ["Maintain current trajectory and scale winning prompt themes."];
+		: ["Maintain current trajectory and scale winning prompt themes."]
 }
 
-function serializeSourceMetrics(
-	sources: DashboardMetrics["sourcesIntelligence"],
-) {
+function serializeSourceMetrics(sources: DashboardMetrics["sourcesIntelligence"]) {
 	return sources.map((source) => ({
 		domain: source.domain,
 		favicon: source.favicon,
@@ -34,27 +32,25 @@ function serializeSourceMetrics(
 		modelCount: source.models.size,
 		models: [...source.models],
 		uniqueRecords: [...source.uniqueRecords],
-	}));
+	}))
 }
 
 export function exportAnalysisJson(args: {
-	workspaceId: string;
-	metrics: DashboardMetrics;
-	modelFilter: string;
-	timeFilter: string;
+	workspaceId: string
+	metrics: DashboardMetrics
+	modelFilter: string
+	timeFilter: string
 }): void {
-	const { workspaceId, metrics, modelFilter, timeFilter } = args;
-	const generatedAt = new Date().toISOString();
+	const { workspaceId, metrics, modelFilter, timeFilter } = args
+	const generatedAt = new Date().toISOString()
 
 	const topCompetitors = metrics.competitorData
 		.filter((competitor) => !competitor.isBrand)
-		.slice(0, 5);
+		.slice(0, 5)
 
-	const actionPriorities = getActionPriorities(metrics);
-	const promptRows = metrics.analyzedRecords.map((record) =>
-		buildDetailedAnalysisCsvRow(record),
-	);
-	const sourceRows = serializeSourceMetrics(metrics.sourcesIntelligence);
+	const actionPriorities = getActionPriorities(metrics)
+	const promptRows = metrics.analyzedRecords.map((record) => buildDetailedAnalysisCsvRow(record))
+	const sourceRows = serializeSourceMetrics(metrics.sourcesIntelligence)
 
 	downloadJson(`dashboard-${workspaceId}-${Date.now()}.json`, {
 		generatedAt,
@@ -95,15 +91,15 @@ export function exportAnalysisJson(args: {
 			sources: sourceRows,
 			prompts: promptRows,
 		},
-	});
+	})
 }
 
 export function exportAnalysisCsv(args: {
-	workspaceId: string;
-	metrics: DashboardMetrics;
+	workspaceId: string
+	metrics: DashboardMetrics
 }): void {
-	const { workspaceId, metrics } = args;
-	const actionPriorities = getActionPriorities(metrics);
+	const { workspaceId, metrics } = args
+	const actionPriorities = getActionPriorities(metrics)
 
 	const overviewRows = [
 		{ section: "overview", metric: "Brand", value: metrics.brandName },
@@ -210,10 +206,8 @@ export function exportAnalysisCsv(args: {
 			models: [...s.models].join(" | "),
 			unique_records: [...s.uniqueRecords].join(" | "),
 		})),
-		...metrics.analyzedRecords.map((record) =>
-			buildDetailedAnalysisCsvRow(record),
-		),
-	];
+		...metrics.analyzedRecords.map((record) => buildDetailedAnalysisCsvRow(record)),
+	]
 
-	downloadCsv(`dashboard-${workspaceId}-${Date.now()}.csv`, overviewRows);
+	downloadCsv(`dashboard-${workspaceId}-${Date.now()}.csv`, overviewRows)
 }

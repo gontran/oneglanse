@@ -1,17 +1,14 @@
-"use client";
+"use client"
 import {
 	AuthFormChrome,
 	formFieldClassName,
 	formLabelClassName,
 	formPrimaryButtonClassName,
-} from "@/components/forms/auth-form-chrome";
-import { PasswordField } from "@/components/forms/password-field";
-import { authClient } from "@/lib/auth/auth-client";
-import {
-	getPostAuthProvidersPath,
-	getSafeAuthRedirectPath,
-} from "@/lib/auth/redirect";
-import { zodResolver } from "@hookform/resolvers/zod";
+} from "@/components/forms/auth-form-chrome"
+import { PasswordField } from "@/components/forms/password-field"
+import { authClient } from "@/lib/auth/auth-client"
+import { getPostAuthProvidersPath, getSafeAuthRedirectPath } from "@/lib/auth/redirect"
+import { zodResolver } from "@hookform/resolvers/zod"
 import {
 	Button,
 	Form,
@@ -23,39 +20,37 @@ import {
 	Input,
 	toast,
 	useForm,
-} from "@oneglanse/ui";
-import { Loader2 } from "lucide-react";
-import { useSearchParams } from "next/navigation";
-import { useState } from "react";
-import { z } from "zod";
+} from "@oneglanse/ui"
+import { Loader2 } from "lucide-react"
+import { useSearchParams } from "next/navigation"
+import { useState } from "react"
+import { z } from "zod"
 
 const formSchema = z.object({
 	username: z.string().min(3),
 	email: z.string().email(),
 	password: z.string().min(8),
-});
+})
 
 export function SignupForm({
 	className,
 	showGoogle = false,
 	...props
 }: React.ComponentProps<"div"> & { showGoogle?: boolean }) {
-	const searchParams = useSearchParams();
-	const [isLoading, setIsLoading] = useState(false);
-	const rawNext = searchParams?.get("next");
-	const redirectPath = getSafeAuthRedirectPath(rawNext);
-	const postAuthRedirectPath = getPostAuthProvidersPath(rawNext);
+	const searchParams = useSearchParams()
+	const [isLoading, setIsLoading] = useState(false)
+	const rawNext = searchParams?.get("next")
+	const redirectPath = getSafeAuthRedirectPath(rawNext)
+	const postAuthRedirectPath = getPostAuthProvidersPath(rawNext)
 	const loginHref =
-		redirectPath === "/"
-			? "/login"
-			: `/login?next=${encodeURIComponent(redirectPath)}`;
+		redirectPath === "/" ? "/login" : `/login?next=${encodeURIComponent(redirectPath)}`
 
 	const signInWithGoogle = async () => {
 		await authClient.signIn.social({
 			provider: "google",
 			callbackURL: postAuthRedirectPath,
-		});
-	};
+		})
+	}
 
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
@@ -64,27 +59,27 @@ export function SignupForm({
 			email: "",
 			password: "",
 		},
-	});
+	})
 
 	async function onSubmit(values: z.infer<typeof formSchema>) {
-		setIsLoading(true);
+		setIsLoading(true)
 
 		const { error } = await authClient.signUp.email({
 			email: values.email,
 			password: values.password,
 			name: values.username,
-		});
+		})
 
 		if (error) {
 			const message = error.message?.toLowerCase().includes("already exists")
 				? "An account with this email already exists. Please sign in instead."
-				: (error.message ?? "Failed to sign up.");
-			toast.error(message);
-			setIsLoading(false);
-			return;
+				: (error.message ?? "Failed to sign up.")
+			toast.error(message)
+			setIsLoading(false)
+			return
 		}
 
-		window.location.href = postAuthRedirectPath;
+		window.location.href = postAuthRedirectPath
 	}
 
 	return (
@@ -106,9 +101,7 @@ export function SignupForm({
 								name="username"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel className={formLabelClassName}>
-											Full name
-										</FormLabel>
+										<FormLabel className={formLabelClassName}>Full name</FormLabel>
 										<FormControl>
 											<Input
 												autoComplete="name"
@@ -143,25 +136,13 @@ export function SignupForm({
 								)}
 							/>
 						</div>
-						<PasswordField
-							control={form.control}
-							name="password"
-							autoComplete="new-password"
-						/>
-						<Button
-							type="submit"
-							className={formPrimaryButtonClassName}
-							disabled={isLoading}
-						>
-							{isLoading ? (
-								<Loader2 className="size-4 animate-spin" />
-							) : (
-								"Create account"
-							)}
+						<PasswordField control={form.control} name="password" autoComplete="new-password" />
+						<Button type="submit" className={formPrimaryButtonClassName} disabled={isLoading}>
+							{isLoading ? <Loader2 className="size-4 animate-spin" /> : "Create account"}
 						</Button>
 					</div>
 				</form>
 			</Form>
 		</AuthFormChrome>
-	);
+	)
 }

@@ -1,14 +1,8 @@
-"use client";
+"use client"
 
-import { getModelFavicon, modelSelectors } from "@oneglanse/utils";
-import { Bot } from "lucide-react";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "./select.js";
+import { getModelFavicon, modelSelectors } from "@oneglanse/utils"
+import { Bot } from "lucide-react"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./select.js"
 
 export function ProviderModelSelect({
 	value,
@@ -17,11 +11,11 @@ export function ProviderModelSelect({
 	contentClassName,
 	placeholder = "Select Model",
 }: {
-	value: string;
-	onValueChange: (value: string) => void;
-	triggerClassName?: string;
-	contentClassName?: string;
-	placeholder?: string;
+	value: string
+	onValueChange: (value: string) => void
+	triggerClassName?: string
+	contentClassName?: string
+	placeholder?: string
 }): React.JSX.Element {
 	return (
 		<Select value={value} onValueChange={onValueChange}>
@@ -47,5 +41,5 @@ export function ProviderModelSelect({
 				))}
 			</SelectContent>
 		</Select>
-	);
+	)
 }

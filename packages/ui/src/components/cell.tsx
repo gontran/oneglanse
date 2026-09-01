@@ -1,15 +1,13 @@
-export const PositionMetricCell = ({
-	position,
-}: { position: number | string }) => {
+export const PositionMetricCell = ({ position }: { position: number | string }) => {
 	if (position === "-" || position === undefined) {
-		return <span className="text-gray-400 text-sm">-</span>;
+		return <span className="text-gray-400 text-sm">-</span>
 	}
 
-	const num = Number(position);
+	const num = Number(position)
 	const color =
 		num <= 3
 			? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
-			: "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400";
+			: "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400"
 
 	return (
 		<div
@@ -17,31 +15,27 @@ export const PositionMetricCell = ({
 		>
 			{num}
 		</div>
-	);
-};
+	)
+}
 
-export const SentimentMetricCell = ({
-	sentiment,
-}: { sentiment: number | string }) => {
+export const SentimentMetricCell = ({ sentiment }: { sentiment: number | string }) => {
 	if (sentiment === "-" || sentiment === undefined) {
-		return <div className="text-gray-400 text-sm">-</div>;
+		return <div className="text-gray-400 text-sm">-</div>
 	}
 
-	const num = Number(sentiment);
-	let bgClass = "";
-	let dotClass = "";
+	const num = Number(sentiment)
+	let bgClass = ""
+	let dotClass = ""
 
 	if (num >= 70) {
-		bgClass =
-			"bg-emerald-50 text-emerald-700 dark:bg-emerald-950/55 dark:text-emerald-300";
-		dotClass = "bg-emerald-500 dark:bg-emerald-400";
+		bgClass = "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/55 dark:text-emerald-300"
+		dotClass = "bg-emerald-500 dark:bg-emerald-400"
 	} else if (num >= 40) {
-		bgClass =
-			"bg-amber-50 text-amber-700 dark:bg-amber-950/55 dark:text-amber-300";
-		dotClass = "bg-amber-500 dark:bg-amber-400";
+		bgClass = "bg-amber-50 text-amber-700 dark:bg-amber-950/55 dark:text-amber-300"
+		dotClass = "bg-amber-500 dark:bg-amber-400"
 	} else {
-		bgClass = "bg-rose-50 text-rose-700 dark:bg-rose-950/55 dark:text-rose-300";
-		dotClass = "bg-rose-500 dark:bg-rose-400";
+		bgClass = "bg-rose-50 text-rose-700 dark:bg-rose-950/55 dark:text-rose-300"
+		dotClass = "bg-rose-500 dark:bg-rose-400"
 	}
 
 	return (
@@ -51,5 +45,5 @@ export const SentimentMetricCell = ({
 			<span className={`w-2 h-2 rounded-[var(--app-radius)] ${dotClass}`} />
 			{num}
 		</div>
-	);
-};
+	)
+}

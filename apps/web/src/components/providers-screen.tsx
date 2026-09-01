@@ -1,20 +1,20 @@
-import { ProviderConnectionsPanel } from "@/components/provider-connections-panel";
+import { ProviderConnectionsPanel } from "@/components/provider-connections-panel"
 
-const DEFAULT_PROVIDERS_TITLE = "Connect Providers";
+const DEFAULT_PROVIDERS_TITLE = "Connect Providers"
 const DEFAULT_PROVIDERS_DESCRIPTION =
-	"Log in to any provider below, then close the browser window. Your auth is saved automatically, and you can continue as soon as one provider is active.";
+	"Log in to any provider below, then close the browser window. Your auth is saved automatically, and you can continue as soon as one provider is active."
 const DEFAULT_PROVIDERS_HELPER_TEXT =
-	"If Google OAuth keeps selecting the same account, sign in to Gmail in the provider browser window with the account you want to use, then reconnect the provider.";
+	"If Google OAuth keeps selecting the same account, sign in to Gmail in the provider browser window with the account you want to use, then reconnect the provider."
 
 export function ProvidersScreen(props: {
-	title?: string | null;
-	description?: string | null;
-	helperText?: string | null;
-	nextHref?: string | null;
-	showSetupNotice?: boolean;
-	workspaceId?: string | null;
-	showOnboardingActions?: boolean;
-	watchForExternalUpdates?: boolean;
+	title?: string | null
+	description?: string | null
+	helperText?: string | null
+	nextHref?: string | null
+	showSetupNotice?: boolean
+	workspaceId?: string | null
+	showOnboardingActions?: boolean
+	watchForExternalUpdates?: boolean
 }) {
 	const {
 		title = DEFAULT_PROVIDERS_TITLE,
@@ -25,7 +25,7 @@ export function ProvidersScreen(props: {
 		workspaceId = null,
 		showOnboardingActions = false,
 		watchForExternalUpdates = false,
-	} = props;
+	} = props
 
 	return (
 		<div className="flex min-h-full min-w-0 items-center justify-center overflow-x-hidden px-4 pt-5 pb-9 sm:px-8 sm:pt-7 sm:pb-11 lg:px-10">
@@ -42,5 +42,5 @@ export function ProvidersScreen(props: {
 				/>
 			</div>
 		</div>
-	);
+	)
 }

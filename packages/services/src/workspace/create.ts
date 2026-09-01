@@ -1,14 +1,14 @@
-import { db, schema } from "@oneglanse/db";
-import type { Workspace } from "@oneglanse/db";
-import { ValidationError } from "@oneglanse/errors";
-import type { CreateWorkspaceForTenantArgs } from "@oneglanse/types";
-import { newId } from "@oneglanse/utils";
-import { and, eq, isNull } from "drizzle-orm";
+import { db, schema } from "@oneglanse/db"
+import type { Workspace } from "@oneglanse/db"
+import { ValidationError } from "@oneglanse/errors"
+import type { CreateWorkspaceForTenantArgs } from "@oneglanse/types"
+import { newId } from "@oneglanse/utils"
+import { and, eq, isNull } from "drizzle-orm"
 
 export async function createWorkspaceForTenant(
 	args: CreateWorkspaceForTenantArgs,
 ): Promise<Workspace> {
-	const { name, slug, domain, tenantId, userId } = args;
+	const { name, slug, domain, tenantId, userId } = args
 
 	const workspace: Workspace = {
 		id: newId("workspace"),
@@ -21,35 +21,34 @@ export async function createWorkspaceForTenant(
 		selectedPromptIds: null,
 		createdAt: new Date(),
 		deletedAt: null,
-	};
+	}
 
-	await db.insert(schema.workspaces).values(workspace);
+	await db.insert(schema.workspaces).values(workspace)
 
 	await db.insert(schema.workspaceMembers).values({
 		workspaceId: workspace.id,
 		userId,
 		role: "owner",
-	});
+	})
 
-	return workspace;
+	return workspace
 }
 
 export async function addWorkspaceToExistingOrg(args: {
-	name: string;
-	slug: string;
-	domain: string;
-	userId: string;
-	tenantId: string;
+	name: string
+	slug: string
+	domain: string
+	userId: string
+	tenantId: string
 }): Promise<{ workspace: Workspace }> {
-	const { name, slug, domain, userId, tenantId } = args;
+	const { name, slug, domain, userId, tenantId } = args
 
 	const membership = await db.query.member.findFirst({
-		where: (m, { eq, and }) =>
-			and(eq(m.organizationId, tenantId), eq(m.userId, userId)),
-	});
+		where: (m, { eq, and }) => and(eq(m.organizationId, tenantId), eq(m.userId, userId)),
+	})
 
 	if (!membership) {
-		throw new ValidationError("User is not a member of this organization.");
+		throw new ValidationError("User is not a member of this organization.")
 	}
 
 	const workspace = await createWorkspaceForTenant({
@@ -58,9 +57,9 @@ export async function addWorkspaceToExistingOrg(args: {
 		domain,
 		tenantId,
 		userId,
-	});
+	})
 
-	return { workspace };
+	return { workspace }
 }
 
 /**
@@ -69,10 +68,10 @@ export async function addWorkspaceToExistingOrg(args: {
  * while allowing different users to track the same brand freely.
  */
 export async function checkSlugExistsForUser(args: {
-	userId: string;
-	slug: string;
+	userId: string
+	slug: string
 }): Promise<boolean> {
-	const { userId, slug } = args;
+	const { userId, slug } = args
 	const existing = await db
 		.select({ id: schema.workspaces.id })
 		.from(schema.workspaces)
@@ -84,24 +83,18 @@ export async function checkSlugExistsForUser(args: {
 				isNull(schema.workspaceMembers.deletedAt),
 			),
 		)
-		.where(
-			and(
-				eq(schema.workspaces.slug, slug),
-				isNull(schema.workspaces.deletedAt),
-			),
-		)
+		.where(and(eq(schema.workspaces.slug, slug), isNull(schema.workspaces.deletedAt)))
 		.limit(1)
-		.execute();
-	return existing.length > 0;
+		.execute()
+	return existing.length > 0
 }
 
 export async function checkIsFirstWorkspace(args: {
-	userId: string;
+	userId: string
 }): Promise<boolean> {
-	const { userId } = args;
+	const { userId } = args
 	const existing = await db.query.workspaceMembers.findFirst({
-		where: (wm, { eq, and, isNull }) =>
-			and(eq(wm.userId, userId), isNull(wm.deletedAt)),
-	});
-	return !existing;
+		where: (wm, { eq, and, isNull }) => and(eq(wm.userId, userId), isNull(wm.deletedAt)),
+	})
+	return !existing
 }

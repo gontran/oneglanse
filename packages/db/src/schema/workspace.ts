@@ -1,4 +1,4 @@
-import { sql } from "drizzle-orm";
+import { sql } from "drizzle-orm"
 import {
 	index,
 	pgEnum,
@@ -8,14 +8,17 @@ import {
 	uniqueIndex,
 	uuid,
 	varchar,
-} from "drizzle-orm/pg-core";
-import z from "zod";
-import { user } from "./auth.js";
+} from "drizzle-orm/pg-core"
+import z from "zod"
+import { user } from "./auth.js"
 
-export const workspaceEnabledProviderEnum = pgEnum(
-	"workspace_enabled_provider",
-	["chatgpt", "perplexity", "gemini", "google", "claude"],
-);
+export const workspaceEnabledProviderEnum = pgEnum("workspace_enabled_provider", [
+	"chatgpt",
+	"perplexity",
+	"gemini",
+	"google",
+	"claude",
+])
 
 export const workspaces = pgTable("workspaces", {
 	id: varchar("id", { length: 256 }).primaryKey(),
@@ -28,7 +31,7 @@ export const workspaces = pgTable("workspaces", {
 	selectedPromptIds: text("selected_prompt_ids").array(),
 	createdAt: timestamp("created_at").defaultNow().notNull(),
 	deletedAt: timestamp("deleted_at"),
-});
+})
 
 export const workspaceMembers = pgTable(
 	"workspace_members",
@@ -53,13 +56,11 @@ export const workspaceMembers = pgTable(
 			.on(table.workspaceId, table.userId)
 			.where(sql`${table.deletedAt} IS NULL`),
 
-		workspaceIdx: index("workspace_members_workspace_id_idx").on(
-			table.workspaceId,
-		),
+		workspaceIdx: index("workspace_members_workspace_id_idx").on(table.workspaceId),
 		userIdx: index("workspace_members_user_id_idx").on(table.userId),
 	}),
-);
+)
 
 export const workspaceInput = z.object({
 	workspaceId: z.string(),
-});
+})

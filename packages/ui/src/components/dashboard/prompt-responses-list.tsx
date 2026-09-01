@@ -1,40 +1,38 @@
-"use client";
+"use client"
 
-import { cn } from "@oneglanse/utils";
-import { ChevronDown } from "lucide-react";
-import { useState } from "react";
-import type { PromptResponsePreviewRow } from "./prompt-responses-preview.js";
-import { PromptResponsesPreview } from "./prompt-responses-preview.js";
+import { cn } from "@oneglanse/utils"
+import { ChevronDown } from "lucide-react"
+import { useState } from "react"
+import type { PromptResponsePreviewRow } from "./prompt-responses-preview.js"
+import { PromptResponsesPreview } from "./prompt-responses-preview.js"
 
 export type PromptGroup = {
-	promptId: string;
-	promptText: string;
-	rows: PromptResponsePreviewRow[];
-};
+	promptId: string
+	promptText: string
+	rows: PromptResponsePreviewRow[]
+}
 
-const INITIAL_VISIBLE = 4;
+const INITIAL_VISIBLE = 4
 
 export function PromptResponsesList({
 	groups,
 }: {
-	groups: PromptGroup[];
+	groups: PromptGroup[]
 }): React.JSX.Element | null {
-	const [expandedPrompts, setExpandedPrompts] = useState<Set<string>>(
-		new Set(),
-	);
-	const [showAll, setShowAll] = useState(false);
+	const [expandedPrompts, setExpandedPrompts] = useState<Set<string>>(new Set())
+	const [showAll, setShowAll] = useState(false)
 
-	if (groups.length === 0) return null;
+	if (groups.length === 0) return null
 
-	const visibleGroups = showAll ? groups : groups.slice(0, INITIAL_VISIBLE);
+	const visibleGroups = showAll ? groups : groups.slice(0, INITIAL_VISIBLE)
 
 	const togglePrompt = (promptId: string) => {
 		setExpandedPrompts((prev) => {
-			const next = new Set(prev);
-			next.has(promptId) ? next.delete(promptId) : next.add(promptId);
-			return next;
-		});
-	};
+			const next = new Set(prev)
+			next.has(promptId) ? next.delete(promptId) : next.add(promptId)
+			return next
+		})
+	}
 
 	return (
 		<section aria-label="Prompt responses" className="space-y-4">
@@ -49,7 +47,7 @@ export function PromptResponsesList({
 
 			<div className="space-y-2">
 				{visibleGroups.map((group) => {
-					const isExpanded = expandedPrompts.has(group.promptId);
+					const isExpanded = expandedPrompts.has(group.promptId)
 					return (
 						<div
 							key={group.promptId}
@@ -71,8 +69,7 @@ export function PromptResponsesList({
 								</span>
 								<div className="flex shrink-0 items-center gap-2">
 									<span className="rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-medium text-gray-500 dark:bg-white/10 dark:text-gray-400">
-										{group.rows.length}{" "}
-										{group.rows.length === 1 ? "response" : "responses"}
+										{group.rows.length} {group.rows.length === 1 ? "response" : "responses"}
 									</span>
 									<ChevronDown
 										className={cn(
@@ -89,18 +86,14 @@ export function PromptResponsesList({
 									<div className="divide-y divide-gray-100/80 dark:divide-gray-800">
 										{group.rows.map((row) => (
 											<div key={row.id} className="px-5 py-4 sm:px-6">
-												<PromptResponsesPreview
-													title=""
-													description=""
-													rows={[row]}
-												/>
+												<PromptResponsesPreview title="" description="" rows={[row]} />
 											</div>
 										))}
 									</div>
 								</div>
 							)}
 						</div>
-					);
+					)
 				})}
 			</div>
 
@@ -113,13 +106,10 @@ export function PromptResponsesList({
 				>
 					{showAll ? "Show fewer prompts" : `Show all ${groups.length} prompts`}
 					<ChevronDown
-						className={cn(
-							"h-4 w-4 transition-transform duration-200",
-							showAll && "rotate-180",
-						)}
+						className={cn("h-4 w-4 transition-transform duration-200", showAll && "rotate-180")}
 					/>
 				</button>
 			)}
 		</section>
-	);
+	)
 }

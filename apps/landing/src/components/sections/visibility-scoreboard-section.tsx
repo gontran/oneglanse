@@ -1,7 +1,4 @@
-import {
-	PREVIEW_COMPETITORS,
-	PREVIEW_COMPETITOR_PROVIDERS,
-} from "@/lib/preview-data";
+import { PREVIEW_COMPETITORS, PREVIEW_COMPETITOR_PROVIDERS } from "@/lib/preview-data"
 import {
 	SentimentMetricCell,
 	Table,
@@ -10,8 +7,8 @@ import {
 	TableHead,
 	TableHeader,
 	TableRow,
-} from "@oneglanse/ui";
-import { getFaviconUrls, getModelFavicon } from "@oneglanse/utils";
+} from "@oneglanse/ui"
+import { getFaviconUrls, getModelFavicon } from "@oneglanse/utils"
 
 export function VisibilityScoreboardSection(): React.JSX.Element {
 	return (
@@ -28,8 +25,8 @@ export function VisibilityScoreboardSection(): React.JSX.Element {
 					Visibility Scoreboard
 				</h2>
 				<p className="mt-2 max-w-2xl text-sm font-medium leading-6 text-muted-foreground sm:text-base">
-					See how your brand stacks up on visibility, mentions, and sentiment
-					across all LLM providers.
+					See how your brand stacks up on visibility, mentions, and sentiment across all LLM
+					providers.
 				</p>
 			</div>
 			<div className="landing-surface overflow-x-auto">
@@ -66,9 +63,7 @@ export function VisibilityScoreboardSection(): React.JSX.Element {
 											alt=""
 											className="h-4 w-4 rounded-sm"
 										/>
-										<span className="font-medium text-gray-900 dark:text-gray-100">
-											{row.name}
-										</span>
+										<span className="font-medium text-gray-900 dark:text-gray-100">{row.name}</span>
 									</span>
 								</TableCell>
 								<TableCell className="px-4 py-3 text-right text-sm font-medium text-gray-900 dark:text-gray-100">
@@ -84,17 +79,15 @@ export function VisibilityScoreboardSection(): React.JSX.Element {
 								</TableCell>
 								<TableCell className="px-4 py-3 text-right">
 									<span className="inline-flex w-full items-center justify-end gap-1.5">
-										{(PREVIEW_COMPETITOR_PROVIDERS[row.name] ?? []).map(
-											(provider) => (
-												<img
-													key={`${row.name}-${provider}`}
-													src={getModelFavicon(provider)}
-													alt={provider}
-													className="h-4 w-4 rounded-sm"
-													title={provider}
-												/>
-											),
-										)}
+										{(PREVIEW_COMPETITOR_PROVIDERS[row.name] ?? []).map((provider) => (
+											<img
+												key={`${row.name}-${provider}`}
+												src={getModelFavicon(provider)}
+												alt={provider}
+												className="h-4 w-4 rounded-sm"
+												title={provider}
+											/>
+										))}
 									</span>
 								</TableCell>
 							</TableRow>
@@ -103,5 +96,5 @@ export function VisibilityScoreboardSection(): React.JSX.Element {
 				</Table>
 			</div>
 		</section>
-	);
+	)
 }

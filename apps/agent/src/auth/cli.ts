@@ -1,5 +1,5 @@
-import { execFile } from "node:child_process";
-import { promisify } from "node:util";
+import { execFile } from "node:child_process"
+import { promisify } from "node:util"
 import {
 	ensureAuthDirectories,
 	getReusableIdentityDomainSuffixes,
@@ -9,112 +9,93 @@ import {
 	saveReusableIdentitySessions,
 	uploadAuthSession,
 	writeProviderAuthStatus,
-} from "@oneglanse/services";
-import { AUTH_PROVIDER_LIST, type AuthProvider } from "@oneglanse/types";
+} from "@oneglanse/services"
+import { AUTH_PROVIDER_LIST, type AuthProvider } from "@oneglanse/types"
 import {
 	AUTH_PROVIDER_CONFIG,
 	AUTH_PROVIDER_DISPLAY,
 	getProviderDisplayName,
 	logger,
-} from "@oneglanse/utils";
-import {
-	type BrowserContext,
-	type Frame,
-	type Page,
-	type Response,
-	firefox,
-} from "playwright-core";
-import { resolveCamoufoxLaunchOptions } from "../lib/browser/camoufox.js";
-import { detectDisplay, isWsl } from "../lib/browser/display.js";
+} from "@oneglanse/utils"
+import { type BrowserContext, type Frame, type Page, type Response, firefox } from "playwright-core"
+import { resolveCamoufoxLaunchOptions } from "../lib/browser/camoufox.js"
+import { detectDisplay, isWsl } from "../lib/browser/display.js"
 
-const AUTH_SNAPSHOT_DEBOUNCE_MS = 250;
-const AUTH_SNAPSHOT_HEARTBEAT_MS = 2_000;
-const AUTH_WINDOW_CLOSE_GRACE_MS = 1_000;
-const SYSTEM_THEME_DETECT_TIMEOUT_MS = 4_000;
-const AUTH_WINDOW_WIDTH = 1280;
-const AUTH_WINDOW_HEIGHT = 900;
-const execFileAsync = promisify(execFile);
-type BrowserLaunchOptions = NonNullable<Parameters<typeof firefox.launch>[0]>;
-type PersistedStorageState = Parameters<typeof saveAuthSession>[1];
-type PersistedCookie = NonNullable<PersistedStorageState["cookies"]>[number];
+const AUTH_SNAPSHOT_DEBOUNCE_MS = 250
+const AUTH_SNAPSHOT_HEARTBEAT_MS = 2_000
+const AUTH_WINDOW_CLOSE_GRACE_MS = 1_000
+const SYSTEM_THEME_DETECT_TIMEOUT_MS = 4_000
+const AUTH_WINDOW_WIDTH = 1280
+const AUTH_WINDOW_HEIGHT = 900
+const execFileAsync = promisify(execFile)
+type BrowserLaunchOptions = NonNullable<Parameters<typeof firefox.launch>[0]>
+type PersistedStorageState = Parameters<typeof saveAuthSession>[1]
+type PersistedCookie = NonNullable<PersistedStorageState["cookies"]>[number]
 type SnapshotOrigin = {
-	origin: string;
-	localStorage: Array<{ name: string; value: string }>;
-};
+	origin: string
+	localStorage: Array<{ name: string; value: string }>
+}
 
 function dedupeStrings(values: readonly string[]): string[] {
-	return [...new Set(values.map((value) => value.trim()).filter(Boolean))];
+	return [...new Set(values.map((value) => value.trim()).filter(Boolean))]
 }
 
 function parseProviderArg(argv: string[]): AuthProvider {
-	const providerFlagIndex = argv.findIndex((value) => value === "--provider");
-	const providerValue =
-		providerFlagIndex >= 0 ? argv[providerFlagIndex + 1]?.trim() : undefined;
+	const providerFlagIndex = argv.findIndex((value) => value === "--provider")
+	const providerValue = providerFlagIndex >= 0 ? argv[providerFlagIndex + 1]?.trim() : undefined
 
-	if (
-		!providerValue ||
-		!AUTH_PROVIDER_LIST.includes(providerValue as AuthProvider)
-	) {
-		throw new Error(
-			`--provider must be one of: ${AUTH_PROVIDER_LIST.join(", ")}`,
-		);
+	if (!providerValue || !AUTH_PROVIDER_LIST.includes(providerValue as AuthProvider)) {
+		throw new Error(`--provider must be one of: ${AUTH_PROVIDER_LIST.join(", ")}`)
 	}
 
-	return providerValue as AuthProvider;
+	return providerValue as AuthProvider
 }
 
-function attachAuthDebugLogging(
-	context: BrowserContext,
-	provider: AuthProvider,
-): void {
-	const seenPages = new WeakSet<Page>();
+function attachAuthDebugLogging(context: BrowserContext, provider: AuthProvider): void {
+	const seenPages = new WeakSet<Page>()
 
 	const watchPage = (page: Page, source: "existing" | "new" | "popup") => {
 		if (seenPages.has(page)) {
-			return;
+			return
 		}
-		seenPages.add(page);
+		seenPages.add(page)
 
-		const pageId = Math.random().toString(36).slice(2, 8);
+		const pageId = Math.random().toString(36).slice(2, 8)
 		logger.debug(
 			`[auth:${provider}] page opened source=${source} id=${pageId} initialUrl=${page.url() || "about:blank"}`,
-		);
+		)
 
 		page.on("framenavigated", (frame) => {
-			if (frame !== page.mainFrame()) return;
-			logger.debug(
-				`[auth:${provider}] page navigated id=${pageId} url=${frame.url()}`,
-			);
-		});
+			if (frame !== page.mainFrame()) return
+			logger.debug(`[auth:${provider}] page navigated id=${pageId} url=${frame.url()}`)
+		})
 
 		page.on("popup", (popup) => {
 			logger.debug(
 				`[auth:${provider}] popup opened parent=${pageId} initialUrl=${popup.url() || "about:blank"}`,
-			);
-			watchPage(popup, "popup");
-		});
+			)
+			watchPage(popup, "popup")
+		})
 
 		page.on("close", () => {
-			logger.debug(`[auth:${provider}] page closed id=${pageId}`);
-		});
+			logger.debug(`[auth:${provider}] page closed id=${pageId}`)
+		})
 
 		void page
 			.title()
 			.then((title) => {
-				logger.debug(
-					`[auth:${provider}] page title id=${pageId} title=${title || "<empty>"}`,
-				);
+				logger.debug(`[auth:${provider}] page title id=${pageId} title=${title || "<empty>"}`)
 			})
-			.catch(() => {});
-	};
+			.catch(() => {})
+	}
 
 	for (const page of context.pages()) {
-		watchPage(page, "existing");
+		watchPage(page, "existing")
 	}
 
 	context.on("page", (page) => {
-		watchPage(page, "new");
-	});
+		watchPage(page, "new")
+	})
 }
 
 async function detectSystemDarkMode(): Promise<boolean | null> {
@@ -122,8 +103,8 @@ async function detectSystemDarkMode(): Promise<boolean | null> {
 		if (process.platform === "darwin") {
 			await execFileAsync("defaults", ["read", "-g", "AppleInterfaceStyle"], {
 				timeout: SYSTEM_THEME_DETECT_TIMEOUT_MS,
-			});
-			return true;
+			})
+			return true
 		}
 
 		if (process.platform === "win32") {
@@ -138,11 +119,11 @@ async function detectSystemDarkMode(): Promise<boolean | null> {
 					encoding: "utf8",
 					timeout: SYSTEM_THEME_DETECT_TIMEOUT_MS,
 				},
-			);
-			const normalized = stdout.trim().toLowerCase();
-			if (normalized === "true") return true;
-			if (normalized === "false") return false;
-			return null;
+			)
+			const normalized = stdout.trim().toLowerCase()
+			if (normalized === "true") return true
+			if (normalized === "false") return false
+			return null
 		}
 
 		const { stdout } = await execFileAsync(
@@ -152,124 +133,115 @@ async function detectSystemDarkMode(): Promise<boolean | null> {
 				encoding: "utf8",
 				timeout: SYSTEM_THEME_DETECT_TIMEOUT_MS,
 			},
-		);
-		const normalized = stdout.trim().toLowerCase();
-		if (normalized.includes("prefer-dark")) return true;
+		)
+		const normalized = stdout.trim().toLowerCase()
+		if (normalized.includes("prefer-dark")) return true
 		if (normalized.includes("default") || normalized.includes("prefer-light")) {
-			return false;
+			return false
 		}
-		return null;
+		return null
 	} catch {
-		return null;
+		return null
 	}
 }
 
 function resolveAuthDisplay(): string | undefined {
-	const display = detectDisplay() ?? undefined;
+	const display = detectDisplay() ?? undefined
 	if (!isWsl() || display) {
-		return display;
+		return display
 	}
 
 	throw new Error(
 		"Provider login requires a visible browser window, but no WSL display was detected. Enable WSLg (`wsl --update`, then restart WSL) or run `pnpm auth` from a desktop OS with GUI support.",
-	);
+	)
 }
 
 function buildAuthLaunchArgs(args: string[] | undefined): string[] {
-	const baseArgs = args ?? [];
+	const baseArgs = args ?? []
 	if (!isWsl()) {
-		return baseArgs;
+		return baseArgs
 	}
 
-	const nextArgs = [...baseArgs];
+	const nextArgs = [...baseArgs]
 	if (!nextArgs.includes("--new-window")) {
-		nextArgs.push("--new-window");
+		nextArgs.push("--new-window")
 	}
 	if (!nextArgs.includes("--width")) {
-		nextArgs.push("--width", String(AUTH_WINDOW_WIDTH));
+		nextArgs.push("--width", String(AUTH_WINDOW_WIDTH))
 	}
 	if (!nextArgs.includes("--height")) {
-		nextArgs.push("--height", String(AUTH_WINDOW_HEIGHT));
+		nextArgs.push("--height", String(AUTH_WINDOW_HEIGHT))
 	}
-	return nextArgs;
+	return nextArgs
 }
 
-function matchesDomainSuffix(
-	hostOrDomain: string,
-	suffixes: readonly string[],
-): boolean {
-	const normalized = hostOrDomain.replace(/^\./, "").toLowerCase();
-	return suffixes.some(
-		(suffix) => normalized === suffix || normalized.endsWith(`.${suffix}`),
-	);
+function matchesDomainSuffix(hostOrDomain: string, suffixes: readonly string[]): boolean {
+	const normalized = hostOrDomain.replace(/^\./, "").toLowerCase()
+	return suffixes.some((suffix) => normalized === suffix || normalized.endsWith(`.${suffix}`))
 }
 
 function normalizeOrigin(url: string): string | null {
 	try {
-		const origin = new URL(url).origin;
-		return origin === "null" ? null : origin;
+		const origin = new URL(url).origin
+		return origin === "null" ? null : origin
 	} catch {
-		return null;
+		return null
 	}
 }
 
 function isTrackedUrl(url: string, suffixes: readonly string[]): boolean {
-	const origin = normalizeOrigin(url);
-	if (!origin) return false;
+	const origin = normalizeOrigin(url)
+	if (!origin) return false
 
 	try {
-		return matchesDomainSuffix(new URL(origin).hostname, suffixes);
+		return matchesDomainSuffix(new URL(origin).hostname, suffixes)
 	} catch {
-		return false;
+		return false
 	}
 }
 
-function cloneCookies(
-	cookies: Awaited<ReturnType<BrowserContext["cookies"]>>,
-): PersistedCookie[] {
-	return cookies.map(
-		({ name, value, domain, path, expires, httpOnly, secure, sameSite }) => ({
-			name,
-			value,
-			domain,
-			path,
-			expires,
-			httpOnly,
-			secure,
-			sameSite,
-		}),
-	);
+function cloneCookies(cookies: Awaited<ReturnType<BrowserContext["cookies"]>>): PersistedCookie[] {
+	return cookies.map(({ name, value, domain, path, expires, httpOnly, secure, sameSite }) => ({
+		name,
+		value,
+		domain,
+		path,
+		expires,
+		httpOnly,
+		secure,
+		sameSite,
+	}))
 }
 
 function toPlaywrightStorageState(state: PersistedStorageState | null):
 	| {
 			cookies: Array<{
-				name: string;
-				value: string;
-				domain: string;
-				path: string;
-				expires: number;
-				httpOnly: boolean;
-				secure: boolean;
-				sameSite: "Strict" | "Lax" | "None";
-			}>;
+				name: string
+				value: string
+				domain: string
+				path: string
+				expires: number
+				httpOnly: boolean
+				secure: boolean
+				sameSite: "Strict" | "Lax" | "None"
+			}>
 			origins: Array<{
-				origin: string;
-				localStorage: Array<{ name: string; value: string }>;
-			}>;
+				origin: string
+				localStorage: Array<{ name: string; value: string }>
+			}>
 	  }
 	| undefined {
 	if (!state) {
-		return undefined;
+		return undefined
 	}
 
 	return {
 		cookies: (state.cookies ?? [])
 			.map((cookie) => {
-				const name = cookie.name?.trim();
-				const domain = cookie.domain?.trim();
+				const name = cookie.name?.trim()
+				const domain = cookie.domain?.trim()
 				if (!name || !domain) {
-					return null;
+					return null
 				}
 
 				return {
@@ -281,40 +253,37 @@ function toPlaywrightStorageState(state: PersistedStorageState | null):
 					httpOnly: Boolean(cookie.httpOnly),
 					secure: Boolean(cookie.secure),
 					sameSite: cookie.sameSite ?? "Lax",
-				};
+				}
 			})
-			.filter(
-				(cookie): cookie is NonNullable<typeof cookie> => cookie !== null,
-			),
+			.filter((cookie): cookie is NonNullable<typeof cookie> => cookie !== null),
 		origins: (state.origins ?? [])
 			.map((originEntry) => {
-				const origin = originEntry.origin?.trim();
+				const origin = originEntry.origin?.trim()
 				if (!origin) {
-					return null;
+					return null
 				}
 
 				return {
 					origin,
 					localStorage: (originEntry.localStorage ?? [])
 						.map((item) => {
-							const name = item.name?.trim();
+							const name = item.name?.trim()
 							if (!name) {
-								return null;
+								return null
 							}
 
 							return {
 								name,
 								value: item.value ?? "",
-							};
+							}
 						})
 						.filter((item): item is NonNullable<typeof item> => item !== null),
-				};
+				}
 			})
 			.filter(
-				(originEntry): originEntry is NonNullable<typeof originEntry> =>
-					originEntry !== null,
+				(originEntry): originEntry is NonNullable<typeof originEntry> => originEntry !== null,
 			),
-	};
+	}
 }
 
 async function collectPageLocalStorage(
@@ -322,58 +291,56 @@ async function collectPageLocalStorage(
 	suffixes: readonly string[],
 ): Promise<SnapshotOrigin | null> {
 	if (page.isClosed() || !isTrackedUrl(page.url(), suffixes)) {
-		return null;
+		return null
 	}
 
 	const storage = await page
 		.evaluate<SnapshotOrigin | null>(() => {
 			try {
-				const origin = window.location.origin;
+				const origin = window.location.origin
 				if (!origin || origin === "null") {
-					return null;
+					return null
 				}
 
-				const localStorageItems: Array<{ name: string; value: string }> = [];
+				const localStorageItems: Array<{ name: string; value: string }> = []
 				for (let index = 0; index < window.localStorage.length; index += 1) {
-					const name = window.localStorage.key(index);
-					if (!name) continue;
+					const name = window.localStorage.key(index)
+					if (!name) continue
 					localStorageItems.push({
 						name,
 						value: window.localStorage.getItem(name) ?? "",
-					});
+					})
 				}
 
-				localStorageItems.sort((left, right) =>
-					left.name.localeCompare(right.name),
-				);
+				localStorageItems.sort((left, right) => left.name.localeCompare(right.name))
 
 				return {
 					origin,
 					localStorage: localStorageItems,
-				};
+				}
 			} catch {
-				return null;
+				return null
 			}
 		})
-		.catch(() => null);
+		.catch(() => null)
 
 	if (!storage || !isTrackedUrl(storage.origin, suffixes)) {
-		return null;
+		return null
 	}
 
-	return storage;
+	return storage
 }
 
 class AuthSessionTracker {
-	private readonly suffixes: readonly string[];
-	private readonly disposers: Array<() => void> = [];
-	private latestCookies: PersistedCookie[] = [];
-	private latestOrigins = new Map<string, SnapshotOrigin>();
-	private debounceTimer: NodeJS.Timeout | null = null;
-	private heartbeatTimer: NodeJS.Timeout | null = null;
-	private snapshotInFlight: Promise<void> | null = null;
-	private snapshotRequested = false;
-	private stopped = false;
+	private readonly suffixes: readonly string[]
+	private readonly disposers: Array<() => void> = []
+	private latestCookies: PersistedCookie[] = []
+	private latestOrigins = new Map<string, SnapshotOrigin>()
+	private debounceTimer: NodeJS.Timeout | null = null
+	private heartbeatTimer: NodeJS.Timeout | null = null
+	private snapshotInFlight: Promise<void> | null = null
+	private snapshotRequested = false
+	private stopped = false
 
 	constructor(
 		private readonly context: BrowserContext,
@@ -382,316 +349,309 @@ class AuthSessionTracker {
 		this.suffixes = dedupeStrings([
 			...AUTH_PROVIDER_CONFIG[provider].domainSuffixes,
 			...getReusableIdentityDomainSuffixes(),
-		]);
+		])
 	}
 
 	start(): void {
 		for (const page of this.context.pages()) {
-			this.watchPage(page);
+			this.watchPage(page)
 		}
 
 		const handlePage = (page: Page) => {
-			this.watchPage(page);
-			this.requestSnapshot();
-		};
+			this.watchPage(page)
+			this.requestSnapshot()
+		}
 		const handleContextClose = () => {
-			this.stopTimers();
-			this.stopped = true;
-		};
+			this.stopTimers()
+			this.stopped = true
+		}
 
-		this.context.on("page", handlePage);
-		this.context.on("close", handleContextClose);
+		this.context.on("page", handlePage)
+		this.context.on("close", handleContextClose)
 		this.disposers.push(() => {
-			this.context.off("page", handlePage);
-		});
+			this.context.off("page", handlePage)
+		})
 		this.disposers.push(() => {
-			this.context.off("close", handleContextClose);
-		});
+			this.context.off("close", handleContextClose)
+		})
 
 		this.heartbeatTimer = setInterval(() => {
-			this.requestSnapshot();
-		}, AUTH_SNAPSHOT_HEARTBEAT_MS);
+			this.requestSnapshot()
+		}, AUTH_SNAPSHOT_HEARTBEAT_MS)
 
-		this.requestSnapshot(true);
+		this.requestSnapshot(true)
 	}
 
 	async finish(): Promise<PersistedStorageState | null> {
-		this.stopped = true;
-		this.stopTimers();
-		await this.snapshotInFlight?.catch(() => {});
+		this.stopped = true
+		this.stopTimers()
+		await this.snapshotInFlight?.catch(() => {})
 
 		for (const dispose of this.disposers.splice(0)) {
-			dispose();
+			dispose()
 		}
 
 		const origins = [...this.latestOrigins.values()].sort((left, right) =>
 			left.origin.localeCompare(right.origin),
-		);
+		)
 
 		if (this.latestCookies.length === 0 && origins.length === 0) {
-			return null;
+			return null
 		}
 
 		return {
 			cookies: [...this.latestCookies],
 			origins,
-		};
+		}
 	}
 
 	private watchPage(page: Page): void {
 		const handleMainFrameNavigation = (frame: Frame) => {
-			if (frame !== page.mainFrame()) return;
+			if (frame !== page.mainFrame()) return
 			if (isTrackedUrl(frame.url(), this.suffixes)) {
-				this.requestSnapshot();
+				this.requestSnapshot()
 			}
-		};
+		}
 		const handleDomContentLoaded = () => {
 			if (isTrackedUrl(page.url(), this.suffixes)) {
-				this.requestSnapshot();
+				this.requestSnapshot()
 			}
-		};
+		}
 		const handleLoad = () => {
 			if (isTrackedUrl(page.url(), this.suffixes)) {
-				this.requestSnapshot();
+				this.requestSnapshot()
 			}
-		};
+		}
 		const handleResponse = (response: Response) => {
-			const resourceType = response.request().resourceType();
+			const resourceType = response.request().resourceType()
 			if (
-				(resourceType === "document" ||
-					resourceType === "xhr" ||
-					resourceType === "fetch") &&
+				(resourceType === "document" || resourceType === "xhr" || resourceType === "fetch") &&
 				isTrackedUrl(response.url(), this.suffixes)
 			) {
-				this.requestSnapshot();
+				this.requestSnapshot()
 			}
-		};
+		}
 		const handleClose = () => {
-			this.requestSnapshot(true);
-		};
+			this.requestSnapshot(true)
+		}
 
-		page.on("framenavigated", handleMainFrameNavigation);
-		page.on("domcontentloaded", handleDomContentLoaded);
-		page.on("load", handleLoad);
-		page.on("response", handleResponse);
-		page.on("close", handleClose);
+		page.on("framenavigated", handleMainFrameNavigation)
+		page.on("domcontentloaded", handleDomContentLoaded)
+		page.on("load", handleLoad)
+		page.on("response", handleResponse)
+		page.on("close", handleClose)
 		this.disposers.push(() => {
-			page.off("framenavigated", handleMainFrameNavigation);
-			page.off("domcontentloaded", handleDomContentLoaded);
-			page.off("load", handleLoad);
-			page.off("response", handleResponse);
-			page.off("close", handleClose);
-		});
+			page.off("framenavigated", handleMainFrameNavigation)
+			page.off("domcontentloaded", handleDomContentLoaded)
+			page.off("load", handleLoad)
+			page.off("response", handleResponse)
+			page.off("close", handleClose)
+		})
 	}
 
 	private requestSnapshot(immediate = false): void {
 		if (this.stopped) {
-			return;
+			return
 		}
 
-		this.snapshotRequested = true;
+		this.snapshotRequested = true
 		if (this.snapshotInFlight) {
-			return;
+			return
 		}
 
 		if (immediate) {
 			if (this.debounceTimer) {
-				clearTimeout(this.debounceTimer);
-				this.debounceTimer = null;
+				clearTimeout(this.debounceTimer)
+				this.debounceTimer = null
 			}
-			void this.flushSnapshotQueue();
-			return;
+			void this.flushSnapshotQueue()
+			return
 		}
 
 		if (this.debounceTimer) {
-			return;
+			return
 		}
 
 		this.debounceTimer = setTimeout(() => {
-			this.debounceTimer = null;
-			void this.flushSnapshotQueue();
-		}, AUTH_SNAPSHOT_DEBOUNCE_MS);
+			this.debounceTimer = null
+			void this.flushSnapshotQueue()
+		}, AUTH_SNAPSHOT_DEBOUNCE_MS)
 	}
 
 	private async flushSnapshotQueue(): Promise<void> {
 		if (this.stopped || this.snapshotInFlight || !this.snapshotRequested) {
-			return;
+			return
 		}
 
-		this.snapshotRequested = false;
-		const run = this.collectSnapshot();
-		this.snapshotInFlight = run;
+		this.snapshotRequested = false
+		const run = this.collectSnapshot()
+		this.snapshotInFlight = run
 
 		try {
-			await run;
+			await run
 		} finally {
-			this.snapshotInFlight = null;
+			this.snapshotInFlight = null
 			if (this.snapshotRequested && !this.stopped) {
-				this.requestSnapshot();
+				this.requestSnapshot()
 			}
 		}
 	}
 
 	private async collectSnapshot(): Promise<void> {
-		const cookies = await this.context.cookies().catch(() => null);
+		const cookies = await this.context.cookies().catch(() => null)
 		if (cookies) {
-			this.latestCookies = cloneCookies(cookies);
+			this.latestCookies = cloneCookies(cookies)
 		}
 
 		for (const page of this.context.pages()) {
 			if (page.isClosed()) {
-				continue;
+				continue
 			}
 
-			const originState = await collectPageLocalStorage(page, this.suffixes);
+			const originState = await collectPageLocalStorage(page, this.suffixes)
 			if (!originState) {
-				continue;
+				continue
 			}
 
 			if (originState.localStorage.length === 0) {
-				this.latestOrigins.delete(originState.origin);
-				continue;
+				this.latestOrigins.delete(originState.origin)
+				continue
 			}
 
-			this.latestOrigins.set(originState.origin, originState);
+			this.latestOrigins.set(originState.origin, originState)
 		}
 	}
 
 	private stopTimers(): void {
 		if (this.debounceTimer) {
-			clearTimeout(this.debounceTimer);
-			this.debounceTimer = null;
+			clearTimeout(this.debounceTimer)
+			this.debounceTimer = null
 		}
 		if (this.heartbeatTimer) {
-			clearInterval(this.heartbeatTimer);
-			this.heartbeatTimer = null;
+			clearInterval(this.heartbeatTimer)
+			this.heartbeatTimer = null
 		}
 	}
 }
 
-async function waitForAllAuthPagesToClose(
-	context: BrowserContext,
-): Promise<void> {
-	const disposers: Array<() => void> = [];
-	let closeTimer: NodeJS.Timeout | null = null;
+async function waitForAllAuthPagesToClose(context: BrowserContext): Promise<void> {
+	const disposers: Array<() => void> = []
+	let closeTimer: NodeJS.Timeout | null = null
 
 	const clearCloseTimer = () => {
 		if (closeTimer) {
-			clearTimeout(closeTimer);
-			closeTimer = null;
+			clearTimeout(closeTimer)
+			closeTimer = null
 		}
-	};
+	}
 
-	const getOpenPageCount = () =>
-		context.pages().filter((page) => !page.isClosed()).length;
+	const getOpenPageCount = () => context.pages().filter((page) => !page.isClosed()).length
 
 	const waitForStableZeroPages = () =>
 		new Promise<void>((resolve) => {
 			const finish = () => {
-				clearCloseTimer();
+				clearCloseTimer()
 				for (const dispose of disposers.splice(0)) {
-					dispose();
+					dispose()
 				}
-				resolve();
-			};
+				resolve()
+			}
 
 			const scheduleCloseCheck = () => {
 				if (getOpenPageCount() > 0) {
-					clearCloseTimer();
-					return;
+					clearCloseTimer()
+					return
 				}
 
 				if (closeTimer) {
-					return;
+					return
 				}
 
 				closeTimer = setTimeout(() => {
-					closeTimer = null;
+					closeTimer = null
 					if (getOpenPageCount() === 0) {
-						finish();
+						finish()
 					}
-				}, AUTH_WINDOW_CLOSE_GRACE_MS);
-			};
+				}, AUTH_WINDOW_CLOSE_GRACE_MS)
+			}
 
 			const watchPage = (page: Page) => {
 				const handleClose = () => {
-					scheduleCloseCheck();
-				};
+					scheduleCloseCheck()
+				}
 
-				page.on("close", handleClose);
+				page.on("close", handleClose)
 				disposers.push(() => {
-					page.off("close", handleClose);
-				});
-			};
+					page.off("close", handleClose)
+				})
+			}
 
 			for (const page of context.pages()) {
-				watchPage(page);
+				watchPage(page)
 			}
 
 			const handlePage = (page: Page) => {
-				watchPage(page);
-				scheduleCloseCheck();
-			};
+				watchPage(page)
+				scheduleCloseCheck()
+			}
 			const handleContextClose = () => {
-				finish();
-			};
+				finish()
+			}
 
-			context.on("page", handlePage);
-			context.on("close", handleContextClose);
+			context.on("page", handlePage)
+			context.on("close", handleContextClose)
 			disposers.push(() => {
-				context.off("page", handlePage);
-			});
+				context.off("page", handlePage)
+			})
 			disposers.push(() => {
-				context.off("close", handleContextClose);
-			});
+				context.off("close", handleContextClose)
+			})
 
-			scheduleCloseCheck();
-		});
+			scheduleCloseCheck()
+		})
 
-	await waitForStableZeroPages();
+	await waitForStableZeroPages()
 }
 
 async function waitForManualBrowserClose(
 	context: BrowserContext,
 	provider: AuthProvider,
 ): Promise<void> {
-	const tracker = new AuthSessionTracker(context, provider);
-	tracker.start();
+	const tracker = new AuthSessionTracker(context, provider)
+	tracker.start()
 
-	let finalState: PersistedStorageState | null = null;
+	let finalState: PersistedStorageState | null = null
 	try {
-		await waitForAllAuthPagesToClose(context);
+		await waitForAllAuthPagesToClose(context)
 	} finally {
-		finalState = await tracker.finish();
+		finalState = await tracker.finish()
 	}
 
 	if (!finalState) {
 		throw new Error(
 			`${AUTH_PROVIDER_DISPLAY[provider].displayName} sign-in window was closed before the session was captured.`,
-		);
+		)
 	}
-	await saveReusableIdentitySessions(finalState);
-	const savedState = await saveAuthSession(provider, finalState);
-	await uploadAuthSession(provider, savedState);
-	await context.close().catch(() => {});
+	await saveReusableIdentitySessions(finalState)
+	const savedState = await saveAuthSession(provider, finalState)
+	await uploadAuthSession(provider, savedState)
+	await context.close().catch(() => {})
 }
 
 async function runAuthLogin(provider: AuthProvider): Promise<void> {
-	const authConfig = AUTH_PROVIDER_CONFIG[provider];
-	const browserProvider = authConfig.providers[0];
+	const authConfig = AUTH_PROVIDER_CONFIG[provider]
+	const browserProvider = authConfig.providers[0]
 	if (!browserProvider) {
-		throw new Error(`No runtime provider is configured for ${provider}.`);
+		throw new Error(`No runtime provider is configured for ${provider}.`)
 	}
 
-	ensureAuthDirectories();
-	const authSeedState = await readAuthLaunchSeedState(provider);
-	const playwrightStorageState = toPlaywrightStorageState(authSeedState);
-	const systemDarkMode = await detectSystemDarkMode();
-	const prefersColorSchemeOverride =
-		systemDarkMode === true ? 0 : systemDarkMode === false ? 1 : 2;
-	const systemUsesDarkThemePref =
-		systemDarkMode === true ? 1 : systemDarkMode === false ? 0 : -1;
-	const authDisplay = resolveAuthDisplay();
+	ensureAuthDirectories()
+	const authSeedState = await readAuthLaunchSeedState(provider)
+	const playwrightStorageState = toPlaywrightStorageState(authSeedState)
+	const systemDarkMode = await detectSystemDarkMode()
+	const prefersColorSchemeOverride = systemDarkMode === true ? 0 : systemDarkMode === false ? 1 : 2
+	const systemUsesDarkThemePref = systemDarkMode === true ? 1 : systemDarkMode === false ? 0 : -1
+	const authDisplay = resolveAuthDisplay()
 
 	const launchOptions = await resolveCamoufoxLaunchOptions({
 		display: authDisplay,
@@ -706,7 +666,7 @@ async function runAuthLogin(provider: AuthProvider): Promise<void> {
 		// (white button backgrounds, broken layout). The auth browser should look
 		// and behave exactly like a stock Firefox.
 		disableDefaultAddons: true,
-	});
+	})
 
 	const browser = await firefox.launch({
 		...(launchOptions as BrowserLaunchOptions),
@@ -740,32 +700,27 @@ async function runAuthLogin(provider: AuthProvider): Promise<void> {
 			// Match website appearance to the explicit host theme when available
 			// instead of relying on Firefox/Camoufox auto-detection.
 			// Values: 0 = Dark, 1 = Light, 2 = System
-			"layout.css.prefers-color-scheme.content-override":
-				prefersColorSchemeOverride,
+			"layout.css.prefers-color-scheme.content-override": prefersColorSchemeOverride,
 
 			// RFP unconditionally forces prefers-color-scheme to light and overrides
 			// the content-override pref above. Keep disabled for auth.
 			"privacy.resistFingerprinting": false,
 		},
-	});
+	})
 	const context = await browser.newContext({
-		viewport: isWsl()
-			? { width: AUTH_WINDOW_WIDTH, height: AUTH_WINDOW_HEIGHT }
-			: null,
+		viewport: isWsl() ? { width: AUTH_WINDOW_WIDTH, height: AUTH_WINDOW_HEIGHT } : null,
 		...(playwrightStorageState ? { storageState: playwrightStorageState } : {}),
-	});
-	attachAuthDebugLogging(context, provider);
+	})
+	attachAuthDebugLogging(context, provider)
 
 	try {
-		const page = await context.newPage();
-		logger.debug(
-			`[auth:${provider}] using primary page url=${page.url() || "about:blank"}`,
-		);
+		const page = await context.newPage()
+		logger.debug(`[auth:${provider}] using primary page url=${page.url() || "about:blank"}`)
 		await page.goto(authConfig.loginUrl, {
 			waitUntil: "domcontentloaded",
 			timeout: 30_000,
-		});
-		await waitForManualBrowserClose(context, provider);
+		})
+		await waitForManualBrowserClose(context, provider)
 	} catch (error) {
 		await writeProviderAuthStatus(provider, {
 			connecting: false,
@@ -773,35 +728,31 @@ async function runAuthLogin(provider: AuthProvider): Promise<void> {
 			syncedAt: null,
 			error: error instanceof Error ? error.message : String(error),
 			launcherPid: null,
-		});
-		await context.close().catch(() => {});
-		await browser.close().catch(() => {});
-		throw error;
+		})
+		await context.close().catch(() => {})
+		await browser.close().catch(() => {})
+		throw error
 	}
 
-	await browser.close().catch(() => {});
+	await browser.close().catch(() => {})
 }
 
-const provider = parseProviderArg(process.argv.slice(2));
+const provider = parseProviderArg(process.argv.slice(2))
 runAuthLogin(provider)
 	.then(() => process.exit(0))
 	.catch(async (error) => {
-		const runtimeProvider = AUTH_PROVIDER_CONFIG[provider].providers[0];
-		const providerName = runtimeProvider
-			? getProviderDisplayName(runtimeProvider)
-			: provider;
-		const errorMessage = error instanceof Error ? error.message : String(error);
-		console.error(`[auth] ${providerName} login failed:`, error);
+		const runtimeProvider = AUTH_PROVIDER_CONFIG[provider].providers[0]
+		const providerName = runtimeProvider ? getProviderDisplayName(runtimeProvider) : provider
+		const errorMessage = error instanceof Error ? error.message : String(error)
+		console.error(`[auth] ${providerName} login failed:`, error)
 		// Failures before the browser context exists bypass the inner status update.
-		const existingStatus = await readPersistedAuthStatus(provider).catch(
-			() => null,
-		);
+		const existingStatus = await readPersistedAuthStatus(provider).catch(() => null)
 		await writeProviderAuthStatus(provider, {
 			connecting: false,
 			lastUpdatedAt: new Date().toISOString(),
 			syncedAt: existingStatus?.syncedAt ?? null,
 			error: errorMessage,
 			launcherPid: null,
-		}).catch(() => {});
-		process.exit(1);
-	});
+		}).catch(() => {})
+		process.exit(1)
+	})

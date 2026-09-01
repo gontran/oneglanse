@@ -1,25 +1,15 @@
-"use client";
+"use client"
 
-import {
-	formFieldClassName,
-	formLabelClassName,
-} from "@/components/forms/auth-form-chrome";
-import {
-	FormControl,
-	FormField,
-	FormItem,
-	FormLabel,
-	FormMessage,
-	Input,
-} from "@oneglanse/ui";
-import type { Control, FieldValues, Path } from "react-hook-form";
+import { formFieldClassName, formLabelClassName } from "@/components/forms/auth-form-chrome"
+import { FormControl, FormField, FormItem, FormLabel, FormMessage, Input } from "@oneglanse/ui"
+import type { Control, FieldValues, Path } from "react-hook-form"
 
 type PasswordFieldProps<T extends FieldValues> = {
-	control: Control<T>;
-	name: Path<T>;
-	forgotHref?: string;
-	autoComplete?: string;
-};
+	control: Control<T>
+	name: Path<T>
+	forgotHref?: string
+	autoComplete?: string
+}
 
 export function PasswordField<T extends FieldValues>({
 	control,
@@ -57,5 +47,5 @@ export function PasswordField<T extends FieldValues>({
 				</a>
 			</div>
 		</div>
-	);
+	)
 }

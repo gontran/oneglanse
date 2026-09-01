@@ -1,4 +1,4 @@
-"use client";
+"use client"
 
 import {
 	formFieldClassName,
@@ -7,9 +7,9 @@ import {
 	formPanelClassName,
 	formPrimaryButtonClassName,
 	formSecondaryButtonClassName,
-} from "@/components/forms/auth-form-chrome";
-import { useSafeSearchParams } from "@/lib/navigation/use-safe-search-params";
-import { api } from "@/trpc/react";
+} from "@/components/forms/auth-form-chrome"
+import { useSafeSearchParams } from "@/lib/navigation/use-safe-search-params"
+import { api } from "@/trpc/react"
 import {
 	Button,
 	EmptyStatePanel,
@@ -28,28 +28,20 @@ import {
 	TableHeader,
 	TableRow,
 	toast,
-} from "@oneglanse/ui";
-import { cn } from "@oneglanse/utils";
-import {
-	Building2,
-	Loader2,
-	Pencil,
-	Plus,
-	Trash2,
-	Users,
-	X,
-} from "lucide-react";
-import { useEffect, useState } from "react";
-import { useLayoutWorkspace } from "../workspace-context";
+} from "@oneglanse/ui"
+import { cn } from "@oneglanse/utils"
+import { Building2, Loader2, Pencil, Plus, Trash2, Users, X } from "lucide-react"
+import { useEffect, useState } from "react"
+import { useLayoutWorkspace } from "../workspace-context"
 
 interface WorkspaceMember {
-	memberId: string;
-	userId: string;
-	role: string;
-	joinedAt: Date;
-	userName: string;
-	userEmail: string;
-	userImage: string | null;
+	memberId: string
+	userId: string
+	role: string
+	joinedAt: Date
+	userName: string
+	userEmail: string
+	userImage: string | null
 }
 
 const WORKSPACE_MEMBER_SKELETON_KEYS = [
@@ -57,233 +49,218 @@ const WORKSPACE_MEMBER_SKELETON_KEYS = [
 	"workspace-member-b",
 	"workspace-member-c",
 	"workspace-member-d",
-] as const;
+] as const
 
 export default function PeoplePage() {
-	const searchParams = useSafeSearchParams();
-	const workspaceId = searchParams.get("workspace") ?? "";
-	const utils = api.useUtils();
-	const layoutWorkspace = useLayoutWorkspace();
+	const searchParams = useSafeSearchParams()
+	const workspaceId = searchParams.get("workspace") ?? ""
+	const utils = api.useUtils()
+	const layoutWorkspace = useLayoutWorkspace()
 
 	// Invite state
-	const [wsInviteEmail, setWsInviteEmail] = useState("");
-	const [wsInviteRole, setWsInviteRole] = useState("member");
-	const [wsAdding, setWsAdding] = useState(false);
+	const [wsInviteEmail, setWsInviteEmail] = useState("")
+	const [wsInviteRole, setWsInviteRole] = useState("member")
+	const [wsAdding, setWsAdding] = useState(false)
 
 	// Edit state
-	const [workspaceName, setWorkspaceName] = useState("");
-	const [workspaceDomain, setWorkspaceDomain] = useState("");
-	const [organizationName, setOrganizationName] = useState("");
-	const [savingWorkspace, setSavingWorkspace] = useState(false);
-	const [savingOrg, setSavingOrg] = useState(false);
-	const [isEditingWorkspace, setIsEditingWorkspace] = useState(false);
-	const [isEditingOrg, setIsEditingOrg] = useState(false);
+	const [workspaceName, setWorkspaceName] = useState("")
+	const [workspaceDomain, setWorkspaceDomain] = useState("")
+	const [organizationName, setOrganizationName] = useState("")
+	const [savingWorkspace, setSavingWorkspace] = useState(false)
+	const [savingOrg, setSavingOrg] = useState(false)
+	const [isEditingWorkspace, setIsEditingWorkspace] = useState(false)
+	const [isEditingOrg, setIsEditingOrg] = useState(false)
 
 	// Queries
 	const wsMembersQuery = api.workspace.listMembers.useQuery(
 		{ workspaceId },
 		{ enabled: !!workspaceId },
-	);
+	)
 	const workspaceQuery = api.workspace.getById.useQuery(
 		{ workspaceId },
 		{
 			enabled: !!workspaceId,
-			initialData:
-				layoutWorkspace?.id === workspaceId ? layoutWorkspace : undefined,
+			initialData: layoutWorkspace?.id === workspaceId ? layoutWorkspace : undefined,
 		},
-	);
+	)
 	const joinInfoQuery = api.workspace.getJoinInfo.useQuery(
 		{ workspaceId },
 		{ enabled: !!workspaceId },
-	);
+	)
 
-	const wsMembers = (wsMembersQuery.data ?? []) as WorkspaceMember[];
-	const joinInfo = joinInfoQuery.data;
-	const joinInfoLoading = joinInfoQuery.isLoading;
-	const workspace = workspaceQuery.data;
-	const organization = joinInfo?.organization;
+	const wsMembers = (wsMembersQuery.data ?? []) as WorkspaceMember[]
+	const joinInfo = joinInfoQuery.data
+	const joinInfoLoading = joinInfoQuery.isLoading
+	const workspace = workspaceQuery.data
+	const organization = joinInfo?.organization
 
 	// Mutations
-	const addWsMemberMutation = api.workspace.addMember.useMutation();
-	const removeWsMemberMutation = api.workspace.removeMember.useMutation();
-	const updateWorkspaceMutation = api.workspace.updateDetails.useMutation();
-	const updateOrgMutation = api.workspace.updateOrganizationName.useMutation();
+	const addWsMemberMutation = api.workspace.addMember.useMutation()
+	const removeWsMemberMutation = api.workspace.removeMember.useMutation()
+	const updateWorkspaceMutation = api.workspace.updateDetails.useMutation()
+	const updateOrgMutation = api.workspace.updateOrganizationName.useMutation()
 
 	useEffect(() => {
-		setWorkspaceName(workspace?.name ?? "");
-		setWorkspaceDomain(workspace?.domain ?? "");
-	}, [workspace?.name, workspace?.domain]);
+		setWorkspaceName(workspace?.name ?? "")
+		setWorkspaceDomain(workspace?.domain ?? "")
+	}, [workspace?.name, workspace?.domain])
 
 	useEffect(() => {
-		setOrganizationName(organization?.name ?? "");
-	}, [organization?.name]);
+		setOrganizationName(organization?.name ?? "")
+	}, [organization?.name])
 
-	const normalizedWorkspaceName = workspaceName.trim();
-	const normalizedWorkspaceDomain = workspaceDomain.trim();
-	const normalizedOrganizationName = organizationName.trim();
+	const normalizedWorkspaceName = workspaceName.trim()
+	const normalizedWorkspaceDomain = workspaceDomain.trim()
+	const normalizedOrganizationName = organizationName.trim()
 	const workspaceDetailsChanged =
 		normalizedWorkspaceName !== (workspace?.name ?? "").trim() ||
-		normalizedWorkspaceDomain !== (workspace?.domain ?? "").trim();
-	const organizationNameChanged =
-		normalizedOrganizationName !== (organization?.name ?? "").trim();
+		normalizedWorkspaceDomain !== (workspace?.domain ?? "").trim()
+	const organizationNameChanged = normalizedOrganizationName !== (organization?.name ?? "").trim()
 
 	const handleCopy = async (value: string, label: string) => {
-		if (!value) return;
+		if (!value) return
 		try {
-			await navigator.clipboard.writeText(value);
-			toast.success(`${label} copied to clipboard.`);
+			await navigator.clipboard.writeText(value)
+			toast.success(`${label} copied to clipboard.`)
 		} catch {
-			toast.error("Failed to copy to clipboard.");
+			toast.error("Failed to copy to clipboard.")
 		}
-	};
+	}
 
 	const handleWsAddMember = async () => {
 		if (!wsInviteEmail.trim()) {
-			toast.error("Please enter an email address.");
-			return;
+			toast.error("Please enter an email address.")
+			return
 		}
-		setWsAdding(true);
+		setWsAdding(true)
 		try {
 			const result = await addWsMemberMutation.mutateAsync({
 				workspaceId,
 				email: wsInviteEmail.trim(),
 				role: wsInviteRole as "owner" | "member",
-			});
+			})
 			if (result?.status === "not-found") {
-				toast.error(
-					"User not found. Share your workspace code so they can join after signing up.",
-				);
-				setWsInviteEmail("");
-				return;
+				toast.error("User not found. Share your workspace code so they can join after signing up.")
+				setWsInviteEmail("")
+				return
 			}
 			if (result?.status === "already-member") {
-				toast.success("This user is already a workspace member.");
-				setWsInviteEmail("");
-				return;
+				toast.success("This user is already a workspace member.")
+				setWsInviteEmail("")
+				return
 			}
-			toast.success("Member added to workspace!");
-			setWsInviteEmail("");
-			await wsMembersQuery.refetch();
+			toast.success("Member added to workspace!")
+			setWsInviteEmail("")
+			await wsMembersQuery.refetch()
 		} catch (err) {
-			console.error(err);
-			toast.error("Failed to add member to workspace.");
+			console.error(err)
+			toast.error("Failed to add member to workspace.")
 		} finally {
-			setWsAdding(false);
+			setWsAdding(false)
 		}
-	};
+	}
 
 	const handleWsRemoveMember = async (userId: string, role: string) => {
 		try {
-			await removeWsMemberMutation.mutateAsync({ workspaceId, userId, role });
-			toast.success("Member removed from workspace.");
-			await wsMembersQuery.refetch();
+			await removeWsMemberMutation.mutateAsync({ workspaceId, userId, role })
+			toast.success("Member removed from workspace.")
+			await wsMembersQuery.refetch()
 		} catch (err) {
-			toast.error(
-				err instanceof Error ? err.message : "Failed to remove member.",
-			);
+			toast.error(err instanceof Error ? err.message : "Failed to remove member.")
 		}
-	};
+	}
 
 	const handleSaveWorkspaceDetails = async () => {
 		if (!workspaceName.trim() || !workspaceDomain.trim()) {
-			toast.error("Please enter both brand name and brand domain.");
-			return;
+			toast.error("Please enter both brand name and brand domain.")
+			return
 		}
-		if (!workspaceDetailsChanged) return;
+		if (!workspaceDetailsChanged) return
 
-		const nextName = workspaceName.trim();
-		const nextDomain = workspaceDomain.trim();
+		const nextName = workspaceName.trim()
+		const nextDomain = workspaceDomain.trim()
 		const brandChanged =
-			(workspace?.name ?? "").trim() !== nextName ||
-			(workspace?.domain ?? "").trim() !== nextDomain;
+			(workspace?.name ?? "").trim() !== nextName || (workspace?.domain ?? "").trim() !== nextDomain
 
 		if (brandChanged) {
 			const confirmed = window.confirm(
 				"Changing brand details will erase all analyzed data for this workspace and require re-analysis. Prompt responses will remain intact. Continue?",
-			);
-			if (!confirmed) return;
+			)
+			if (!confirmed) return
 		}
 
-		setSavingWorkspace(true);
+		setSavingWorkspace(true)
 		try {
 			const result = await updateWorkspaceMutation.mutateAsync({
 				workspaceId,
 				name: nextName,
 				domain: nextDomain,
-			});
+			})
 			if (result?.analysisReset) {
 				toast.success(
 					"Brand details updated. Previous analysis was cleared and will be regenerated on next analysis run.",
-				);
+				)
 			} else {
-				toast.success("Workspace details updated.");
+				toast.success("Workspace details updated.")
 			}
-			await workspaceQuery.refetch();
-			await joinInfoQuery.refetch();
-			await utils.workspace.listAllForUser.invalidate();
-			await utils.workspace.getById.invalidate({ workspaceId });
-			await utils.workspace.getJoinInfo.invalidate({ workspaceId });
-			setIsEditingWorkspace(false);
+			await workspaceQuery.refetch()
+			await joinInfoQuery.refetch()
+			await utils.workspace.listAllForUser.invalidate()
+			await utils.workspace.getById.invalidate({ workspaceId })
+			await utils.workspace.getJoinInfo.invalidate({ workspaceId })
+			setIsEditingWorkspace(false)
 		} catch (err) {
-			toast.error(
-				err instanceof Error
-					? err.message
-					: "Failed to update workspace details.",
-			);
+			toast.error(err instanceof Error ? err.message : "Failed to update workspace details.")
 		} finally {
-			setSavingWorkspace(false);
+			setSavingWorkspace(false)
 		}
-	};
+	}
 
 	const handleSaveOrganizationName = async () => {
 		if (!organizationName.trim()) {
-			toast.error("Please enter an organization name.");
-			return;
+			toast.error("Please enter an organization name.")
+			return
 		}
-		if (!organizationNameChanged) return;
-		setSavingOrg(true);
+		if (!organizationNameChanged) return
+		setSavingOrg(true)
 		try {
 			await updateOrgMutation.mutateAsync({
 				workspaceId,
 				organizationName: organizationName.trim(),
-			});
-			toast.success("Organization name updated.");
-			await joinInfoQuery.refetch();
-			await utils.workspace.listAllForUser.invalidate();
-			await utils.workspace.getJoinInfo.invalidate({ workspaceId });
-			setIsEditingOrg(false);
+			})
+			toast.success("Organization name updated.")
+			await joinInfoQuery.refetch()
+			await utils.workspace.listAllForUser.invalidate()
+			await utils.workspace.getJoinInfo.invalidate({ workspaceId })
+			setIsEditingOrg(false)
 		} catch (err) {
 			toast.error(
-				err instanceof Error
-					? err.message
-					: "Only workspace owners can update organization name.",
-			);
+				err instanceof Error ? err.message : "Only workspace owners can update organization name.",
+			)
 		} finally {
-			setSavingOrg(false);
+			setSavingOrg(false)
 		}
-	};
+	}
 
 	const getRoleBadgeClass = (role: string) => {
 		switch (role) {
 			case "owner":
-				return "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400";
+				return "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400"
 			case "admin":
-				return "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400";
+				return "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400"
 			default:
-				return "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300";
+				return "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300"
 		}
-	};
+	}
 
 	if (!workspaceId) {
 		return (
 			<div className="web-centered-state">
 				<div className="web-empty-state">
-					<p className="text-sm text-gray-500 dark:text-gray-400">
-						No workspace selected.
-					</p>
+					<p className="text-sm text-gray-500 dark:text-gray-400">No workspace selected.</p>
 				</div>
 			</div>
-		);
+		)
 	}
 
 	return (
@@ -311,31 +288,20 @@ export default function PeoplePage() {
 								className="h-8 w-8 p-0"
 								onClick={() => {
 									if (isEditingWorkspace) {
-										setWorkspaceName(workspace?.name ?? "");
-										setWorkspaceDomain(workspace?.domain ?? "");
-										setIsEditingWorkspace(false);
-										return;
+										setWorkspaceName(workspace?.name ?? "")
+										setWorkspaceDomain(workspace?.domain ?? "")
+										setIsEditingWorkspace(false)
+										return
 									}
-									setIsEditingWorkspace(true);
+									setIsEditingWorkspace(true)
 								}}
-								aria-label={
-									isEditingWorkspace
-										? "Cancel editing workspace"
-										: "Edit workspace"
-								}
+								aria-label={isEditingWorkspace ? "Cancel editing workspace" : "Edit workspace"}
 							>
-								{isEditingWorkspace ? (
-									<X className="h-4 w-4" />
-								) : (
-									<Pencil className="h-4 w-4" />
-								)}
+								{isEditingWorkspace ? <X className="h-4 w-4" /> : <Pencil className="h-4 w-4" />}
 							</Button>
 						</div>
 						<div className="space-y-2">
-							<Label
-								htmlFor="people-workspace-name"
-								className={formLabelClassName}
-							>
+							<Label htmlFor="people-workspace-name" className={formLabelClassName}>
 								Brand Name
 							</Label>
 							<Input
@@ -348,10 +314,7 @@ export default function PeoplePage() {
 							/>
 						</div>
 						<div className="mt-3 space-y-2">
-							<Label
-								htmlFor="people-workspace-domain"
-								className={formLabelClassName}
-							>
+							<Label htmlFor="people-workspace-domain" className={formLabelClassName}>
 								Brand Domain
 							</Label>
 							<Input
@@ -363,14 +326,13 @@ export default function PeoplePage() {
 								className={formFieldClassName}
 							/>
 							<p className={formHintClassName}>
-								Used to track your brand visibility and citations in AI
-								responses.
+								Used to track your brand visibility and citations in AI responses.
 							</p>
 							{isEditingWorkspace && (
 								<div className="rounded-[var(--app-radius)] border border-amber-200 bg-amber-50 px-3 py-3 dark:border-amber-900/60 dark:bg-amber-950/20">
 									<p className="text-xs text-amber-800 dark:text-amber-300">
-										Warning: Changing brand details clears all analyzed data in
-										this workspace. Raw prompt responses are not deleted.
+										Warning: Changing brand details clears all analyzed data in this workspace. Raw
+										prompt responses are not deleted.
 									</p>
 								</div>
 							)}
@@ -380,14 +342,11 @@ export default function PeoplePage() {
 								<>
 									<Button
 										variant="outline"
-										className={cn(
-											formSecondaryButtonClassName,
-											"w-full sm:w-auto",
-										)}
+										className={cn(formSecondaryButtonClassName, "w-full sm:w-auto")}
 										onClick={() => {
-											setWorkspaceName(workspace?.name ?? "");
-											setWorkspaceDomain(workspace?.domain ?? "");
-											setIsEditingWorkspace(false);
+											setWorkspaceName(workspace?.name ?? "")
+											setWorkspaceDomain(workspace?.domain ?? "")
+											setIsEditingWorkspace(false)
 										}}
 										disabled={savingWorkspace}
 									>
@@ -401,16 +360,9 @@ export default function PeoplePage() {
 											!workspaceDomain.trim() ||
 											!workspaceDetailsChanged
 										}
-										className={cn(
-											formPrimaryButtonClassName,
-											"w-full sm:w-auto",
-										)}
+										className={cn(formPrimaryButtonClassName, "w-full sm:w-auto")}
 									>
-										{savingWorkspace ? (
-											<Loader2 className="h-4 w-4 animate-spin" />
-										) : (
-											"Save"
-										)}
+										{savingWorkspace ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save"}
 									</Button>
 								</>
 							)}
@@ -422,9 +374,7 @@ export default function PeoplePage() {
 						<div className="mb-3 flex items-center justify-between gap-2">
 							<div className="flex items-center gap-2">
 								<Building2 className="h-4 w-4 text-gray-500" />
-								<p className="text-sm font-medium text-gray-900 dark:text-gray-100">
-									Organization
-								</p>
+								<p className="text-sm font-medium text-gray-900 dark:text-gray-100">Organization</p>
 							</div>
 							<Button
 								variant="ghost"
@@ -432,23 +382,15 @@ export default function PeoplePage() {
 								className="h-8 w-8 p-0"
 								onClick={() => {
 									if (isEditingOrg) {
-										setOrganizationName(organization?.name ?? "");
-										setIsEditingOrg(false);
-										return;
+										setOrganizationName(organization?.name ?? "")
+										setIsEditingOrg(false)
+										return
 									}
-									setIsEditingOrg(true);
+									setIsEditingOrg(true)
 								}}
-								aria-label={
-									isEditingOrg
-										? "Cancel editing organization"
-										: "Edit organization"
-								}
+								aria-label={isEditingOrg ? "Cancel editing organization" : "Edit organization"}
 							>
-								{isEditingOrg ? (
-									<X className="h-4 w-4" />
-								) : (
-									<Pencil className="h-4 w-4" />
-								)}
+								{isEditingOrg ? <X className="h-4 w-4" /> : <Pencil className="h-4 w-4" />}
 							</Button>
 						</div>
 						<div className="space-y-2">
@@ -472,13 +414,10 @@ export default function PeoplePage() {
 								<>
 									<Button
 										variant="outline"
-										className={cn(
-											formSecondaryButtonClassName,
-											"w-full sm:w-auto",
-										)}
+										className={cn(formSecondaryButtonClassName, "w-full sm:w-auto")}
 										onClick={() => {
-											setOrganizationName(organization?.name ?? "");
-											setIsEditingOrg(false);
+											setOrganizationName(organization?.name ?? "")
+											setIsEditingOrg(false)
 										}}
 										disabled={savingOrg}
 									>
@@ -486,21 +425,10 @@ export default function PeoplePage() {
 									</Button>
 									<Button
 										onClick={handleSaveOrganizationName}
-										disabled={
-											savingOrg ||
-											!organizationName.trim() ||
-											!organizationNameChanged
-										}
-										className={cn(
-											formPrimaryButtonClassName,
-											"w-full sm:w-auto",
-										)}
+										disabled={savingOrg || !organizationName.trim() || !organizationNameChanged}
+										className={cn(formPrimaryButtonClassName, "w-full sm:w-auto")}
 									>
-										{savingOrg ? (
-											<Loader2 className="h-4 w-4 animate-spin" />
-										) : (
-											"Save"
-										)}
+										{savingOrg ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save"}
 									</Button>
 								</>
 							)}
@@ -522,8 +450,8 @@ export default function PeoplePage() {
 							Workspace Join Code
 						</p>
 						<p className={cn(formHintClassName, "mt-1")}>
-							Share this code with teammates to let them join instantly. Each
-							workspace has a globally unique code.
+							Share this code with teammates to let them join instantly. Each workspace has a
+							globally unique code.
 						</p>
 						{joinInfo?.organization?.name && (
 							<div className="mt-2 flex flex-wrap gap-4 text-xs text-gray-500">
@@ -556,22 +484,14 @@ export default function PeoplePage() {
 									readOnly
 									value={joinInfo?.workspaceCode ?? ""}
 									placeholder="Workspace code"
-									className={cn(
-										formFieldClassName,
-										"w-full max-w-md font-mono text-xs",
-									)}
+									className={cn(formFieldClassName, "w-full max-w-md font-mono text-xs")}
 								/>
 								<Button
 									variant="outline"
 									size="sm"
-									onClick={() =>
-										handleCopy(joinInfo?.workspaceCode ?? "", "Workspace code")
-									}
+									onClick={() => handleCopy(joinInfo?.workspaceCode ?? "", "Workspace code")}
 									disabled={!joinInfo?.workspaceCode}
-									className={cn(
-										formSecondaryButtonClassName,
-										"w-full sm:w-auto",
-									)}
+									className={cn(formSecondaryButtonClassName, "w-full sm:w-auto")}
 								>
 									Copy
 								</Button>
@@ -635,10 +555,7 @@ export default function PeoplePage() {
 						{WORKSPACE_MEMBER_SKELETON_KEYS.map((key) => (
 							<div
 								key={key}
-								className={cn(
-									formPanelClassName,
-									"flex items-center justify-between px-4 py-3",
-								)}
+								className={cn(formPanelClassName, "flex items-center justify-between px-4 py-3")}
 							>
 								<div className="space-y-2">
 									<Skeleton className="h-4 w-32" />
@@ -703,9 +620,7 @@ export default function PeoplePage() {
 												<Button
 													variant="ghost"
 													size="sm"
-													onClick={() =>
-														handleWsRemoveMember(member.userId, member.role)
-													}
+													onClick={() => handleWsRemoveMember(member.userId, member.role)}
 													className="h-8 w-8 p-0 text-gray-400 hover:text-red-600"
 												>
 													<Trash2 className="h-4 w-4" />
@@ -720,5 +635,5 @@ export default function PeoplePage() {
 				)}
 			</section>
 		</div>
-	);
+	)
 }

@@ -1,4 +1,4 @@
-"use client";
+"use client"
 
 import {
 	formFieldClassName,
@@ -7,9 +7,9 @@ import {
 	formPanelClassName,
 	formPrimaryButtonClassName,
 	formSecondaryButtonClassName,
-} from "@/components/forms/auth-form-chrome";
-import { authClient } from "@/lib/auth/auth-client";
-import { api } from "@/trpc/react";
+} from "@/components/forms/auth-form-chrome"
+import { authClient } from "@/lib/auth/auth-client"
+import { api } from "@/trpc/react"
 import {
 	Button,
 	Card,
@@ -20,60 +20,60 @@ import {
 	Input,
 	Label,
 	toast,
-} from "@oneglanse/ui";
-import { cn } from "@oneglanse/utils";
-import { ArrowRight, Loader2 } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+} from "@oneglanse/ui"
+import { cn } from "@oneglanse/utils"
+import { ArrowRight, Loader2 } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { useState } from "react"
 
 type JoinSelection = {
-	organization: { id: string; name: string; slug: string | null };
-	workspaces: { id: string; name: string; slug: string }[];
-};
+	organization: { id: string; name: string; slug: string | null }
+	workspaces: { id: string; name: string; slug: string }[]
+}
 
 export default function WorkspaceGateway() {
-	const router = useRouter();
-	const [code, setCode] = useState("");
-	const [selection, setSelection] = useState<JoinSelection | null>(null);
+	const router = useRouter()
+	const [code, setCode] = useState("")
+	const [selection, setSelection] = useState<JoinSelection | null>(null)
 
-	const joinMutation = api.workspace.joinByCode.useMutation();
+	const joinMutation = api.workspace.joinByCode.useMutation()
 
 	const handleJoin = async (joinCode: string) => {
 		if (!joinCode.trim()) {
-			toast.error("Please enter a workspace code.");
-			return;
+			toast.error("Please enter a workspace code.")
+			return
 		}
 
-		setSelection(null);
+		setSelection(null)
 
 		try {
-			const result = await joinMutation.mutateAsync({ code: joinCode.trim() });
+			const result = await joinMutation.mutateAsync({ code: joinCode.trim() })
 			if (result.status === "select-workspace") {
 				setSelection({
 					organization: result.organization,
 					workspaces: result.workspaces,
-				});
-				return;
+				})
+				return
 			}
 
-			const { workspace, organization } = result;
+			const { workspace, organization } = result
 			await authClient.organization.setActive({
 				organizationId: organization.id,
 				organizationSlug: organization.slug ?? undefined,
-			});
-			router.refresh();
-			router.push(`/dashboard?workspace=${workspace.id}`);
+			})
+			router.refresh()
+			router.push(`/dashboard?workspace=${workspace.id}`)
 		} catch (err) {
-			console.error(err);
-			toast.error("Unable to join workspace.");
+			console.error(err)
+			toast.error("Unable to join workspace.")
 		}
-	};
+	}
 
 	const handleSelectWorkspace = async (workspaceSlug: string) => {
-		if (!selection) return;
-		const orgCode = selection.organization.slug ?? selection.organization.id;
-		await handleJoin(`${orgCode}/${workspaceSlug}`);
-	};
+		if (!selection) return
+		const orgCode = selection.organization.slug ?? selection.organization.id
+		await handleJoin(`${orgCode}/${workspaceSlug}`)
+	}
 
 	return (
 		<div className="flex min-h-full min-w-0 items-center justify-center bg-stone-50 px-4 py-3 dark:bg-neutral-950 sm:px-6 sm:py-5 xl:px-10 xl:py-8">
@@ -106,8 +106,7 @@ export default function WorkspaceGateway() {
 							{selection && (
 								<div className="space-y-2.5 rounded-[var(--app-radius)] border border-dashed border-gray-200/80 bg-stone-50/80 p-3.5 dark:border-gray-800 dark:bg-gray-900/60 xl:space-y-3 xl:p-4">
 									<p className="text-sm text-gray-600 dark:text-gray-300 xl:text-[14px]">
-										Select a workspace in{" "}
-										<strong>{selection.organization.name}</strong>
+										Select a workspace in <strong>{selection.organization.name}</strong>
 									</p>
 									<div className="flex flex-wrap gap-2">
 										{selection.workspaces.map((ws) => (
@@ -152,8 +151,8 @@ export default function WorkspaceGateway() {
 								Create Workspace
 							</CardTitle>
 							<CardDescription className="xl:text-[14px] xl:leading-6">
-								Start fresh and create your first workspace. You can invite
-								teammates later from the People tab.
+								Start fresh and create your first workspace. You can invite teammates later from the
+								People tab.
 							</CardDescription>
 						</CardHeader>
 						<CardContent className="flex flex-1 px-5 py-4 sm:px-6 sm:py-5 xl:px-7 xl:py-6" />
@@ -169,5 +168,5 @@ export default function WorkspaceGateway() {
 				</div>
 			</div>
 		</div>
-	);
+	)
 }

@@ -1,4 +1,4 @@
-"use client";
+"use client"
 
 import {
 	cleanCitedText,
@@ -7,80 +7,66 @@ import {
 	getFaviconUrls,
 	getModelFavicon,
 	getUrlPath,
-} from "@oneglanse/utils";
-import {
-	BarChart3,
-	ChevronRight,
-	ExternalLink,
-	Globe2,
-	Link2,
-	SearchX,
-} from "lucide-react";
-import { Fragment, useMemo, useState } from "react";
-import { useSortState } from "../../hooks/use-sort-state.js";
-import { Card } from "../card.js";
-import {
-	Table,
-	TableBody,
-	TableCell,
-	TableHead,
-	TableHeader,
-	TableRow,
-} from "../table.js";
-import { SortableHeader } from "./sortable-header.js";
+} from "@oneglanse/utils"
+import { BarChart3, ChevronRight, ExternalLink, Globe2, Link2, SearchX } from "lucide-react"
+import { Fragment, useMemo, useState } from "react"
+import { useSortState } from "../../hooks/use-sort-state.js"
+import { Card } from "../card.js"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../table.js"
+import { SortableHeader } from "./sortable-header.js"
 
-type SourcesTab = "domains" | "citations";
-type SortColumn = "share" | "citations" | "urls" | "providers";
+type SourcesTab = "domains" | "citations"
+type SortColumn = "share" | "citations" | "urls" | "providers"
 
 export type SourcePanelMetrics = {
-	totalDomains: number;
-	totalUrls: number;
-	totalCitations: number;
-	avgCitationsPerUrl: string;
-	topDomain: string;
-	topDomainShare: number;
-};
+	totalDomains: number
+	totalUrls: number
+	totalCitations: number
+	avgCitationsPerUrl: string
+	topDomain: string
+	topDomainShare: number
+}
 
 export type SourcePanelDomainRow = {
-	domain: string;
-	share: number;
-	totalCitations: number;
-	urlCount: number;
-	providers: string[];
-};
+	domain: string
+	share: number
+	totalCitations: number
+	urlCount: number
+	providers: string[]
+}
 
 export type SourcePanelCitationExcerpt = {
-	modelProvider?: string;
-	citedText?: string;
-};
+	modelProvider?: string
+	citedText?: string
+}
 
 export type SourcePanelCitationUrl = {
-	url: string;
-	title: string;
-	totalCitations: number;
-	providers: string[];
-	excerpts: SourcePanelCitationExcerpt[];
-};
+	url: string
+	title: string
+	totalCitations: number
+	providers: string[]
+	excerpts: SourcePanelCitationExcerpt[]
+}
 
 export type SourcePanelCitationDomain = {
-	domain: string;
-	totalCitations: number;
-	urlCount: number;
-	providers: string[];
-	urls: SourcePanelCitationUrl[];
-};
+	domain: string
+	totalCitations: number
+	urlCount: number
+	providers: string[]
+	urls: SourcePanelCitationUrl[]
+}
 
 function FaviconWithFallback({
 	url,
 	size = "md",
 }: {
-	url: string;
-	size?: "sm" | "md";
+	url: string
+	size?: "sm" | "md"
 }): React.JSX.Element {
-	const [showFavicon, setShowFavicon] = useState(true);
-	const favicon = getFaviconUrls(url, "")[0];
-	const sizeClasses = size === "sm" ? "h-4 w-4" : "h-5 w-5";
-	const iconSizeClasses = size === "sm" ? "h-2.5 w-2.5" : "h-3 w-3";
+	const [showFavicon, setShowFavicon] = useState(true)
+	const favicon = getFaviconUrls(url, "")[0]
+	const sizeClasses = size === "sm" ? "h-4 w-4" : "h-5 w-5"
+	const iconSizeClasses = size === "sm" ? "h-2.5 w-2.5" : "h-3 w-3"
 
 	if (favicon && showFavicon) {
 		return (
@@ -90,18 +76,16 @@ function FaviconWithFallback({
 				className={`${sizeClasses} rounded-[var(--app-radius)]`}
 				onError={() => setShowFavicon(false)}
 			/>
-		);
+		)
 	}
 
 	return (
 		<div
 			className={`${sizeClasses} flex items-center justify-center rounded-[var(--app-radius)] border border-gray-200/70 bg-stone-100 dark:border-gray-800 dark:bg-neutral-900`}
 		>
-			<Globe2
-				className={`${iconSizeClasses} text-gray-500 dark:text-gray-400`}
-			/>
+			<Globe2 className={`${iconSizeClasses} text-gray-500 dark:text-gray-400`} />
 		</div>
-	);
+	)
 }
 
 function MetricCard({
@@ -111,11 +95,11 @@ function MetricCard({
 	icon: Icon,
 	badgeFavicon,
 }: {
-	label: string;
-	value: string;
-	subtitle: string;
-	icon: typeof Globe2;
-	badgeFavicon?: string | null;
+	label: string
+	value: string
+	subtitle: string
+	icon: typeof Globe2
+	badgeFavicon?: string | null
 }): React.JSX.Element {
 	return (
 		<div className="rounded-[var(--app-radius)] border border-gray-100/80 bg-white p-5 shadow-[0_20px_60px_-32px_rgba(15,23,42,0.18)] dark:border-gray-800 dark:bg-neutral-950 dark:shadow-[0_20px_60px_-32px_rgba(0,0,0,0.55)]">
@@ -130,16 +114,12 @@ function MetricCard({
 			</p>
 			<div className="mt-2 flex items-center gap-2">
 				{badgeFavicon ? (
-					<img
-						src={badgeFavicon}
-						alt=""
-						className="h-3.5 w-3.5 rounded-[var(--app-radius)]"
-					/>
+					<img src={badgeFavicon} alt="" className="h-3.5 w-3.5 rounded-[var(--app-radius)]" />
 				) : null}
 				<p className="break-words text-xs text-muted-foreground">{subtitle}</p>
 			</div>
 		</div>
-	);
+	)
 }
 
 export function SourcesIntelligencePanel({
@@ -151,26 +131,28 @@ export function SourcesIntelligencePanel({
 	emptyTitle = "No source data for this filter",
 	emptySubtitle = "Try another model filter to inspect source patterns.",
 }: {
-	metrics: SourcePanelMetrics;
-	domainRows: SourcePanelDomainRow[];
-	citationDomains: SourcePanelCitationDomain[];
-	enableDomainSorting?: boolean;
-	containerVariant?: "card" | "plain";
-	emptyTitle?: string;
-	emptySubtitle?: string;
+	metrics: SourcePanelMetrics
+	domainRows: SourcePanelDomainRow[]
+	citationDomains: SourcePanelCitationDomain[]
+	enableDomainSorting?: boolean
+	containerVariant?: "card" | "plain"
+	emptyTitle?: string
+	emptySubtitle?: string
 }): React.JSX.Element {
-	const [activeTab, setActiveTab] = useState<SourcesTab>("domains");
-	const [openDomain, setOpenDomain] = useState<string | null>(null);
-	const [openUrl, setOpenUrl] = useState<string | null>(null);
-	const { sortColumn, sortDirection, toggleSort, resetSort } =
-		useSortState<SortColumn>("citations", "desc");
+	const [activeTab, setActiveTab] = useState<SourcesTab>("domains")
+	const [openDomain, setOpenDomain] = useState<string | null>(null)
+	const [openUrl, setOpenUrl] = useState<string | null>(null)
+	const { sortColumn, sortDirection, toggleSort, resetSort } = useSortState<SortColumn>(
+		"citations",
+		"desc",
+	)
 
-	const hasData = domainRows.length > 0 || citationDomains.length > 0;
+	const hasData = domainRows.length > 0 || citationDomains.length > 0
 
 	const sortedDomainRows = useMemo(() => {
-		if (!enableDomainSorting || sortColumn === null) return domainRows;
+		if (!enableDomainSorting || sortColumn === null) return domainRows
 
-		const rows = [...domainRows];
+		const rows = [...domainRows]
 		rows.sort((a, b) => {
 			const aValue =
 				sortColumn === "share"
@@ -179,7 +161,7 @@ export function SourcesIntelligencePanel({
 						? a.providers.length
 						: sortColumn === "urls"
 							? a.urlCount
-							: a.totalCitations;
+							: a.totalCitations
 			const bValue =
 				sortColumn === "share"
 					? b.share
@@ -187,38 +169,38 @@ export function SourcesIntelligencePanel({
 						? b.providers.length
 						: sortColumn === "urls"
 							? b.urlCount
-							: b.totalCitations;
-			const diff = aValue - bValue;
-			return sortDirection === "asc" ? diff : -diff;
-		});
-		return rows;
-	}, [domainRows, enableDomainSorting, sortColumn, sortDirection]);
+							: b.totalCitations
+			const diff = aValue - bValue
+			return sortDirection === "asc" ? diff : -diff
+		})
+		return rows
+	}, [domainRows, enableDomainSorting, sortColumn, sortDirection])
 
 	const sortedCitationDomains = useMemo(() => {
-		if (sortColumn === null) return citationDomains;
+		if (sortColumn === null) return citationDomains
 
-		const rows = [...citationDomains];
+		const rows = [...citationDomains]
 		rows.sort((a, b) => {
 			const aValue =
 				sortColumn === "providers"
 					? a.providers.length
 					: sortColumn === "urls"
 						? a.urlCount
-						: a.totalCitations;
+						: a.totalCitations
 			const bValue =
 				sortColumn === "providers"
 					? b.providers.length
 					: sortColumn === "urls"
 						? b.urlCount
-						: b.totalCitations;
-			const diff = aValue - bValue;
+						: b.totalCitations
+			const diff = aValue - bValue
 			if (diff !== 0) {
-				return sortDirection === "asc" ? diff : -diff;
+				return sortDirection === "asc" ? diff : -diff
 			}
-			return a.domain.localeCompare(b.domain);
-		});
-		return rows;
-	}, [citationDomains, sortColumn, sortDirection]);
+			return a.domain.localeCompare(b.domain)
+		})
+		return rows
+	}, [citationDomains, sortColumn, sortDirection])
 
 	const panelBody = (
 		<div className="flex flex-col gap-6 sm:gap-7">
@@ -450,14 +432,12 @@ export function SourcesIntelligencePanel({
 						</TableHeader>
 						<TableBody>
 							{sortedCitationDomains.map((group) => {
-								const domainOpen = openDomain === group.domain;
+								const domainOpen = openDomain === group.domain
 								return (
 									<Fragment key={group.domain}>
 										<TableRow
 											className="cursor-pointer bg-white hover:bg-gray-50/60 dark:bg-neutral-950 dark:hover:bg-neutral-900/60"
-											onClick={() =>
-												setOpenDomain(domainOpen ? null : group.domain)
-											}
+											onClick={() => setOpenDomain(domainOpen ? null : group.domain)}
 										>
 											<TableCell className="w-px whitespace-normal px-4 py-5 sm:whitespace-normal">
 												<div className="flex items-center gap-2">
@@ -475,9 +455,7 @@ export function SourcesIntelligencePanel({
 											</TableCell>
 											<TableCell className="hidden px-2 py-5 text-center text-sm whitespace-nowrap text-gray-700 dark:text-gray-200 sm:table-cell sm:px-4">
 												<span className="sm:hidden">{group.urlCount}</span>
-												<span className="hidden sm:inline">
-													{group.urlCount} URLs
-												</span>
+												<span className="hidden sm:inline">{group.urlCount} URLs</span>
 											</TableCell>
 											<TableCell className="px-2 py-5 sm:px-4">
 												<div className="flex flex-wrap items-center justify-center gap-1">
@@ -496,14 +474,12 @@ export function SourcesIntelligencePanel({
 
 										{domainOpen &&
 											group.urls.map((source) => {
-												const urlOpen = openUrl === source.url;
+												const urlOpen = openUrl === source.url
 												return (
 													<Fragment key={source.url}>
 														<TableRow
 															className="cursor-pointer bg-white hover:bg-gray-50/60 dark:bg-neutral-950 dark:hover:bg-neutral-900/60"
-															onClick={() =>
-																setOpenUrl(urlOpen ? null : source.url)
-															}
+															onClick={() => setOpenUrl(urlOpen ? null : source.url)}
 														>
 															<TableCell className="w-px whitespace-normal px-4 py-4 pl-12 sm:whitespace-normal">
 																<div className="flex min-w-0 items-center gap-2">
@@ -573,9 +549,7 @@ export function SourcesIntelligencePanel({
 																		{excerpt.modelProvider ? (
 																			<div className="inline-flex items-center gap-1 rounded-[var(--app-radius)] border border-gray-200/70 bg-white px-2 py-1 text-[10px] font-semibold text-muted-foreground dark:border-gray-800 dark:bg-neutral-950">
 																				<img
-																					src={getModelFavicon(
-																						excerpt.modelProvider,
-																					)}
+																					src={getModelFavicon(excerpt.modelProvider)}
 																					alt=""
 																					className="h-3.5 w-3.5 rounded-[var(--app-radius)]"
 																				/>
@@ -590,25 +564,25 @@ export function SourcesIntelligencePanel({
 																</TableRow>
 															))}
 													</Fragment>
-												);
+												)
 											})}
 									</Fragment>
-								);
+								)
 							})}
 						</TableBody>
 					</Table>
 				</div>
 			)}
 		</div>
-	);
+	)
 
 	if (containerVariant === "plain") {
-		return panelBody;
+		return panelBody
 	}
 
 	return (
 		<Card className="rounded-[var(--app-radius)] border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-black">
 			{panelBody}
 		</Card>
-	);
+	)
 }

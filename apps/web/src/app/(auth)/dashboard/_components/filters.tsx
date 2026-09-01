@@ -1,14 +1,9 @@
-import { formToolbarSelectClassName } from "@/components/forms/auth-form-chrome";
-import { useSafeSearchParams } from "@/lib/navigation/use-safe-search-params";
-import {
-	Button,
-	ProviderModelSelect,
-	Separator,
-	TimeRangeSelect,
-} from "@oneglanse/ui";
-import { cn, getFaviconUrls } from "@oneglanse/utils";
-import { FilterX } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { formToolbarSelectClassName } from "@/components/forms/auth-form-chrome"
+import { useSafeSearchParams } from "@/lib/navigation/use-safe-search-params"
+import { Button, ProviderModelSelect, Separator, TimeRangeSelect } from "@oneglanse/ui"
+import { cn, getFaviconUrls } from "@oneglanse/utils"
+import { FilterX } from "lucide-react"
+import { useRouter } from "next/navigation"
 
 export function DashboardFilters({
 	brandName,
@@ -18,28 +13,28 @@ export function DashboardFilters({
 	timeFilter,
 	setTimeFilter,
 }: {
-	brandName: string;
-	brandDomain: string;
-	modelFilter: string;
-	setModelFilter: (v: string) => void;
-	timeFilter: "all" | "7d" | "14d" | "30d";
-	setTimeFilter: (v: "all" | "7d" | "14d" | "30d") => void;
+	brandName: string
+	brandDomain: string
+	modelFilter: string
+	setModelFilter: (v: string) => void
+	timeFilter: "all" | "7d" | "14d" | "30d"
+	setTimeFilter: (v: "all" | "7d" | "14d" | "30d") => void
 }) {
-	const router = useRouter();
-	const searchParams = useSafeSearchParams();
-	const faviconUrls = getFaviconUrls(brandDomain);
+	const router = useRouter()
+	const searchParams = useSafeSearchParams()
+	const faviconUrls = getFaviconUrls(brandDomain)
 
 	const clearFilters = () => {
-		const params = new URLSearchParams(searchParams.toString());
-		params.delete("model");
-		params.delete("time");
+		const params = new URLSearchParams(searchParams.toString())
+		params.delete("model")
+		params.delete("time")
 
-		setModelFilter("All Models");
-		setTimeFilter("all");
+		setModelFilter("All Models")
+		setTimeFilter("all")
 
-		const query = params.toString();
-		router.push(query ? `?${query}` : "?", { scroll: false });
-	};
+		const query = params.toString()
+		router.push(query ? `?${query}` : "?", { scroll: false })
+	}
 
 	return (
 		<div className="flex w-full flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3">
@@ -56,13 +51,11 @@ export function DashboardFilters({
 						alt=""
 						className="h-4 w-4 rounded-[var(--app-radius)]"
 						onError={(e) => {
-							(e.target as HTMLImageElement).style.display = "none";
+							;(e.target as HTMLImageElement).style.display = "none"
 						}}
 					/>
 				)}
-				<span className="truncate font-medium text-gray-900 dark:text-gray-100">
-					{brandName}
-				</span>
+				<span className="truncate font-medium text-gray-900 dark:text-gray-100">{brandName}</span>
 			</div>
 
 			<ProviderModelSelect
@@ -93,5 +86,5 @@ export function DashboardFilters({
 				</>
 			)}
 		</div>
-	);
+	)
 }

@@ -1,4 +1,4 @@
-"use client";
+"use client"
 
 import {
 	formDialogBodyClassName,
@@ -11,18 +11,13 @@ import {
 	formPanelClassName,
 	formPrimaryButtonClassName,
 	formSecondaryButtonClassName,
-} from "@/components/forms/auth-form-chrome";
-import { authClient } from "@/lib/auth/auth-client";
-import { signOutAndRedirect } from "@/lib/auth/logout";
-import { downloadCsv, downloadJson } from "@/lib/export/download";
-import { useSafeSearchParams } from "@/lib/navigation/use-safe-search-params";
-import { api } from "@/trpc/react";
-import type {
-	AnalysisRecord,
-	DomainStats,
-	GroupedSource,
-	SourceExcerpt,
-} from "@oneglanse/types";
+} from "@/components/forms/auth-form-chrome"
+import { authClient } from "@/lib/auth/auth-client"
+import { signOutAndRedirect } from "@/lib/auth/logout"
+import { downloadCsv, downloadJson } from "@/lib/export/download"
+import { useSafeSearchParams } from "@/lib/navigation/use-safe-search-params"
+import { api } from "@/trpc/react"
+import type { AnalysisRecord, DomainStats, GroupedSource, SourceExcerpt } from "@oneglanse/types"
 import {
 	Button,
 	Dialog,
@@ -33,23 +28,20 @@ import {
 	Input,
 	Label,
 	toast,
-} from "@oneglanse/ui";
+} from "@oneglanse/ui"
 import {
 	buildDetailedAnalysisCsvRow,
 	getUniqueModelProviders,
 	joinCitedTexts,
-} from "@oneglanse/utils";
-import { cn } from "@oneglanse/utils";
-import { Download, Loader2 } from "lucide-react";
-import { useState } from "react";
-import { useDashboardData } from "../dashboard/_hooks/use-dashboard-data";
-import type { DashboardMetrics } from "../dashboard/_utils/types";
-import { useLayoutUserEmail } from "../workspace-context";
+} from "@oneglanse/utils"
+import { cn } from "@oneglanse/utils"
+import { Download, Loader2 } from "lucide-react"
+import { useState } from "react"
+import { useDashboardData } from "../dashboard/_hooks/use-dashboard-data"
+import type { DashboardMetrics } from "../dashboard/_utils/types"
+import { useLayoutUserEmail } from "../workspace-context"
 
-function getWorkspaceActionPriorities(
-	metrics: DashboardMetrics,
-	promptCount: number,
-): string[] {
+function getWorkspaceActionPriorities(metrics: DashboardMetrics, promptCount: number): string[] {
 	const priorities = [
 		metrics.aggregateStats.presenceRate < 70
 			? "Increase brand mention frequency across high-intent prompts."
@@ -63,51 +55,46 @@ function getWorkspaceActionPriorities(
 		metrics.impactMetrics.criticalRiskCount > 0
 			? "Resolve critical risk signals found in model answers."
 			: null,
-		promptCount < 5
-			? "Add more prompts to improve coverage across buyer intent categories."
-			: null,
+		promptCount < 5 ? "Add more prompts to improve coverage across buyer intent categories." : null,
 		metrics.totalCitations === 0
 			? "No citations captured yet. Publish authoritative content for AI models to reference."
 			: null,
-	].filter((priority): priority is string => priority !== null);
+	].filter((priority): priority is string => priority !== null)
 
 	return priorities.length > 0
 		? priorities
-		: ["Maintain current trajectory and scale winning prompt themes."];
+		: ["Maintain current trajectory and scale winning prompt themes."]
 }
 
 export default function SettingsPage() {
-	const searchParams = useSafeSearchParams();
-	const workspaceId = searchParams.get("workspace") ?? "";
-	const subtleBorderButtonClassName = "border-gray-200/80 dark:border-gray-800";
+	const searchParams = useSafeSearchParams()
+	const workspaceId = searchParams.get("workspace") ?? ""
+	const subtleBorderButtonClassName = "border-gray-200/80 dark:border-gray-800"
 	const destructiveSubtleBorderButtonClassName =
-		"border-red-200/80 bg-red-50 text-red-700 hover:bg-red-100 hover:text-red-800 dark:border-red-900/70 dark:bg-red-950/30 dark:text-red-300 dark:hover:bg-red-950/50 dark:hover:text-red-200";
+		"border-red-200/80 bg-red-50 text-red-700 hover:bg-red-100 hover:text-red-800 dark:border-red-900/70 dark:bg-red-950/30 dark:text-red-300 dark:hover:bg-red-950/50 dark:hover:text-red-200"
 
 	// User email from layout context (server-fetched, no waterfall)
-	const userEmail = useLayoutUserEmail();
+	const userEmail = useLayoutUserEmail()
 
 	// Delete account state
-	const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-	const [deleteConfirmEmail, setDeleteConfirmEmail] = useState("");
-	const [isDeletingAccount, setIsDeletingAccount] = useState(false);
-	const deleteAccountMutation = api.workspace.deleteAccount.useMutation();
+	const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+	const [deleteConfirmEmail, setDeleteConfirmEmail] = useState("")
+	const [isDeletingAccount, setIsDeletingAccount] = useState(false)
+	const deleteAccountMutation = api.workspace.deleteAccount.useMutation()
 
 	const userPromptsQuery = api.prompt.fetchUserPrompts.useQuery(
 		{ workspaceId },
 		{ enabled: !!workspaceId },
-	);
+	)
 	const analysisQuery = api.analysis.fetchAnalysis.useQuery(
 		{ workspaceId },
 		{ enabled: !!workspaceId },
-	);
+	)
 	const sourcesQuery = api.prompt.fetchPromptSources.useQuery(
 		{ workspaceId },
 		{ enabled: !!workspaceId },
-	);
-	const workspaceQuery = api.workspace.getById.useQuery(
-		{ workspaceId },
-		{ enabled: !!workspaceId },
-	);
+	)
+	const workspaceQuery = api.workspace.getById.useQuery({ workspaceId }, { enabled: !!workspaceId })
 
 	const dashboardMetrics = useDashboardData(
 		Array.isArray(analysisQuery.data) ? analysisQuery.data : [],
@@ -117,40 +104,38 @@ export default function SettingsPage() {
 			name: workspaceQuery.data?.name,
 			domain: workspaceQuery.data?.domain,
 		},
-	);
+	)
 
 	// Delete account handler
 	const handleDeleteAccount = async () => {
 		if (deleteConfirmEmail.trim().toLowerCase() !== userEmail.toLowerCase()) {
-			toast.error("Email does not match. Please type your email to confirm.");
-			return;
+			toast.error("Email does not match. Please type your email to confirm.")
+			return
 		}
-		setIsDeletingAccount(true);
+		setIsDeletingAccount(true)
 		try {
-			await deleteAccountMutation.mutateAsync();
-			await signOutAndRedirect("/login");
-			toast.success("Your account has been deleted.");
+			await deleteAccountMutation.mutateAsync()
+			await signOutAndRedirect("/login")
+			toast.success("Your account has been deleted.")
 		} catch (err) {
-			console.error(err);
-			toast.error(
-				err instanceof Error ? err.message : "Failed to delete account.",
-			);
+			console.error(err)
+			toast.error(err instanceof Error ? err.message : "Failed to delete account.")
 		} finally {
-			setIsDeletingAccount(false);
+			setIsDeletingAccount(false)
 		}
-	};
+	}
 
 	const handleExportAllJson = () => {
-		const userPrompts = userPromptsQuery.data ?? [];
-		const analysisData = analysisQuery.data ?? [];
-		const sourceData = sourcesQuery.data ?? null;
-		const sourceStats = sourceData?.sourceStats;
-		const combinedSources = sourceStats?.combined ?? [];
-		const domainStatsRaw = sourceData?.domain_stats;
+		const userPrompts = userPromptsQuery.data ?? []
+		const analysisData = analysisQuery.data ?? []
+		const sourceData = sourcesQuery.data ?? null
+		const sourceStats = sourceData?.sourceStats
+		const combinedSources = sourceStats?.combined ?? []
+		const domainStatsRaw = sourceData?.domain_stats
 		const domainStats = Array.isArray(domainStatsRaw)
 			? domainStatsRaw
-			: (domainStatsRaw?.combined ?? []);
-		const m = dashboardMetrics;
+			: (domainStatsRaw?.combined ?? [])
+		const m = dashboardMetrics
 
 		const citationRows = combinedSources.flatMap((source: GroupedSource) =>
 			(source.excerpts ?? []).map((excerpt: SourceExcerpt) => ({
@@ -160,18 +145,18 @@ export default function SettingsPage() {
 				modelProvider: excerpt.model_provider ?? "",
 				citedText: excerpt.cited_text ?? "",
 			})),
-		);
-		const analysisRecords = Array.isArray(analysisData) ? analysisData : [];
+		)
+		const analysisRecords = Array.isArray(analysisData) ? analysisData : []
 		const analysisMetricRows = analysisRecords.map((record: AnalysisRecord) =>
 			buildDetailedAnalysisCsvRow(record),
-		);
+		)
 		const promptRows = userPrompts.map((prompt) => ({
 			promptId: prompt.id,
 			prompt: prompt.prompt,
 			createdAt: prompt.created_at,
-		}));
+		}))
 		const sourceRows = combinedSources.map((source: GroupedSource) => {
-			const models = getUniqueModelProviders(source.excerpts ?? []);
+			const models = getUniqueModelProviders(source.excerpts ?? [])
 
 			return {
 				url: source.url,
@@ -181,8 +166,8 @@ export default function SettingsPage() {
 				models,
 				excerptCount: source.excerpts?.length ?? 0,
 				citedTexts: joinCitedTexts(source.excerpts ?? []),
-			};
-		});
+			}
+		})
 		const dashboardSourceRows = m.sourcesIntelligence.map((source) => ({
 			domain: source.domain,
 			favicon: source.favicon,
@@ -191,11 +176,8 @@ export default function SettingsPage() {
 			modelCount: source.models.size,
 			models: [...source.models],
 			uniqueRecords: [...source.uniqueRecords],
-		}));
-		const actionPriorities = getWorkspaceActionPriorities(
-			m,
-			userPrompts.length,
-		);
+		}))
+		const actionPriorities = getWorkspaceActionPriorities(m, userPrompts.length)
 
 		downloadJson(`workspace-all-${workspaceId}-${Date.now()}.json`, {
 			generatedAt: new Date().toISOString(),
@@ -241,25 +223,20 @@ export default function SettingsPage() {
 					citations: citationRows,
 				},
 			},
-		});
-	};
+		})
+	}
 
 	const handleExportAllCsv = () => {
-		const userPrompts = userPromptsQuery.data ?? [];
-		const analysisData = Array.isArray(analysisQuery.data)
-			? analysisQuery.data
-			: [];
-		const sourceStats = sourcesQuery.data?.sourceStats;
-		const combinedSources = sourceStats?.combined ?? [];
-		const domainStatsRaw = sourcesQuery.data?.domain_stats;
+		const userPrompts = userPromptsQuery.data ?? []
+		const analysisData = Array.isArray(analysisQuery.data) ? analysisQuery.data : []
+		const sourceStats = sourcesQuery.data?.sourceStats
+		const combinedSources = sourceStats?.combined ?? []
+		const domainStatsRaw = sourcesQuery.data?.domain_stats
 		const domainStats = Array.isArray(domainStatsRaw)
 			? domainStatsRaw
-			: (domainStatsRaw?.combined ?? []);
-		const m = dashboardMetrics;
-		const actionPriorities = getWorkspaceActionPriorities(
-			m,
-			userPrompts.length,
-		);
+			: (domainStatsRaw?.combined ?? [])
+		const m = dashboardMetrics
+		const actionPriorities = getWorkspaceActionPriorities(m, userPrompts.length)
 
 		const rows: Array<Record<string, unknown>> = [
 			// Overview
@@ -278,8 +255,7 @@ export default function SettingsPage() {
 				section: "overview",
 				metric: "Citation Excerpts",
 				value: combinedSources.reduce(
-					(count: number, source: GroupedSource) =>
-						count + (source.excerpts?.length ?? 0),
+					(count: number, source: GroupedSource) => count + (source.excerpts?.length ?? 0),
 					0,
 				),
 			},
@@ -406,7 +382,7 @@ export default function SettingsPage() {
 			})),
 			// URL performance
 			...combinedSources.map((source: GroupedSource) => {
-				const models = getUniqueModelProviders(source.excerpts ?? []);
+				const models = getUniqueModelProviders(source.excerpts ?? [])
 
 				return {
 					section: "source_url_performance",
@@ -417,7 +393,7 @@ export default function SettingsPage() {
 					models: models.join(", "),
 					excerpt_count: source.excerpts?.length ?? 0,
 					cited_texts: joinCitedTexts(source.excerpts ?? []),
-				};
+				}
 			}),
 			// Source excerpts
 			...combinedSources.flatMap((source: GroupedSource) =>
@@ -430,18 +406,16 @@ export default function SettingsPage() {
 				})),
 			),
 			// Full per-record detail
-			...analysisData.map((record: AnalysisRecord) =>
-				buildDetailedAnalysisCsvRow(record),
-			),
-		];
+			...analysisData.map((record: AnalysisRecord) => buildDetailedAnalysisCsvRow(record)),
+		]
 
-		downloadCsv(`workspace-all-${workspaceId}-${Date.now()}.csv`, rows);
-	};
+		downloadCsv(`workspace-all-${workspaceId}-${Date.now()}.csv`, rows)
+	}
 
 	const hasAnyExportData =
 		(userPromptsQuery.data?.length ?? 0) > 0 ||
 		(analysisQuery.data?.length ?? 0) > 0 ||
-		(sourcesQuery.data?.sourceStats?.combined?.length ?? 0) > 0;
+		(sourcesQuery.data?.sourceStats?.combined?.length ?? 0) > 0
 
 	return (
 		<div className="web-page-panel max-w-4xl">
@@ -459,8 +433,7 @@ export default function SettingsPage() {
 									Export All Data
 								</p>
 								<p className={formHintClassName}>
-									Export Dashboard, Prompts, and Sources data together in one
-									file.
+									Export Dashboard, Prompts, and Sources data together in one file.
 								</p>
 							</div>
 							<div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center">
@@ -516,12 +489,10 @@ export default function SettingsPage() {
 				<div className={cn(formPanelClassName, "space-y-3 p-5")}>
 					<div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
 						<div>
-							<p className="text-sm font-medium text-gray-900 dark:text-gray-100">
-								Delete Account
-							</p>
+							<p className="text-sm font-medium text-gray-900 dark:text-gray-100">Delete Account</p>
 							<p className={cn(formHintClassName, "mt-1")}>
-								Permanently delete your account, all your workspaces, and all
-								associated data. This cannot be undone.
+								Permanently delete your account, all your workspaces, and all associated data. This
+								cannot be undone.
 							</p>
 						</div>
 						<Button
@@ -532,8 +503,8 @@ export default function SettingsPage() {
 								"h-10 w-auto shrink-0 self-start px-4 sm:self-auto",
 							)}
 							onClick={() => {
-								setDeleteConfirmEmail("");
-								setShowDeleteDialog(true);
+								setDeleteConfirmEmail("")
+								setShowDeleteDialog(true)
 							}}
 						>
 							Delete Account
@@ -554,9 +525,8 @@ export default function SettingsPage() {
 					<div className="px-4 sm:px-4.5 lg:px-5">
 						<div className="rounded-[var(--app-radius)] border border-amber-200 bg-amber-50 px-3 py-3 dark:border-amber-900/60 dark:bg-amber-950/20">
 							<p className="text-xs leading-5 text-amber-800 dark:text-amber-300">
-								If you are the sole owner of any organization, that organization
-								and all its workspaces will be permanently deleted along with
-								your account.
+								If you are the sole owner of any organization, that organization and all its
+								workspaces will be permanently deleted along with your account.
 							</p>
 						</div>
 					</div>
@@ -568,10 +538,7 @@ export default function SettingsPage() {
 								className="text-sm font-medium text-gray-700 dark:text-gray-300"
 							>
 								Type your email{" "}
-								<span className="font-mono text-xs text-gray-500">
-									({userEmail})
-								</span>{" "}
-								to confirm
+								<span className="font-mono text-xs text-gray-500">({userEmail})</span> to confirm
 							</Label>
 
 							<Input
@@ -609,8 +576,7 @@ export default function SettingsPage() {
 							onClick={handleDeleteAccount}
 							disabled={
 								isDeletingAccount ||
-								deleteConfirmEmail.trim().toLowerCase() !==
-									userEmail.toLowerCase()
+								deleteConfirmEmail.trim().toLowerCase() !== userEmail.toLowerCase()
 							}
 						>
 							{isDeletingAccount ? (
@@ -623,5 +589,5 @@ export default function SettingsPage() {
 				</DialogContent>
 			</Dialog>
 		</div>
-	);
+	)
 }

@@ -1,13 +1,6 @@
-import { METHOD_POINTS } from "@/lib/landing-content";
-import { Card } from "@oneglanse/ui";
-import {
-	ExternalLink,
-	Fingerprint,
-	KeyRound,
-	Monitor,
-	ShieldCheck,
-	ShieldOff,
-} from "lucide-react";
+import { METHOD_POINTS } from "@/lib/landing-content"
+import { Card } from "@oneglanse/ui"
+import { ExternalLink, Fingerprint, KeyRound, Monitor, ShieldCheck, ShieldOff } from "lucide-react"
 
 export function DataCollectionSection(): React.JSX.Element {
 	return (
@@ -24,8 +17,8 @@ export function DataCollectionSection(): React.JSX.Element {
 					Data collection methodology
 				</h2>
 				<p className="mt-3 text-sm leading-6 text-muted-foreground sm:text-base">
-					We disclose exactly how AI visibility data is collected and why
-					UI-first monitoring matters.
+					We disclose exactly how AI visibility data is collected and why UI-first monitoring
+					matters.
 				</p>
 
 				<ul className="mt-4 grid gap-2">
@@ -36,16 +29,10 @@ export function DataCollectionSection(): React.JSX.Element {
 						>
 							<span className="inline-flex items-center gap-2.5">
 								{index === 0 ? (
-									<Monitor
-										className="h-4 w-4 shrink-0 text-muted-foreground"
-										aria-hidden="true"
-									/>
+									<Monitor className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" />
 								) : null}
 								{index === 1 ? (
-									<KeyRound
-										className="h-4 w-4 shrink-0 text-muted-foreground"
-										aria-hidden="true"
-									/>
+									<KeyRound className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" />
 								) : null}
 								{index === 2 ? (
 									<ShieldCheck
@@ -85,5 +72,5 @@ export function DataCollectionSection(): React.JSX.Element {
 				</p>
 			</Card>
 		</section>
-	);
+	)
 }

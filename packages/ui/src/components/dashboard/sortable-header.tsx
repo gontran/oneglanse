@@ -1,6 +1,6 @@
-"use client";
+"use client"
 
-import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
+import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react"
 
 export function SortableHeader<C extends string>({
 	children,
@@ -11,27 +11,27 @@ export function SortableHeader<C extends string>({
 	onResetSort,
 	className = "",
 }: {
-	children: React.ReactNode;
-	column: C;
-	currentSort: C | null;
-	currentDirection: "asc" | "desc";
-	onSort: (column: C) => void;
-	onResetSort?: () => void;
-	className?: string;
+	children: React.ReactNode
+	column: C
+	currentSort: C | null
+	currentDirection: "asc" | "desc"
+	onSort: (column: C) => void
+	onResetSort?: () => void
+	className?: string
 }): React.JSX.Element {
-	const isActive = currentSort === column;
+	const isActive = currentSort === column
 
 	return (
 		<button
 			type="button"
 			onClick={(event) => {
-				event.stopPropagation();
-				onSort(column);
+				event.stopPropagation()
+				onSort(column)
 			}}
 			onDoubleClick={(event) => {
-				if (!isActive || !onResetSort) return;
-				event.stopPropagation();
-				onResetSort();
+				if (!isActive || !onResetSort) return
+				event.stopPropagation()
+				onResetSort()
 			}}
 			className={`inline-flex items-center gap-1 whitespace-nowrap transition-colors hover:text-gray-900 dark:hover:text-gray-100 ${className}`}
 		>
@@ -46,5 +46,5 @@ export function SortableHeader<C extends string>({
 				<ArrowUpDown className="h-3.5 w-3.5 opacity-40" />
 			)}
 		</button>
-	);
+	)
 }

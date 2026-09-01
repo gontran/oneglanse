@@ -1,4 +1,4 @@
-"use client";
+"use client"
 
 import {
 	formDialogContentClassName,
@@ -8,16 +8,16 @@ import {
 	formPanelClassName,
 	formPrimaryButtonClassName,
 	formSecondaryButtonClassName,
-} from "@/components/forms/auth-form-chrome";
+} from "@/components/forms/auth-form-chrome"
 import {
 	clearActiveProviderRun,
 	handleAgentRunResult,
 	persistActiveProviderRun,
-} from "@/components/provider-run-toast";
-import { useSafeSearchParams } from "@/lib/navigation/use-safe-search-params";
-import { api } from "@/trpc/react";
-import type { AppMode } from "@oneglanse/types";
-import { canConfigureRecurringScheduleInMode } from "@oneglanse/types";
+} from "@/components/provider-run-toast"
+import { useSafeSearchParams } from "@/lib/navigation/use-safe-search-params"
+import { api } from "@/trpc/react"
+import type { AppMode } from "@oneglanse/types"
+import { canConfigureRecurringScheduleInMode } from "@oneglanse/types"
 import {
 	Button,
 	Dialog,
@@ -29,27 +29,21 @@ import {
 	ScrollArea,
 	Skeleton,
 	toast,
-} from "@oneglanse/ui";
-import { cn } from "@oneglanse/utils";
-import {
-	Calendar,
-	Check,
-	Loader2,
-	PlayCircle,
-	SlidersHorizontal,
-} from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+} from "@oneglanse/ui"
+import { cn } from "@oneglanse/utils"
+import { Calendar, Check, Loader2, PlayCircle, SlidersHorizontal } from "lucide-react"
+import { useEffect, useRef, useState } from "react"
 
 function localHourToUTC(localHour: number): number {
-	const now = new Date();
-	now.setHours(localHour, 0, 0, 0);
-	return now.getUTCHours();
+	const now = new Date()
+	now.setHours(localHour, 0, 0, 0)
+	return now.getUTCHours()
 }
 
 function formatAbsoluteTime(timestamp: string | null): string {
-	if (!timestamp) return "Never";
+	if (!timestamp) return "Never"
 
-	const date = new Date(timestamp);
+	const date = new Date(timestamp)
 	return date.toLocaleString(undefined, {
 		month: "short",
 		day: "numeric",
@@ -58,36 +52,36 @@ function formatAbsoluteTime(timestamp: string | null): string {
 		minute: "2-digit",
 		second: "2-digit",
 		hour12: true,
-	});
+	})
 }
 
 function formatRelativeTime(timestamp: string | null): string {
-	if (!timestamp) return "Not scheduled";
+	if (!timestamp) return "Not scheduled"
 
-	const date = new Date(timestamp);
-	const now = new Date();
-	const diffMs = date.getTime() - now.getTime();
-	const diffMins = Math.floor(diffMs / 60000);
-	const diffHours = Math.floor(diffMs / 3600000);
-	const diffDays = Math.floor(diffMs / 86400000);
+	const date = new Date(timestamp)
+	const now = new Date()
+	const diffMs = date.getTime() - now.getTime()
+	const diffMins = Math.floor(diffMs / 60000)
+	const diffHours = Math.floor(diffMs / 3600000)
+	const diffDays = Math.floor(diffMs / 86400000)
 
 	if (diffMs < 0) {
-		return formatAbsoluteTime(timestamp);
+		return formatAbsoluteTime(timestamp)
 	}
 	if (diffMins < 1) {
-		return "In less than a minute";
+		return "In less than a minute"
 	}
 	if (diffMins < 60) {
-		return `In ${diffMins} minute${diffMins !== 1 ? "s" : ""}`;
+		return `In ${diffMins} minute${diffMins !== 1 ? "s" : ""}`
 	}
 	if (diffHours < 24) {
-		return `In ${diffHours} hour${diffHours !== 1 ? "s" : ""}`;
+		return `In ${diffHours} hour${diffHours !== 1 ? "s" : ""}`
 	}
 	if (diffDays < 7) {
-		return `In ${diffDays} day${diffDays !== 1 ? "s" : ""}`;
+		return `In ${diffDays} day${diffDays !== 1 ? "s" : ""}`
 	}
 
-	return formatAbsoluteTime(timestamp);
+	return formatAbsoluteTime(timestamp)
 }
 
 function getScheduleOptions() {
@@ -112,109 +106,100 @@ function getScheduleOptions() {
 			value: `0 ${localHourToUTC(0)} * * 0`,
 			description: "Runs every Sunday at midnight",
 		},
-	];
+	]
 }
 
-const SCHEDULE_OPTIONS = getScheduleOptions();
-const TIMING_SKELETON_KEYS = ["timing-a", "timing-b"] as const;
-const SCHEDULE_SKELETON_KEYS = [
-	"schedule-a",
-	"schedule-b",
-	"schedule-c",
-	"schedule-d",
-] as const;
+const SCHEDULE_OPTIONS = getScheduleOptions()
+const TIMING_SKELETON_KEYS = ["timing-a", "timing-b"] as const
+const SCHEDULE_SKELETON_KEYS = ["schedule-a", "schedule-b", "schedule-c", "schedule-d"] as const
 
 function getScheduleLabel(cron: string | null): string {
-	if (!cron) return "Not scheduled";
-	const match = SCHEDULE_OPTIONS.find((opt) => opt.value === cron);
-	return match?.label ?? cron;
+	if (!cron) return "Not scheduled"
+	const match = SCHEDULE_OPTIONS.find((opt) => opt.value === cron)
+	return match?.label ?? cron
 }
 
 function PromptSelectionCard({ workspaceId }: { workspaceId: string }) {
 	const promptsQuery = api.prompt.fetchUserPrompts.useQuery(
 		{ workspaceId },
 		{ enabled: !!workspaceId },
-	);
+	)
 	const selectedQuery = api.workspace.getSelectedPrompts.useQuery(
 		{ workspaceId },
 		{ enabled: !!workspaceId },
-	);
-	const setSelectedMutation = api.workspace.setSelectedPrompts.useMutation();
-	const [localSelected, setLocalSelected] = useState<string[] | null>(null);
-	const [isDialogOpen, setIsDialogOpen] = useState(false);
-	const [saving, setSaving] = useState(false);
+	)
+	const setSelectedMutation = api.workspace.setSelectedPrompts.useMutation()
+	const [localSelected, setLocalSelected] = useState<string[] | null>(null)
+	const [isDialogOpen, setIsDialogOpen] = useState(false)
+	const [saving, setSaving] = useState(false)
 
 	useEffect(() => {
 		if (selectedQuery.data !== undefined) {
-			setLocalSelected(selectedQuery.data.selectedPromptIds ?? null);
+			setLocalSelected(selectedQuery.data.selectedPromptIds ?? null)
 		}
-	}, [selectedQuery.data]);
+	}, [selectedQuery.data])
 
-	const prompts = promptsQuery.data ?? [];
-	const savedIds = selectedQuery.data?.selectedPromptIds ?? null;
-	const allPromptIds = prompts.map((prompt) => prompt.id);
-	const effectiveSelected =
-		localSelected === null ? allPromptIds : localSelected;
-	const selectedCount = effectiveSelected.length;
-	const savedEffectiveSelected = savedIds === null ? allPromptIds : savedIds;
+	const prompts = promptsQuery.data ?? []
+	const savedIds = selectedQuery.data?.selectedPromptIds ?? null
+	const allPromptIds = prompts.map((prompt) => prompt.id)
+	const effectiveSelected = localSelected === null ? allPromptIds : localSelected
+	const selectedCount = effectiveSelected.length
+	const savedEffectiveSelected = savedIds === null ? allPromptIds : savedIds
 	const hasChanges =
 		JSON.stringify([...effectiveSelected].sort()) !==
-		JSON.stringify([...savedEffectiveSelected].sort());
-	const isAllSelected =
-		prompts.length > 0 && effectiveSelected.length === prompts.length;
+		JSON.stringify([...savedEffectiveSelected].sort())
+	const isAllSelected = prompts.length > 0 && effectiveSelected.length === prompts.length
 	const getPromptCreatedAt = (prompt: (typeof prompts)[number]) =>
-		new Date(prompt.created_at).getTime();
+		new Date(prompt.created_at).getTime()
 	const orderedPrompts = [...prompts].sort((left, right) => {
-		const leftSelected = effectiveSelected.includes(left.id);
-		const rightSelected = effectiveSelected.includes(right.id);
+		const leftSelected = effectiveSelected.includes(left.id)
+		const rightSelected = effectiveSelected.includes(right.id)
 
 		if (leftSelected !== rightSelected) {
-			return leftSelected ? -1 : 1;
+			return leftSelected ? -1 : 1
 		}
 
-		return getPromptCreatedAt(right) - getPromptCreatedAt(left);
-	});
+		return getPromptCreatedAt(right) - getPromptCreatedAt(left)
+	})
 	const togglePrompt = (id: string) => {
 		setLocalSelected((prev) => {
-			const current = prev === null ? allPromptIds : prev;
-			const isChecked = current.includes(id);
-			const next = isChecked
-				? current.filter((pid) => pid !== id)
-				: [...current, id];
-			return next.length === prompts.length ? null : next;
-		});
-	};
+			const current = prev === null ? allPromptIds : prev
+			const isChecked = current.includes(id)
+			const next = isChecked ? current.filter((pid) => pid !== id) : [...current, id]
+			return next.length === prompts.length ? null : next
+		})
+	}
 
 	const toggleAllPrompts = () => {
 		setLocalSelected((prev) => {
-			const current = prev === null ? allPromptIds : prev;
-			return current.length === prompts.length ? [] : null;
-		});
-	};
+			const current = prev === null ? allPromptIds : prev
+			return current.length === prompts.length ? [] : null
+		})
+	}
 
 	const handleSave = async () => {
 		if (effectiveSelected.length === 0) {
-			toast.error("Select at least one prompt to run.");
-			return;
+			toast.error("Select at least one prompt to run.")
+			return
 		}
 
-		setSaving(true);
+		setSaving(true)
 		try {
 			await setSelectedMutation.mutateAsync({
 				workspaceId,
 				selectedPromptIds: isAllSelected ? null : effectiveSelected,
-			});
-			await selectedQuery.refetch();
-			setIsDialogOpen(false);
-			toast.success("Prompts for this workspace updated.");
+			})
+			await selectedQuery.refetch()
+			setIsDialogOpen(false)
+			toast.success("Prompts for this workspace updated.")
 		} catch {
-			toast.error("Failed to save selection.");
+			toast.error("Failed to save selection.")
 		} finally {
-			setSaving(false);
+			setSaving(false)
 		}
-	};
+	}
 
-	const isLoading = promptsQuery.isLoading || selectedQuery.isLoading;
+	const isLoading = promptsQuery.isLoading || selectedQuery.isLoading
 
 	return (
 		<div className={cn(formPanelClassName, "px-5 py-5")}>
@@ -275,12 +260,7 @@ function PromptSelectionCard({ workspaceId }: { workspaceId: string }) {
 						"!max-w-[min(100vw-1.5rem,56rem)] max-h-[min(100dvh-1.5rem,48rem)] grid-rows-[auto,minmax(0,1fr),auto] border-transparent bg-white shadow-[0_20px_70px_-34px_rgba(15,23,42,0.26)] dark:bg-neutral-950 dark:shadow-[0_24px_80px_-36px_rgba(0,0,0,0.58)]",
 					)}
 				>
-					<DialogHeader
-						className={cn(
-							formDialogHeaderClassName,
-							"space-y-0.5 sm:space-y-0.5",
-						)}
-					>
+					<DialogHeader className={cn(formDialogHeaderClassName, "space-y-0.5 sm:space-y-0.5")}>
 						<DialogTitle className="text-lg font-semibold tracking-[-0.02em] text-gray-950 leading-tight dark:text-gray-50">
 							Select Prompts
 						</DialogTitle>
@@ -318,7 +298,7 @@ function PromptSelectionCard({ workspaceId }: { workspaceId: string }) {
 								</div>
 							</button>
 							{orderedPrompts.map((prompt, index) => {
-								const checked = effectiveSelected.includes(prompt.id);
+								const checked = effectiveSelected.includes(prompt.id)
 								return (
 									<button
 										key={prompt.id}
@@ -364,7 +344,7 @@ function PromptSelectionCard({ workspaceId }: { workspaceId: string }) {
 											</p>
 										</div>
 									</button>
-								);
+								)
 							})}
 						</div>
 					</ScrollArea>
@@ -401,7 +381,7 @@ function PromptSelectionCard({ workspaceId }: { workspaceId: string }) {
 				</DialogContent>
 			</Dialog>
 		</div>
-	);
+	)
 }
 
 function ManualRunView({
@@ -410,19 +390,16 @@ function ManualRunView({
 	mode,
 	canRunNow,
 }: {
-	isRunning: boolean;
-	onRunNow: () => Promise<void>;
-	mode: "local" | "self-host";
-	canRunNow: boolean;
+	isRunning: boolean
+	onRunNow: () => Promise<void>
+	mode: "local" | "self-host"
+	canRunNow: boolean
 }) {
 	if (mode === "local") {
 		return (
 			<div className="flex flex-col gap-3">
 				<div
-					className={cn(
-						formPanelClassName,
-						"flex items-center justify-between gap-4 px-5 py-5",
-					)}
+					className={cn(formPanelClassName, "flex items-center justify-between gap-4 px-5 py-5")}
 				>
 					<div className="flex items-center gap-4">
 						<div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gray-100 dark:bg-white/10">
@@ -479,16 +456,11 @@ function ManualRunView({
 					</span>
 				</div>
 			</div>
-		);
+		)
 	}
 
 	return (
-		<div
-			className={cn(
-				formPanelClassName,
-				"flex items-center justify-between gap-4 px-5 py-5",
-			)}
-		>
+		<div className={cn(formPanelClassName, "flex items-center justify-between gap-4 px-5 py-5")}>
 			<div className="flex items-center gap-4">
 				<div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gray-100 dark:bg-white/10">
 					<PlayCircle className="h-4 w-4 text-gray-500 dark:text-gray-400" />
@@ -519,13 +491,13 @@ function ManualRunView({
 				)}
 			</Button>
 		</div>
-	);
+	)
 }
 
 function ScheduleIntro({
 	mode,
 }: {
-	mode: "local" | "self-host";
+	mode: "local" | "self-host"
 }) {
 	return (
 		<div className="space-y-1">
@@ -538,7 +510,7 @@ function ScheduleIntro({
 					: "Choose the prompts for this workspace and manage both recurring and manual runs."}
 			</p>
 		</div>
-	);
+	)
 }
 
 function TimingSummary({
@@ -546,9 +518,9 @@ function TimingSummary({
 	nextRun,
 	lastPromptRun,
 }: {
-	currentSchedule: string | null;
-	nextRun: string | null | undefined;
-	lastPromptRun: string | null | undefined;
+	currentSchedule: string | null
+	nextRun: string | null | undefined
+	lastPromptRun: string | null | undefined
 }) {
 	return (
 		<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -560,9 +532,7 @@ function TimingSummary({
 					</span>
 				</div>
 				<p className="text-sm font-semibold text-gray-900 sm:text-base dark:text-gray-100">
-					{currentSchedule && nextRun
-						? formatRelativeTime(nextRun)
-						: "Not scheduled"}
+					{currentSchedule && nextRun ? formatRelativeTime(nextRun) : "Not scheduled"}
 				</p>
 			</div>
 
@@ -578,7 +548,7 @@ function TimingSummary({
 				</p>
 			</div>
 		</div>
-	);
+	)
 }
 
 function ScheduleOptionsSection({
@@ -590,20 +560,18 @@ function ScheduleOptionsSection({
 	onDisable,
 	onSave,
 }: {
-	currentSchedule: string | null;
-	selected: string | null;
-	saving: boolean;
-	hasChanges: boolean;
-	onSelect: (value: string) => void;
-	onDisable: () => Promise<void>;
-	onSave: () => Promise<void>;
+	currentSchedule: string | null
+	selected: string | null
+	saving: boolean
+	hasChanges: boolean
+	onSelect: (value: string) => void
+	onDisable: () => Promise<void>
+	onSave: () => Promise<void>
 }) {
 	return (
 		<div className="space-y-4">
 			<div className="space-y-1">
-				<h2 className="text-sm font-medium text-gray-900 dark:text-gray-100">
-					Recurring schedule
-				</h2>
+				<h2 className="text-sm font-medium text-gray-900 dark:text-gray-100">Recurring schedule</h2>
 				<p className="text-sm text-gray-500 dark:text-gray-400">
 					Choose how often this workspace should run automatically.
 				</p>
@@ -675,39 +643,35 @@ function ScheduleOptionsSection({
 						disabled={saving}
 						className="gap-2 rounded-[var(--app-radius)] border border-gray-200/70 dark:border-gray-700/80"
 					>
-						{saving ? (
-							<Loader2 className="h-4 w-4 animate-spin" />
-						) : (
-							"Save schedule"
-						)}
+						{saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save schedule"}
 					</Button>
 				</div>
 			) : null}
 		</div>
-	);
+	)
 }
 
 export default function SchedulePageClient({
 	appMode,
 	workspaceId: initialWorkspaceId,
 }: {
-	appMode: AppMode;
-	workspaceId?: string;
+	appMode: AppMode
+	workspaceId?: string
 }) {
-	const searchParams = useSafeSearchParams();
-	const workspaceId = initialWorkspaceId ?? searchParams.get("workspace") ?? "";
-	const canConfigureSchedule = canConfigureRecurringScheduleInMode(appMode);
-	const [selected, setSelected] = useState<string | null>(null);
-	const [saving, setSaving] = useState(false);
-	const [hasInitializedSelection, setHasInitializedSelection] = useState(false);
-	const [runJobId, setRunJobId] = useState<string | null>(null);
-	const [isRunning, setIsRunning] = useState(false);
-	const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+	const searchParams = useSafeSearchParams()
+	const workspaceId = initialWorkspaceId ?? searchParams.get("workspace") ?? ""
+	const canConfigureSchedule = canConfigureRecurringScheduleInMode(appMode)
+	const [selected, setSelected] = useState<string | null>(null)
+	const [saving, setSaving] = useState(false)
+	const [hasInitializedSelection, setHasInitializedSelection] = useState(false)
+	const [runJobId, setRunJobId] = useState<string | null>(null)
+	const [isRunning, setIsRunning] = useState(false)
+	const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
 	const scheduleQuery = api.workspace.getSchedule.useQuery(
 		{ workspaceId },
 		{ enabled: !!workspaceId && canConfigureSchedule },
-	);
+	)
 
 	const cronTimingQuery = api.workspace.getCronTiming.useQuery(
 		{ workspaceId },
@@ -716,18 +680,18 @@ export default function SchedulePageClient({
 			refetchInterval: 60000,
 			refetchIntervalInBackground: false,
 		},
-	);
+	)
 
-	const setScheduleMutation = api.workspace.setSchedule.useMutation();
-	const runNowMutation = api.agent.run.useMutation();
+	const setScheduleMutation = api.workspace.setSchedule.useMutation()
+	const runNowMutation = api.agent.run.useMutation()
 	const promptsQuery = api.prompt.fetchUserPrompts.useQuery(
 		{ workspaceId },
 		{ enabled: !!workspaceId },
-	);
+	)
 	const selectedPromptsQuery = api.workspace.getSelectedPrompts.useQuery(
 		{ workspaceId },
 		{ enabled: !!workspaceId },
-	);
+	)
 
 	const jobStatusQuery = api.agent.status.useQuery(
 		{ workspaceId, jobId: runJobId ?? "" },
@@ -736,109 +700,106 @@ export default function SchedulePageClient({
 			refetchInterval: 3000,
 			refetchIntervalInBackground: true,
 		},
-	);
+	)
 
 	useEffect(() => {
-		if (!isRunning || !runJobId) return;
+		if (!isRunning || !runJobId) return
 		if (jobStatusQuery.data?.status === "completed") {
-			clearActiveProviderRun();
-			setIsRunning(false);
-			setRunJobId(null);
+			clearActiveProviderRun()
+			setIsRunning(false)
+			setRunJobId(null)
 		}
-	}, [isRunning, jobStatusQuery.data?.status, runJobId]);
+	}, [isRunning, jobStatusQuery.data?.status, runJobId])
 
 	useEffect(() => {
 		return () => {
-			if (pollRef.current) clearInterval(pollRef.current);
-		};
-	}, []);
+			if (pollRef.current) clearInterval(pollRef.current)
+		}
+	}, [])
 
 	useEffect(() => {
 		if (scheduleQuery.data && !hasInitializedSelection) {
-			setSelected(scheduleQuery.data.schedule);
-			setHasInitializedSelection(true);
+			setSelected(scheduleQuery.data.schedule)
+			setHasInitializedSelection(true)
 		}
-	}, [scheduleQuery.data, hasInitializedSelection]);
+	}, [scheduleQuery.data, hasInitializedSelection])
 
-	const currentSchedule = scheduleQuery.data?.schedule ?? null;
-	const hasChanges = selected !== currentSchedule;
-	const availablePromptIds =
-		promptsQuery.data?.map((prompt) => prompt.id) ?? [];
-	const selectedPromptIds =
-		selectedPromptsQuery.data?.selectedPromptIds ?? null;
-	const effectivePromptIds =
-		selectedPromptIds === null ? availablePromptIds : selectedPromptIds;
-	const canRunNow = effectivePromptIds.length > 0;
+	const currentSchedule = scheduleQuery.data?.schedule ?? null
+	const hasChanges = selected !== currentSchedule
+	const availablePromptIds = promptsQuery.data?.map((prompt) => prompt.id) ?? []
+	const selectedPromptIds = selectedPromptsQuery.data?.selectedPromptIds ?? null
+	const effectivePromptIds = selectedPromptIds === null ? availablePromptIds : selectedPromptIds
+	const canRunNow = effectivePromptIds.length > 0
 
 	const handleSave = async () => {
-		setSaving(true);
+		setSaving(true)
 		try {
 			const result = await setScheduleMutation.mutateAsync({
 				workspaceId,
 				schedule: selected,
-			});
-			setSelected(result.schedule);
-			await Promise.all([scheduleQuery.refetch(), cronTimingQuery.refetch()]);
-			toast.success(selected ? "Schedule saved." : "Schedule disabled.");
+			})
+			setSelected(result.schedule)
+			await Promise.all([scheduleQuery.refetch(), cronTimingQuery.refetch()])
+			toast.success(selected ? "Schedule saved." : "Schedule disabled.")
 		} catch (err) {
-			console.error(err);
-			toast.error("Failed to update schedule.");
+			console.error(err)
+			toast.error("Failed to update schedule.")
 		} finally {
-			setSaving(false);
+			setSaving(false)
 		}
-	};
+	}
 
 	const handleDisable = async () => {
-		setSaving(true);
+		setSaving(true)
 		try {
 			await setScheduleMutation.mutateAsync({
 				workspaceId,
 				schedule: null,
-			});
-			setSelected(null);
-			setHasInitializedSelection(true);
-			await Promise.all([scheduleQuery.refetch(), cronTimingQuery.refetch()]);
-			toast.success("Schedule disabled.");
+			})
+			setSelected(null)
+			setHasInitializedSelection(true)
+			await Promise.all([scheduleQuery.refetch(), cronTimingQuery.refetch()])
+			toast.success("Schedule disabled.")
 		} catch (err) {
-			console.error(err);
-			toast.error("Failed to disable schedule.");
+			console.error(err)
+			toast.error("Failed to disable schedule.")
 		} finally {
-			setSaving(false);
+			setSaving(false)
 		}
-	};
+	}
 
 	const handleRunNow = async () => {
-		setIsRunning(true);
+		setIsRunning(true)
 		try {
-			const result = await runNowMutation.mutateAsync({ workspaceId });
+			const result = await runNowMutation.mutateAsync({ workspaceId })
 			if (result.status === "queued" && result.jobId) {
-				persistActiveProviderRun({ workspaceId, jobId: result.jobId });
-				setRunJobId(result.jobId);
-				return;
+				persistActiveProviderRun({ workspaceId, jobId: result.jobId })
+				setRunJobId(result.jobId)
+				return
 			}
 			if (result.status === "empty") {
-				clearActiveProviderRun();
-				setIsRunning(false);
-				toast.warning("No prompts configured for this workspace.");
-				return;
+				clearActiveProviderRun()
+				setIsRunning(false)
+				toast.warning("No prompts configured for this workspace.")
+				return
 			}
 			if (
 				!handleAgentRunResult(result, {
 					onDone: () => setIsRunning(false),
 				})
 			) {
-				return;
+				return
 			}
-			clearActiveProviderRun();
-			setIsRunning(false);
-			toast.error("Failed to start run.");
+			clearActiveProviderRun()
+			setIsRunning(false)
+			toast.error("Failed to start run.")
 		} catch (err) {
-			console.error(err);
-			clearActiveProviderRun();
-			setIsRunning(false);
-			toast.error("Failed to start run.");
+			console.error(err)
+			clearActiveProviderRun()
+			setIsRunning(false)
+			toast.error("Failed to start run.")
 		}
-	};
+	}
 
 	if (!workspaceId) {
 		return (
@@ -847,7 +808,7 @@ export default function SchedulePageClient({
 					<p className="text-sm text-gray-500">No workspace selected.</p>
 				</div>
 			</div>
-		);
+		)
 	}
 
 	if (!canConfigureSchedule) {
@@ -862,7 +823,7 @@ export default function SchedulePageClient({
 					mode="local"
 				/>
 			</div>
-		);
+		)
 	}
 
 	return (
@@ -901,10 +862,7 @@ export default function SchedulePageClient({
 					{SCHEDULE_SKELETON_KEYS.map((key) => (
 						<div
 							key={key}
-							className={cn(
-								formPanelClassName,
-								"flex items-center justify-between px-4 py-4",
-							)}
+							className={cn(formPanelClassName, "flex items-center justify-between px-4 py-4")}
 						>
 							<div className="space-y-2">
 								<Skeleton className="h-4 w-36" />
@@ -926,5 +884,5 @@ export default function SchedulePageClient({
 				/>
 			)}
 		</div>
-	);
+	)
 }

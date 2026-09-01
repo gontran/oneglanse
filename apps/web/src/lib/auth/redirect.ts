@@ -1,46 +1,42 @@
-export function getSafeAuthRedirectPath(
-	rawNext: string | null | undefined,
-): string {
+export function getSafeAuthRedirectPath(rawNext: string | null | undefined): string {
 	if (!rawNext) {
-		return "/";
+		return "/"
 	}
 
-	const normalizedNext = rawNext.trim();
+	const normalizedNext = rawNext.trim()
 	if (
 		normalizedNext.length === 0 ||
 		!normalizedNext.startsWith("/") ||
 		normalizedNext.startsWith("//")
 	) {
-		return "/";
+		return "/"
 	}
 
-	return normalizedNext;
+	return normalizedNext
 }
 
-export function getPostAuthProvidersPath(
-	rawNext: string | null | undefined,
-): string {
-	const nextPath = getSafeAuthRedirectPath(rawNext);
+export function getPostAuthProvidersPath(rawNext: string | null | undefined): string {
+	const nextPath = getSafeAuthRedirectPath(rawNext)
 
 	if (nextPath === "/" || nextPath === "/providers") {
-		return "/providers?onboarding=1";
+		return "/providers?onboarding=1"
 	}
 
-	return `/providers?next=${encodeURIComponent(nextPath)}&onboarding=1`;
+	return `/providers?next=${encodeURIComponent(nextPath)}&onboarding=1`
 }
 
 export function getPostProvidersContinuePath(args: {
-	rawNext: string | null | undefined;
-	workspaceId?: string | null;
+	rawNext: string | null | undefined
+	workspaceId?: string | null
 }): string {
-	const nextPath = getSafeAuthRedirectPath(args.rawNext);
+	const nextPath = getSafeAuthRedirectPath(args.rawNext)
 	if (nextPath !== "/" && nextPath !== "/providers") {
-		return nextPath;
+		return nextPath
 	}
 
 	if (args.workspaceId) {
-		return `/dashboard?workspace=${encodeURIComponent(args.workspaceId)}`;
+		return `/dashboard?workspace=${encodeURIComponent(args.workspaceId)}`
 	}
 
-	return "/workspace";
+	return "/workspace"
 }

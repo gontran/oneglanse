@@ -1,11 +1,11 @@
-import { ExternalServiceError, ValidationError } from "@oneglanse/errors";
-import type { Provider, Source } from "@oneglanse/types";
-import type { Page } from "playwright";
-import { logger, validateResponse, withTimeout } from "@oneglanse/utils";
-import { askPrompt } from "../steps/askPrompt.js";
-import { checkAndExtractSources } from "../steps/extractSources.js";
-import { fetchPromptResponses } from "../steps/fetchPromptResponses.js";
-import { PROVIDER_CONFIGS } from "../providers/index.js";
+import { ExternalServiceError, ValidationError } from "@oneglanse/errors"
+import type { Provider, Source } from "@oneglanse/types"
+import { logger, validateResponse, withTimeout } from "@oneglanse/utils"
+import type { Page } from "playwright"
+import { PROVIDER_CONFIGS } from "../providers/index.js"
+import { askPrompt } from "../steps/askPrompt.js"
+import { checkAndExtractSources } from "../steps/extractSources.js"
+import { fetchPromptResponses } from "../steps/fetchPromptResponses.js"
 
 /**
  * Runs one full prompt cycle for a single prompt:
@@ -22,49 +22,49 @@ export async function executePrompt(
 	prompt: string,
 	provider: Provider,
 ): Promise<{ response: string; sources: Source[] }> {
-	const config = PROVIDER_CONFIGS[provider];
+	const config = PROVIDER_CONFIGS[provider]
 	if (config.navigateToPrompt) {
 		await withTimeout(
 			`[${provider}] navigateToPrompt`,
 			async () => await config.navigateToPrompt?.(page, prompt),
 			45_000,
-		);
+		)
 	} else {
 		await withTimeout(
 			`[${provider}] askPrompt`,
 			async () => await askPrompt(page, prompt, provider),
 			60_000,
-		);
+		)
 	}
 
 	const response = await withTimeout(
 		`[${provider}] fetchPromptResponses`,
 		async () => await fetchPromptResponses(page, provider),
 		6 * 60 * 1000,
-	);
+	)
 	if (!response || response.trim().length === 0) {
 		throw new ExternalServiceError(
 			provider,
 			"Empty response extracted; blocking source extraction and retrying prompt",
-		);
+		)
 	}
 
-	const validation = validateResponse(response, provider);
+	const validation = validateResponse(response, provider)
 	if (!validation.valid) {
 		logger.warn(
 			`invalid response (${response.trim().length} chars): ${validation.reason} — retrying`,
-		);
+		)
 		throw new ValidationError(`[${provider}] Invalid response: ${validation.reason}`, {
 			provider,
 			reason: validation.reason,
-		});
+		})
 	}
 
 	const sources = await withTimeout(
 		`[${provider}] extractSources`,
 		async () => await checkAndExtractSources(page, provider),
 		20_000,
-	);
+	)
 
-	return { response, sources };
+	return { response, sources }
 }

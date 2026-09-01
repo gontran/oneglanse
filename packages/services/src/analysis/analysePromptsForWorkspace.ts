@@ -1,65 +1,61 @@
-import { clickhouse } from "@oneglanse/db";
-import { toErrorMessage } from "@oneglanse/errors";
-import type {
-	BrandAnalysisResult,
-	PromptAnalysis,
-	PromptResponse,
-} from "@oneglanse/types";
-import { v4 as uuidv4 } from "uuid";
-import { getWorkspaceById } from "../workspace/index.js";
-import { runAnalysis } from "./runAnalysis.js";
+import { clickhouse } from "@oneglanse/db"
+import { toErrorMessage } from "@oneglanse/errors"
+import type { BrandAnalysisResult, PromptAnalysis, PromptResponse } from "@oneglanse/types"
+import { v4 as uuidv4 } from "uuid"
+import { getWorkspaceById } from "../workspace/index.js"
+import { runAnalysis } from "./runAnalysis.js"
 
 async function analysePromptResponse(args: {
-	workspaceId: string;
-	response: string;
-	prompt: string;
-	promptId?: string;
+	workspaceId: string
+	response: string
+	prompt: string
+	promptId?: string
 }): Promise<BrandAnalysisResult> {
-	const { workspaceId, response, prompt, promptId } = args;
+	const { workspaceId, response, prompt, promptId } = args
 
-	const workspace = await getWorkspaceById({ workspaceId });
+	const workspace = await getWorkspaceById({ workspaceId })
 
 	const result = await runAnalysis({
 		brandDomain: workspace.domain,
 		brandName: workspace.name,
 		response,
 		prompt,
-	});
+	})
 
 	result.metadata = {
 		brandName: workspace.name,
 		brandDomain: workspace.domain,
-	};
+	}
 
-	return result;
+	return result
 }
 
 export async function analysePromptsForWorkspace(args: {
-	workspaceId: string;
-	batchSize?: number;
-	analyzeAll?: boolean;
+	workspaceId: string
+	batchSize?: number
+	analyzeAll?: boolean
 }): Promise<{
-	analysedCount: number;
-	failedCount: number;
-	errors: Array<{ responseId: string; modelProvider: string; error: string }>;
-	remainingCount: number;
+	analysedCount: number
+	failedCount: number
+	errors: Array<{ responseId: string; modelProvider: string; error: string }>
+	remainingCount: number
 }> {
-	const { workspaceId, batchSize = 50, analyzeAll = false } = args;
+	const { workspaceId, batchSize = 50, analyzeAll = false } = args
 
-	let totalAnalyzed = 0;
-	let totalFailed = 0;
+	let totalAnalyzed = 0
+	let totalFailed = 0
 	let allErrors: Array<{
-		responseId: string;
-		modelProvider: string;
-		error: string;
-	}> = [];
+		responseId: string
+		modelProvider: string
+		error: string
+	}> = []
 
 	// offset advances the cursor independently of ClickHouse mutation completion.
 	// ALTER TABLE UPDATE is async — without OFFSET, the same rows are returned
 	// every iteration until the background mutation finishes, causing duplicate
 	// processing and a potential infinite loop.
-	let offset = 0;
-	let hasMore = true;
+	let offset = 0
+	let hasMore = true
 	while (hasMore) {
 		const result = await clickhouse.query({
 			query: `
@@ -72,21 +68,21 @@ export async function analysePromptsForWorkspace(args: {
             `,
 			query_params: { workspaceId, batchSize, offset },
 			format: "JSONEachRow",
-		});
+		})
 
-		const responses: PromptResponse[] = await result.json();
+		const responses: PromptResponse[] = await result.json()
 
 		if (responses.length === 0) {
-			break;
+			break
 		}
 
-		const analysisRows: PromptAnalysis[] = [];
-		const responseIdsToMark: string[] = [];
+		const analysisRows: PromptAnalysis[] = []
+		const responseIdsToMark: string[] = []
 		const errors: Array<{
-			responseId: string;
-			modelProvider: string;
-			error: string;
-		}> = [];
+			responseId: string
+			modelProvider: string
+			error: string
+		}> = []
 
 		// Analyze each response
 		for (const resp of responses) {
@@ -96,7 +92,7 @@ export async function analysePromptsForWorkspace(args: {
 					response: resp.response,
 					prompt: resp.prompt,
 					promptId: resp.prompt_id,
-				});
+				})
 
 				analysisRows.push({
 					id: uuidv4(),
@@ -108,22 +104,22 @@ export async function analysePromptsForWorkspace(args: {
 					brand_analysis: JSON.stringify(analysisResult),
 					prompt_run_at: resp.prompt_run_at,
 					created_at: resp.created_at,
-				});
+				})
 
-				responseIdsToMark.push(resp.id);
+				responseIdsToMark.push(resp.id)
 			} catch (err) {
-				const errorMessage = toErrorMessage(err);
+				const errorMessage = toErrorMessage(err)
 				console.error(
 					`Failed to analyze response ${resp.id} (${resp.model_provider}):`,
 					errorMessage,
-				);
+				)
 
 				// Collect error details for frontend
 				errors.push({
 					responseId: resp.id,
 					modelProvider: resp.model_provider,
 					error: errorMessage,
-				});
+				})
 			}
 		}
 
@@ -132,7 +128,7 @@ export async function analysePromptsForWorkspace(args: {
 				table: "analytics.prompt_analysis",
 				values: analysisRows,
 				format: "JSONEachRow",
-			});
+			})
 		}
 
 		if (responseIdsToMark.length > 0) {
@@ -143,26 +139,26 @@ export async function analysePromptsForWorkspace(args: {
                     WHERE id IN ({ids:Array(String)})
                 `,
 				query_params: { ids: responseIdsToMark },
-			});
+			})
 		}
 
-		totalAnalyzed += analysisRows.length;
-		totalFailed += errors.length;
-		allErrors = allErrors.concat(errors);
-		offset += batchSize;
+		totalAnalyzed += analysisRows.length
+		totalFailed += errors.length
+		allErrors = allErrors.concat(errors)
+		offset += batchSize
 
 		// If not analyzing all, stop after first batch
 		if (!analyzeAll) {
-			hasMore = false;
+			hasMore = false
 		} else {
 			// Check if there are more to process
-			hasMore = responses.length === batchSize;
+			hasMore = responses.length === batchSize
 			// Give ClickHouse 100ms to process the async ALTER TABLE mutation
 			// before the next SELECT. Without this, a narrow window exists where
 			// the mutation hasn't landed yet and the OFFSET cursor is the only
 			// safeguard against duplicate processing.
 			if (hasMore) {
-				await new Promise((resolve) => setTimeout(resolve, 100));
+				await new Promise((resolve) => setTimeout(resolve, 100))
 			}
 		}
 	}
@@ -177,15 +173,15 @@ export async function analysePromptsForWorkspace(args: {
         `,
 		query_params: { workspaceId },
 		format: "JSONEachRow",
-	});
+	})
 
-	const remainingData: Array<{ count: string }> = await remainingResult.json();
-	const remainingCount = Number(remainingData[0]?.count || 0);
+	const remainingData: Array<{ count: string }> = await remainingResult.json()
+	const remainingCount = Number(remainingData[0]?.count || 0)
 
 	return {
 		analysedCount: totalAnalyzed,
 		failedCount: totalFailed,
 		errors: allErrors,
 		remainingCount,
-	};
+	}
 }

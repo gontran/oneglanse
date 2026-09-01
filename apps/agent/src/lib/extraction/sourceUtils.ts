@@ -1,6 +1,6 @@
-import type { Provider, Source } from "@oneglanse/types";
-import { getDomain, getFaviconUrls } from "@oneglanse/utils";
-import type { Locator, Page } from "playwright";
+import type { Provider, Source } from "@oneglanse/types"
+import { getDomain, getFaviconUrls } from "@oneglanse/utils"
+import type { Locator, Page } from "playwright"
 
 /**
  * Shape returned by the browser bridge before Node.js post-processing.
@@ -8,10 +8,10 @@ import type { Locator, Page } from "playwright";
  * but fragment stripping and domain extraction happen here in Node.js.
  */
 export type RawSource = {
-	rawHref: string;
-	title: string;
-	citedText: string;
-};
+	rawHref: string
+	title: string
+	citedText: string
+}
 
 const PROVIDER_OWNED_SOURCE_DOMAINS: Partial<Record<Provider, string[]>> = {
 	chatgpt: ["chatgpt.com", "openai.com"],
@@ -19,46 +19,43 @@ const PROVIDER_OWNED_SOURCE_DOMAINS: Partial<Record<Provider, string[]>> = {
 	gemini: ["gemini.google.com", "google.com"],
 	claude: ["claude.ai", "anthropic.com"],
 	"ai-overview": ["google.com"],
-};
+}
 
 function escapeRegExp(value: string): string {
-	return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+	return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
 }
 
 function normalizeSourceTitle(rawTitle: string, url: string): string {
-	const normalized = rawTitle.replace(/\s+/g, " ").trim();
-	if (!normalized) return normalized;
+	const normalized = rawTitle.replace(/\s+/g, " ").trim()
+	if (!normalized) return normalized
 
-	const domain = getDomain(url)?.replace(/^www\./i, "") || "";
-	const hostLabel = domain.split(".")[0] || "";
-	const prefixes = [domain, hostLabel].filter(Boolean);
+	const domain = getDomain(url)?.replace(/^www\./i, "") || ""
+	const hostLabel = domain.split(".")[0] || ""
+	const prefixes = [domain, hostLabel].filter(Boolean)
 
-	let title = normalized;
+	let title = normalized
 	for (const prefix of prefixes) {
-		title = title.replace(
-			new RegExp(`^${escapeRegExp(prefix)}(?:\\s+|(?=[A-Z]))`, "i"),
-			"",
-		);
+		title = title.replace(new RegExp(`^${escapeRegExp(prefix)}(?:\\s+|(?=[A-Z]))`, "i"), "")
 	}
 
-	return title.trim() || normalized;
+	return title.trim() || normalized
 }
 
 function isProviderOwnedSource(provider: Provider | undefined, url: string): boolean {
-	if (!provider) return false;
+	if (!provider) return false
 
 	const hostname = (() => {
 		try {
-			return new URL(url).hostname.toLowerCase();
+			return new URL(url).hostname.toLowerCase()
 		} catch {
-			return "";
+			return ""
 		}
-	})();
-	if (!hostname) return false;
+	})()
+	if (!hostname) return false
 
 	return (PROVIDER_OWNED_SOURCE_DOMAINS[provider] || []).some(
 		(domain) => hostname === domain || hostname.endsWith(`.${domain}`),
-	);
+	)
 }
 
 /**
@@ -67,35 +64,32 @@ function isProviderOwnedSource(provider: Provider | undefined, url: string): boo
  * - extracts domains via getDomain()
  * - resolves favicons via getFaviconUrls()
  */
-export function buildSources(
-	rawSources: RawSource[],
-	options?: { provider?: Provider },
-): Source[] {
-	const results: Source[] = [];
-	const seen = new Set<string>();
+export function buildSources(rawSources: RawSource[], options?: { provider?: Provider }): Source[] {
+	const results: Source[] = []
+	const seen = new Set<string>()
 
 	for (const { rawHref, title: rawTitle, citedText } of rawSources) {
-		const url = rawHref.replace(/#.*$/, "");
-		if (!url) continue;
-		if (isProviderOwnedSource(options?.provider, url)) continue;
+		const url = rawHref.replace(/#.*$/, "")
+		if (!url) continue
+		if (isProviderOwnedSource(options?.provider, url)) continue
 
-		const domain = getDomain(url) || null;
-		const title = normalizeSourceTitle(rawTitle || "", url) || domain || url;
-		const favicon = getFaviconUrls(domain ?? "")?.[0] ?? null;
-		const source: Source = { title, cited_text: citedText, url, domain, favicon };
+		const domain = getDomain(url) || null
+		const title = normalizeSourceTitle(rawTitle || "", url) || domain || url
+		const favicon = getFaviconUrls(domain ?? "")?.[0] ?? null
+		const source: Source = { title, cited_text: citedText, url, domain, favicon }
 		const dedupeKey = JSON.stringify({
 			domain: source.domain ?? null,
 			url: source.url,
 			title: source.title,
 			cited_text: source.cited_text ?? "",
-		});
+		})
 
-		if (seen.has(dedupeKey)) continue;
-		seen.add(dedupeKey);
-		results.push(source);
+		if (seen.has(dedupeKey)) continue
+		seen.add(dedupeKey)
+		results.push(source)
 	}
 
-	return results;
+	return results
 }
 
 /**
@@ -105,10 +99,7 @@ export function buildSources(
  *
  * Returns true if the click was dispatched, false if the element handle was unavailable.
  */
-export async function clickButtonViaDispatch(
-	_page: Page,
-	button: Locator,
-): Promise<boolean> {
-	await button.dispatchClick();
-	return true;
+export async function clickButtonViaDispatch(_page: Page, button: Locator): Promise<boolean> {
+	await button.dispatchClick()
+	return true
 }

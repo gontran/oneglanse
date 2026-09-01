@@ -1,4 +1,4 @@
-"use client";
+"use client"
 
 import {
 	formFieldClassName,
@@ -6,11 +6,11 @@ import {
 	formLabelClassName,
 	formPrimaryButtonClassName,
 	formSurfaceClassName,
-} from "@/components/forms/auth-form-chrome";
-import { authClient } from "@/lib/auth/auth-client";
-import { env } from "@/env";
-import { api } from "@/trpc/react";
-import { resolveAppMode } from "@oneglanse/types";
+} from "@/components/forms/auth-form-chrome"
+import { env } from "@/env"
+import { authClient } from "@/lib/auth/auth-client"
+import { api } from "@/trpc/react"
+import { resolveAppMode } from "@oneglanse/types"
 import {
 	Button,
 	Card,
@@ -22,11 +22,11 @@ import {
 	Input,
 	Label,
 	toast,
-} from "@oneglanse/ui";
-import { cn } from "@oneglanse/utils";
-import { Loader2 } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+} from "@oneglanse/ui"
+import { cn } from "@oneglanse/utils"
+import { Loader2 } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { useState } from "react"
 
 function toSlug(input: string): string {
 	return input
@@ -34,11 +34,11 @@ function toSlug(input: string): string {
 		.toLowerCase()
 		.replace(/[^a-z0-9]+/g, "-")
 		.replace(/^-+|-+$/g, "")
-		.replace(/-{2,}/g, "-");
+		.replace(/-{2,}/g, "-")
 }
 
 function toDomainFromSlug(slug: string): string {
-	return slug ? `www.${slug}.com` : "";
+	return slug ? `www.${slug}.com` : ""
 }
 
 export default function NewWorkspace() {
@@ -47,13 +47,13 @@ export default function NewWorkspace() {
 		workspaceName: "",
 		workspaceSlug: "",
 		domain: "",
-	});
-	const [slugTouched, setSlugTouched] = useState(false);
-	const [domainTouched, setDomainTouched] = useState(false);
-	const [loading, setLoading] = useState(false);
-	const router = useRouter();
+	})
+	const [slugTouched, setSlugTouched] = useState(false)
+	const [domainTouched, setDomainTouched] = useState(false)
+	const [loading, setLoading] = useState(false)
+	const router = useRouter()
 
-	const createWorkspaceMutation = api.workspace.create.useMutation();
+	const createWorkspaceMutation = api.workspace.create.useMutation()
 
 	const handleComplete = async () => {
 		if (
@@ -62,68 +62,65 @@ export default function NewWorkspace() {
 			!formData.workspaceName ||
 			!formData.domain
 		) {
-			toast.error("Please fill all the mandatory fields.");
-			return;
+			toast.error("Please fill all the mandatory fields.")
+			return
 		}
 
-		setLoading(true);
+		setLoading(true)
 		try {
 			const response = await createWorkspaceMutation.mutateAsync({
 				organizationName: formData.organizationName.trim(),
 				name: formData.workspaceName.trim(),
 				slug: formData.workspaceSlug.trim(),
 				domain: formData.domain.trim(),
-			});
+			})
 
-			const { workspace, org, isFirstWorkspace } =
-				response as typeof response & {
-					isFirstWorkspace?: boolean;
-				};
+			const { workspace, org, isFirstWorkspace } = response as typeof response & {
+				isFirstWorkspace?: boolean
+			}
 
 			try {
 				await authClient.organization.setActive({
 					organizationId: org.id,
 					organizationSlug: org.slug ?? undefined,
-				});
+				})
 			} catch (err) {
-				console.error("Error setting active organization", err);
-				toast.error("Could not set active workspace.");
-				setLoading(false);
-				return;
+				console.error("Error setting active organization", err)
+				toast.error("Could not set active workspace.")
+				setLoading(false)
+				return
 			}
 
-			toast.success("Workspace created successfully!");
-			router.refresh();
+			toast.success("Workspace created successfully!")
+			router.refresh()
 			if (isFirstWorkspace) {
-				const appMode = resolveAppMode(env.NEXT_PUBLIC_ONEGLANSE_APP_MODE);
+				const appMode = resolveAppMode(env.NEXT_PUBLIC_ONEGLANSE_APP_MODE)
 				if (appMode === "local") {
-					router.replace(
-						`/providers?next=/onboarding?workspace=${workspace.id}`,
-					);
+					router.replace(`/providers?next=/onboarding?workspace=${workspace.id}`)
 				} else {
-					router.replace(`/onboarding?workspace=${workspace.id}`);
+					router.replace(`/onboarding?workspace=${workspace.id}`)
 				}
 			} else {
-				router.replace(`/dashboard?workspace=${workspace.id}`);
+				router.replace(`/dashboard?workspace=${workspace.id}`)
 			}
 			// loading stays true while navigation completes
 		} catch {
-			toast.error("Workspace creation failed");
-			setLoading(false);
+			toast.error("Workspace creation failed")
+			setLoading(false)
 		}
-	};
+	}
 
 	const handleWorkspaceNameChange = (workspaceName: string) => {
-		const nextSlug = toSlug(workspaceName);
-		const nextDomain = toDomainFromSlug(nextSlug);
+		const nextSlug = toSlug(workspaceName)
+		const nextDomain = toDomainFromSlug(nextSlug)
 
 		setFormData((prev) => ({
 			...prev,
 			workspaceName,
 			workspaceSlug: slugTouched ? prev.workspaceSlug : nextSlug,
 			domain: domainTouched ? prev.domain : nextDomain,
-		}));
-	};
+		}))
+	}
 
 	return (
 		<div className="flex min-h-full min-w-0 w-full items-start justify-center overflow-y-auto overflow-x-hidden bg-stone-50 px-4 py-5 dark:bg-neutral-950 sm:items-center sm:px-8 sm:py-7 lg:px-10 xl:px-14 xl:py-10">
@@ -171,8 +168,7 @@ export default function NewWorkspace() {
 								onChange={(e) => handleWorkspaceNameChange(e.target.value)}
 							/>
 							<p className={formHintClassName}>
-								This is used as your tracked brand name in AI visibility
-								analysis.
+								This is used as your tracked brand name in AI visibility analysis.
 							</p>
 						</div>
 
@@ -188,11 +184,11 @@ export default function NewWorkspace() {
 								value={formData.workspaceSlug}
 								className={formFieldClassName}
 								onChange={(e) => {
-									setSlugTouched(true);
+									setSlugTouched(true)
 									setFormData((prev) => ({
 										...prev,
 										workspaceSlug: e.target.value,
-									}));
+									}))
 								}}
 							/>
 						</div>
@@ -210,16 +206,15 @@ export default function NewWorkspace() {
 								value={formData.domain}
 								className={formFieldClassName}
 								onChange={(e) => {
-									setDomainTouched(true);
+									setDomainTouched(true)
 									setFormData((prev) => ({
 										...prev,
 										domain: e.target.value,
-									}));
+									}))
 								}}
 							/>
 							<p className={formHintClassName}>
-								Use your primary brand domain. We use this for source matching
-								and brand tracking.
+								Use your primary brand domain. We use this for source matching and brand tracking.
 							</p>
 						</div>
 					</CardContent>
@@ -235,16 +230,9 @@ export default function NewWorkspace() {
 									!formData.workspaceSlug.trim() ||
 									!formData.domain.trim()
 								}
-								className={cn(
-									formPrimaryButtonClassName,
-									"flex items-center gap-2",
-								)}
+								className={cn(formPrimaryButtonClassName, "flex items-center gap-2")}
 							>
-								{loading ? (
-									<Loader2 className="h-4 w-4 animate-spin" />
-								) : (
-									"Create Workspace"
-								)}
+								{loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Create Workspace"}
 							</Button>
 							<button
 								type="button"
@@ -258,5 +246,5 @@ export default function NewWorkspace() {
 				</Card>
 			</div>
 		</div>
-	);
+	)
 }

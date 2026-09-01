@@ -1,16 +1,16 @@
+import { IPRefreshNeededError, toErrorMessage } from "@oneglanse/errors"
 import {
 	type AskPromptResult,
 	type PromptPayload,
 	type Provider,
 	resolveAppMode,
 	shouldUseProxyInMode,
-} from "@oneglanse/types";
-import type { Page } from "playwright";
-import { IPRefreshNeededError, toErrorMessage } from "@oneglanse/errors";
-import { logger } from "@oneglanse/utils";
-import { env } from "../../env.js";
-import { PROVIDER_CONFIGS } from "../providers/index.js";
-import { executePromptWithRetry } from "./retryPolicy.js";
+} from "@oneglanse/types"
+import { logger } from "@oneglanse/utils"
+import type { Page } from "playwright"
+import { env } from "../../env.js"
+import { PROVIDER_CONFIGS } from "../providers/index.js"
+import { executePromptWithRetry } from "./retryPolicy.js"
 
 /**
  * Loops over all prompts in the payload and runs each through the retry policy.
@@ -22,30 +22,30 @@ export async function runPrompts(
 	provider: Provider,
 	onPromptProgress?: (current: number, total: number) => Promise<void>,
 ): Promise<AskPromptResult[]> {
-	const { user_id: userId, workspace_id: workspaceId, prompts: promptsArray } = payload;
+	const { user_id: userId, workspace_id: workspaceId, prompts: promptsArray } = payload
 
-	await page.waitForLoadState("domcontentloaded", { timeout: 30000 }).catch(() => {});
+	await page.waitForLoadState("domcontentloaded", { timeout: 30000 }).catch(() => {})
 
-	const config = PROVIDER_CONFIGS[provider];
-	const results: AskPromptResult[] = [];
-	const useProxy = shouldUseProxyInMode(resolveAppMode(env.ONEGLANSE_APP_MODE));
-	let proxyProven = !useProxy;
+	const config = PROVIDER_CONFIGS[provider]
+	const results: AskPromptResult[] = []
+	const useProxy = shouldUseProxyInMode(resolveAppMode(env.ONEGLANSE_APP_MODE))
+	let proxyProven = !useProxy
 
 	for (let i = 0; i < promptsArray.length; i++) {
-		const promptEntry = promptsArray[i];
+		const promptEntry = promptsArray[i]
 		if (!promptEntry) {
-			logger.error(`Prompt at index ${i} is undefined.`);
-			continue;
+			logger.error(`Prompt at index ${i} is undefined.`)
+			continue
 		}
 
-		const preview = promptEntry.prompt.slice(0, 60) + (promptEntry.prompt.length > 60 ? "..." : "");
-		logger.log(`prompt ${i + 1}/${promptsArray.length} — "${preview}"`);
+		const preview = promptEntry.prompt.slice(0, 60) + (promptEntry.prompt.length > 60 ? "..." : "")
+		logger.log(`prompt ${i + 1}/${promptsArray.length} — "${preview}"`)
 
-		await onPromptProgress?.(i + 1, promptsArray.length).catch(() => {});
+		await onPromptProgress?.(i + 1, promptsArray.length).catch(() => {})
 
 		// IPRefreshNeededError propagates immediately for proxy rotation.
 		// Any other terminal failure skips this prompt and preserves accumulated results.
-		let executeResult: { result: AskPromptResult; proxyNowProven: boolean };
+		let executeResult: { result: AskPromptResult; proxyNowProven: boolean }
 		try {
 			executeResult = await executePromptWithRetry(
 				page,
@@ -58,25 +58,25 @@ export async function runPrompts(
 				results,
 				promptsArray.slice(i),
 				proxyProven,
-			);
+			)
 		} catch (err) {
-			if (err instanceof IPRefreshNeededError) throw err;
+			if (err instanceof IPRefreshNeededError) throw err
 			logger.error(
 				`prompt ${i + 1}/${promptsArray.length} failed permanently — skipping: ${toErrorMessage(err)}`,
-			);
-			continue;
+			)
+			continue
 		}
-		const { result, proxyNowProven } = executeResult;
+		const { result, proxyNowProven } = executeResult
 
-		results.push(result);
-		if (proxyNowProven) proxyProven = true;
+		results.push(result)
+		if (proxyNowProven) proxyProven = true
 
-		const hasMorePrompts = i < promptsArray.length - 1;
+		const hasMorePrompts = i < promptsArray.length - 1
 		if (config.betweenPromptsHook && hasMorePrompts) {
-			await config.betweenPromptsHook(page);
+			await config.betweenPromptsHook(page)
 		}
 	}
 
-	logger.success(`all ${results.length}/${promptsArray.length} prompts completed`);
-	return results;
+	logger.success(`all ${results.length}/${promptsArray.length} prompts completed`)
+	return results
 }

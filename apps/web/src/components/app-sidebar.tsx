@@ -1,15 +1,12 @@
-"use client";
+"use client"
 
-import { formToolbarButtonClassName } from "@/components/forms/auth-form-chrome";
-import { authClient } from "@/lib/auth/auth-client";
-import { signOutAndRedirect } from "@/lib/auth/logout";
-import { useSafeSearchParams } from "@/lib/navigation/use-safe-search-params";
-import { api } from "@/trpc/react";
-import type { Workspace } from "@oneglanse/db";
-import {
-	type AppMode,
-	canAccessPeopleInMode,
-} from "@oneglanse/types";
+import { formToolbarButtonClassName } from "@/components/forms/auth-form-chrome"
+import { authClient } from "@/lib/auth/auth-client"
+import { signOutAndRedirect } from "@/lib/auth/logout"
+import { useSafeSearchParams } from "@/lib/navigation/use-safe-search-params"
+import { api } from "@/trpc/react"
+import type { Workspace } from "@oneglanse/db"
+import { type AppMode, canAccessPeopleInMode } from "@oneglanse/types"
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -28,8 +25,8 @@ import {
 	SidebarMenuButton,
 	SidebarMenuItem,
 	toast,
-} from "@oneglanse/ui";
-import { cn, getFaviconUrls } from "@oneglanse/utils";
+} from "@oneglanse/ui"
+import { cn, getFaviconUrls } from "@oneglanse/utils"
 import {
 	Check,
 	ChevronDown,
@@ -45,65 +42,54 @@ import {
 	User2,
 	UserPlus,
 	Users,
-} from "lucide-react";
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
-import { CreateWorkspaceDialog } from "./dialogs/create-workspace-dialog";
-import { JoinWorkspaceDialog } from "./dialogs/join-workspace-dialog";
+} from "lucide-react"
+import Link from "next/link"
+import { usePathname, useRouter } from "next/navigation"
+import { useEffect, useMemo, useState } from "react"
+import { CreateWorkspaceDialog } from "./dialogs/create-workspace-dialog"
+import { JoinWorkspaceDialog } from "./dialogs/join-workspace-dialog"
 
 interface AppSidebarProps {
-	appMode: AppMode;
-	workspace: Workspace | null;
-	userName: string;
-	userEmail: string;
+	appMode: AppMode
+	workspace: Workspace | null
+	userName: string
+	userEmail: string
 }
 
-export function AppSidebar({
-	appMode,
-	workspace,
-	userName,
-	userEmail,
-}: AppSidebarProps) {
-	const [isLoading, setIsLoading] = useState(false);
-	const [showCreateWorkspaceDialog, setShowCreateWorkspaceDialog] =
-		useState(false);
-	const [showJoinWorkspaceDialog, setShowJoinWorkspaceDialog] = useState(false);
-	const [failedWorkspaceFavicon, setFailedWorkspaceFavicon] = useState<
-		string | null
-	>(null);
-	const router = useRouter();
-	const pathname = usePathname();
-	const searchParams = useSafeSearchParams();
+export function AppSidebar({ appMode, workspace, userName, userEmail }: AppSidebarProps) {
+	const [isLoading, setIsLoading] = useState(false)
+	const [showCreateWorkspaceDialog, setShowCreateWorkspaceDialog] = useState(false)
+	const [showJoinWorkspaceDialog, setShowJoinWorkspaceDialog] = useState(false)
+	const [failedWorkspaceFavicon, setFailedWorkspaceFavicon] = useState<string | null>(null)
+	const router = useRouter()
+	const pathname = usePathname()
+	const searchParams = useSafeSearchParams()
 
-	const activeOrgId = workspace?.tenantId ?? null;
+	const activeOrgId = workspace?.tenantId ?? null
 
 	// Fetch all workspaces across all orgs for this user
-	const allWorkspacesQuery = api.workspace.listAllForUser.useQuery();
-	const groupedWorkspaces = allWorkspacesQuery.data ?? [];
+	const allWorkspacesQuery = api.workspace.listAllForUser.useQuery()
+	const groupedWorkspaces = allWorkspacesQuery.data ?? []
 
 	// Flat list of all workspaces for lookup
 	const allWorkspaces = useMemo(() => {
-		return groupedWorkspaces.flatMap((g) => g.workspaces);
-	}, [groupedWorkspaces]);
+		return groupedWorkspaces.flatMap((g) => g.workspaces)
+	}, [groupedWorkspaces])
 
 	// Derive active workspace from URL params, falling back to server prop
-	const workspaceIdFromUrl = searchParams.get("workspace");
+	const workspaceIdFromUrl = searchParams.get("workspace")
 	const activeWorkspace = useMemo(() => {
 		if (workspaceIdFromUrl) {
-			const match = allWorkspaces.find((ws) => ws.id === workspaceIdFromUrl);
-			if (match) return match;
+			const match = allWorkspaces.find((ws) => ws.id === workspaceIdFromUrl)
+			if (match) return match
 		}
-		return workspace;
-	}, [workspaceIdFromUrl, allWorkspaces, workspace]);
+		return workspace
+	}, [workspaceIdFromUrl, allWorkspaces, workspace])
 
-	const activeWorkspaceDomain = activeWorkspace?.domain ?? "";
+	const activeWorkspaceDomain = activeWorkspace?.domain ?? ""
 	const activeWorkspaceFavicon = useMemo(() => {
-		return (
-			getFaviconUrls(activeWorkspaceDomain, activeWorkspace?.name ?? "")[0] ??
-			""
-		);
-	}, [activeWorkspaceDomain, activeWorkspace?.name]);
+		return getFaviconUrls(activeWorkspaceDomain, activeWorkspace?.name ?? "")[0] ?? ""
+	}, [activeWorkspaceDomain, activeWorkspace?.name])
 
 	const generalItems = [
 		{
@@ -121,21 +107,21 @@ export function AppSidebar({
 			url: `/sources?workspace=${activeWorkspace?.id ?? ""}`,
 			icon: Globe,
 		},
-	];
+	]
 
 	if (canAccessPeopleInMode(appMode)) {
 		generalItems.push({
 			title: "People",
 			url: `/people?workspace=${activeWorkspace?.id ?? ""}`,
 			icon: Users,
-		});
+		})
 	}
 
 	generalItems.splice(3, 0, {
 		title: "Schedule",
 		url: `/schedule?workspace=${activeWorkspace?.id ?? ""}`,
 		icon: Clock,
-	});
+	})
 
 	const settingsItems = [
 		{
@@ -148,36 +134,36 @@ export function AppSidebar({
 			url: `/settings?workspace=${activeWorkspace?.id ?? ""}`,
 			icon: Settings,
 		},
-	];
+	]
 
 	const handleSwitchWorkspace = async (ws: Workspace) => {
-		if (ws.id === activeWorkspace?.id) return;
+		if (ws.id === activeWorkspace?.id) return
 
 		// If switching to a workspace in a different org, update active org
 		if (ws.tenantId !== activeWorkspace?.tenantId) {
 			try {
 				await authClient.organization.setActive({
 					organizationId: ws.tenantId,
-				});
+				})
 			} catch (err) {
-				console.error("Failed to switch org:", err);
+				console.error("Failed to switch org:", err)
 			}
 		}
 
-		router.push(`/dashboard?workspace=${ws.id}`);
-	};
+		router.push(`/dashboard?workspace=${ws.id}`)
+	}
 
 	const handleLogout = async () => {
-		setIsLoading(true);
+		setIsLoading(true)
 		try {
-			await signOutAndRedirect("/login");
-			toast.success("Signed out successfully!");
+			await signOutAndRedirect("/login")
+			toast.success("Signed out successfully!")
 		} catch (err) {
-			console.error(err);
-			toast.error("Failed to sign out!");
-			setIsLoading(false);
+			console.error(err)
+			toast.error("Failed to sign out!")
+			setIsLoading(false)
 		}
-	};
+	}
 
 	return (
 		<>
@@ -200,9 +186,7 @@ export function AppSidebar({
 													src={activeWorkspaceFavicon}
 													alt=""
 													className="h-4 w-4 shrink-0 rounded-[var(--app-radius)]"
-													onError={() =>
-														setFailedWorkspaceFavicon(activeWorkspaceFavicon)
-													}
+													onError={() => setFailedWorkspaceFavicon(activeWorkspaceFavicon)}
 												/>
 											) : (
 												<LayoutGrid className="h-4 w-4 shrink-0 text-gray-500" />
@@ -246,10 +230,7 @@ export function AppSidebar({
 														className="flex items-center gap-2 rounded-[var(--app-radius)]"
 													>
 														<img
-															src={
-																getFaviconUrls(ws.domain ?? "", ws.name)[0] ??
-																""
-															}
+															src={getFaviconUrls(ws.domain ?? "", ws.name)[0] ?? ""}
 															alt=""
 															className="w-4 h-4 rounded-[var(--app-radius)] shrink-0"
 														/>
@@ -263,9 +244,7 @@ export function AppSidebar({
 										))
 									) : (
 										<DropdownMenuItem disabled>
-											<span className="text-muted-foreground">
-												No workspaces yet
-											</span>
+											<span className="text-muted-foreground">No workspaces yet</span>
 										</DropdownMenuItem>
 									)}
 									<DropdownMenuSeparator />
@@ -276,9 +255,7 @@ export function AppSidebar({
 										<Plus className="h-4 w-4" />
 										<span>Create Workspace</span>
 									</DropdownMenuItem>
-									<DropdownMenuItem
-										onClick={() => setShowJoinWorkspaceDialog(true)}
-									>
+									<DropdownMenuItem onClick={() => setShowJoinWorkspaceDialog(true)}>
 										<UserPlus className="h-4 w-4" />
 										<span>Join Workspace</span>
 									</DropdownMenuItem>
@@ -349,9 +326,7 @@ export function AppSidebar({
 										)}
 									>
 										<User2 />
-										<span className="truncate">
-											{userName || userEmail || "Account"}
-										</span>
+										<span className="truncate">{userName || userEmail || "Account"}</span>
 										<ChevronUp className="ml-auto" />
 									</SidebarMenuButton>
 								</DropdownMenuTrigger>
@@ -368,9 +343,7 @@ export function AppSidebar({
 										<p className="truncate text-xs font-medium text-gray-900 dark:text-gray-100">
 											{userName || "Account"}
 										</p>
-										<p className="truncate text-xs text-gray-500 dark:text-gray-400">
-											{userEmail}
-										</p>
+										<p className="truncate text-xs text-gray-500 dark:text-gray-400">{userEmail}</p>
 									</div>
 									<DropdownMenuSeparator />
 									<DropdownMenuItem onClick={handleLogout}>
@@ -400,5 +373,5 @@ export function AppSidebar({
 				onOpenChange={setShowJoinWorkspaceDialog}
 			/>
 		</>
-	);
+	)
 }

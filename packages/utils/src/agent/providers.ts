@@ -1,10 +1,10 @@
-import type { AuthProvider, Provider } from "@oneglanse/types";
-import { AUTH_PROVIDER_LIST, PROVIDER_LIST } from "@oneglanse/types";
+import type { AuthProvider, Provider } from "@oneglanse/types"
+import { AUTH_PROVIDER_LIST, PROVIDER_LIST } from "@oneglanse/types"
 
 interface ProviderDisplayConfig {
-	displayName: string;
-	domain: string;
-	description: string;
+	displayName: string
+	domain: string
+	description: string
 }
 
 export const PROVIDER_DISPLAY = {
@@ -33,19 +33,19 @@ export const PROVIDER_DISPLAY = {
 		domain: "google.com",
 		description: "Google Search AI summaries",
 	},
-} satisfies Record<Provider, ProviderDisplayConfig>;
+} satisfies Record<Provider, ProviderDisplayConfig>
 
 interface AuthProviderDisplayConfig {
-	displayName: string;
-	domain: string;
-	connectLabel: string;
+	displayName: string
+	domain: string
+	connectLabel: string
 }
 
 interface AuthProviderConfig extends AuthProviderDisplayConfig {
-	loginUrl: string;
-	postLoginUrls: string[];
-	domainSuffixes: string[];
-	providers: Provider[];
+	loginUrl: string
+	postLoginUrls: string[]
+	domainSuffixes: string[]
+	providers: Provider[]
 }
 
 export const AUTH_PROVIDER_DISPLAY = {
@@ -74,7 +74,7 @@ export const AUTH_PROVIDER_DISPLAY = {
 		domain: "claude.ai",
 		connectLabel: "Connect with Claude",
 	},
-} satisfies Record<AuthProvider, AuthProviderDisplayConfig>;
+} satisfies Record<AuthProvider, AuthProviderDisplayConfig>
 
 export const AUTH_PROVIDER_CONFIG = {
 	chatgpt: {
@@ -101,12 +101,7 @@ export const AUTH_PROVIDER_CONFIG = {
 		connectLabel: "Connect with Gemini",
 		loginUrl: "https://gemini.google.com/",
 		postLoginUrls: ["https://gemini.google.com/"],
-		domainSuffixes: [
-			"gemini.google.com",
-			"google.com",
-			"googleusercontent.com",
-			"gstatic.com",
-		],
+		domainSuffixes: ["gemini.google.com", "google.com", "googleusercontent.com", "gstatic.com"],
 		providers: ["gemini"],
 	},
 	google: {
@@ -127,7 +122,7 @@ export const AUTH_PROVIDER_CONFIG = {
 		domainSuffixes: ["claude.ai", "anthropic.com"],
 		providers: ["claude"],
 	},
-} satisfies Record<AuthProvider, AuthProviderConfig>;
+} satisfies Record<AuthProvider, AuthProviderConfig>
 
 export const PROVIDER_AUTH_GROUP: Record<Provider, AuthProvider> = {
 	chatgpt: "chatgpt",
@@ -135,10 +130,10 @@ export const PROVIDER_AUTH_GROUP: Record<Provider, AuthProvider> = {
 	gemini: "gemini",
 	"ai-overview": "google",
 	claude: "claude",
-};
+}
 
-export const ALL_PROVIDERS_JSON = JSON.stringify([...PROVIDER_LIST]);
-export const ALL_AUTH_PROVIDERS_JSON = JSON.stringify([...AUTH_PROVIDER_LIST]);
+export const ALL_PROVIDERS_JSON = JSON.stringify([...PROVIDER_LIST])
+export const ALL_AUTH_PROVIDERS_JSON = JSON.stringify([...AUTH_PROVIDER_LIST])
 
 /**
  * Get the user-friendly display name for a provider
@@ -146,16 +141,15 @@ export const ALL_AUTH_PROVIDERS_JSON = JSON.stringify([...AUTH_PROVIDER_LIST]);
  * @returns Display name (ChatGPT, Claude, Perplexity, Gemini)
  */
 export function getProviderDisplayName(provider: string): string {
-	const config = PROVIDER_DISPLAY[provider as keyof typeof PROVIDER_DISPLAY];
-	return config?.displayName ?? provider;
+	const config = PROVIDER_DISPLAY[provider as keyof typeof PROVIDER_DISPLAY]
+	return config?.displayName ?? provider
 }
 
 export function getAuthProviderDisplayName(provider: string): string {
-	const config =
-		AUTH_PROVIDER_DISPLAY[provider as keyof typeof AUTH_PROVIDER_DISPLAY];
-	return config?.displayName ?? provider;
+	const config = AUTH_PROVIDER_DISPLAY[provider as keyof typeof AUTH_PROVIDER_DISPLAY]
+	return config?.displayName ?? provider
 }
 
 export function getAuthProviderForProvider(provider: Provider): AuthProvider {
-	return PROVIDER_AUTH_GROUP[provider];
+	return PROVIDER_AUTH_GROUP[provider]
 }

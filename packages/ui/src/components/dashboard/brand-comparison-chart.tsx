@@ -1,42 +1,40 @@
-"use client";
-import { LineChart } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
-import { Card } from "../card.js";
-import type { DashboardCompetitorData } from "./types.js";
+"use client"
+import { LineChart } from "lucide-react"
+import { useEffect, useRef, useState } from "react"
+import { Card } from "../card.js"
+import type { DashboardCompetitorData } from "./types.js"
 
-type MetricKey = "presence" | "recommendation" | "sentiment" | "rankStrength";
+type MetricKey = "presence" | "recommendation" | "sentiment" | "rankStrength"
 
 type SeriesPoint = {
-	name: string;
-	isBrand: boolean;
-	composite: number;
-	values: Record<MetricKey, number>;
-};
+	name: string
+	isBrand: boolean
+	composite: number
+	values: Record<MetricKey, number>
+}
 
 const METRIC_CONFIG: { key: MetricKey; label: string }[] = [
 	{ key: "presence", label: "Presence" },
 	{ key: "recommendation", label: "Recommendation" },
 	{ key: "sentiment", label: "Sentiment" },
 	{ key: "rankStrength", label: "Rank Strength" },
-];
+]
 
-const SERIES_COLORS = ["#4E79A7", "#F28E2B", "#E15759", "#76B7B2", "#59A14F"];
+const SERIES_COLORS = ["#4E79A7", "#F28E2B", "#E15759", "#76B7B2", "#59A14F"]
 
 function getSeriesColor(index: number): string {
-	return (
-		SERIES_COLORS[index % SERIES_COLORS.length] ?? SERIES_COLORS[0] ?? "#4E79A7"
-	);
+	return SERIES_COLORS[index % SERIES_COLORS.length] ?? SERIES_COLORS[0] ?? "#4E79A7"
 }
 
 function clampScore(value: number): number {
-	if (Number.isNaN(value)) return 0;
-	return Math.max(0, Math.min(100, Math.round(value)));
+	if (Number.isNaN(value)) return 0
+	return Math.max(0, Math.min(100, Math.round(value)))
 }
 
 function rankToStrength(rank: number | null): number {
-	if (rank === null) return 0;
-	if (rank >= 6) return 30;
-	if (rank <= 1) return 100;
+	if (rank === null) return 0
+	if (rank >= 6) return 30
+	if (rank <= 1) return 100
 
 	const points: Array<{ x: number; y: number }> = [
 		{ x: 1, y: 100 },
@@ -45,25 +43,23 @@ function rankToStrength(rank: number | null): number {
 		{ x: 4, y: 50 },
 		{ x: 5, y: 40 },
 		{ x: 6, y: 30 },
-	];
+	]
 
 	for (let i = 0; i < points.length - 1; i++) {
-		const start = points[i];
-		const end = points[i + 1];
-		if (!start || !end) continue;
+		const start = points[i]
+		const end = points[i + 1]
+		if (!start || !end) continue
 		if (rank >= start.x && rank <= end.x) {
-			const t = (rank - start.x) / (end.x - start.x);
-			return clampScore(start.y + t * (end.y - start.y));
+			const t = (rank - start.x) / (end.x - start.x)
+			return clampScore(start.y + t * (end.y - start.y))
 		}
 	}
 
-	return 30;
+	return 30
 }
 
 function buildPath(points: Array<{ x: number; y: number }>): string {
-	return points
-		.map((p, idx) => `${idx === 0 ? "M" : "L"} ${p.x} ${p.y}`)
-		.join(" ");
+	return points.map((p, idx) => `${idx === 0 ? "M" : "L"} ${p.x} ${p.y}`).join(" ")
 }
 
 function getMetricLabelLines(
@@ -71,10 +67,10 @@ function getMetricLabelLines(
 	isCompactChart: boolean,
 ): string[] {
 	if (metric.key === "recommendation" && isCompactChart) {
-		return ["Recommend."];
+		return ["Recommend."]
 	}
 
-	return [metric.label];
+	return [metric.label]
 }
 
 export function BrandComparisonChart({
@@ -86,54 +82,54 @@ export function BrandComparisonChart({
 	brandSentimentScore,
 	brandAvgRank,
 }: {
-	competitors: DashboardCompetitorData[];
-	brandName: string;
-	totalResponses: number;
-	brandPresenceRate: number;
-	brandRecommendationRate: number;
-	brandSentimentScore: number;
-	brandAvgRank: number | null;
+	competitors: DashboardCompetitorData[]
+	brandName: string
+	totalResponses: number
+	brandPresenceRate: number
+	brandRecommendationRate: number
+	brandSentimentScore: number
+	brandAvgRank: number | null
 }) {
-	const svgRef = useRef<SVGSVGElement>(null);
-	const containerRef = useRef<HTMLDivElement>(null);
-	const [containerWidth, setContainerWidth] = useState(0);
+	const svgRef = useRef<SVGSVGElement>(null)
+	const containerRef = useRef<HTMLDivElement>(null)
+	const [containerWidth, setContainerWidth] = useState(0)
 
 	const [hoveredPoint, setHoveredPoint] = useState<{
-		name: string;
-		metric: string;
-		value: number;
-		leftPx: number;
-		topPx: number;
-		color: string;
-	} | null>(null);
-	const [hoveredBrand, setHoveredBrand] = useState<string | null>(null);
+		name: string
+		metric: string
+		value: number
+		leftPx: number
+		topPx: number
+		color: string
+	} | null>(null)
+	const [hoveredBrand, setHoveredBrand] = useState<string | null>(null)
 
 	useEffect(() => {
-		const element = containerRef.current;
-		if (!element) return;
+		const element = containerRef.current
+		if (!element) return
 
 		const updateWidth = () => {
-			setContainerWidth(element.getBoundingClientRect().width);
-		};
+			setContainerWidth(element.getBoundingClientRect().width)
+		}
 
-		updateWidth();
+		updateWidth()
 
-		const observer = new ResizeObserver(() => updateWidth());
-		observer.observe(element);
+		const observer = new ResizeObserver(() => updateWidth())
+		observer.observe(element)
 
-		return () => observer.disconnect();
-	}, []);
+		return () => observer.disconnect()
+	}, [])
 
 	const rivals = competitors
 		.filter((c) => !c.isBrand)
 		.sort((a, b) => {
-			if (a.appearances !== b.appearances) return b.appearances - a.appearances;
+			if (a.appearances !== b.appearances) return b.appearances - a.appearances
 			if (a.avgRank !== null && b.avgRank !== null && a.avgRank !== b.avgRank) {
-				return a.avgRank - b.avgRank;
+				return a.avgRank - b.avgRank
 			}
-			return b.recCount - a.recCount;
+			return b.recCount - a.recCount
 		})
-		.slice(0, 4);
+		.slice(0, 4)
 
 	const series: SeriesPoint[] = [
 		{
@@ -151,12 +147,8 @@ export function BrandComparisonChart({
 			name: r.name,
 			isBrand: false,
 			values: {
-				presence: clampScore(
-					totalResponses > 0 ? (r.appearances / totalResponses) * 100 : 0,
-				),
-				recommendation: clampScore(
-					totalResponses > 0 ? (r.recCount / totalResponses) * 100 : 0,
-				),
+				presence: clampScore(totalResponses > 0 ? (r.appearances / totalResponses) * 100 : 0),
+				recommendation: clampScore(totalResponses > 0 ? (r.recCount / totalResponses) * 100 : 0),
 				sentiment: clampScore(r.avgSentiment),
 				rankStrength: rankToStrength(r.avgRank),
 			},
@@ -174,11 +166,11 @@ export function BrandComparisonChart({
 			),
 		}))
 		.sort((a, b) => {
-			if (a.composite !== b.composite) return b.composite - a.composite;
-			if (a.isBrand && !b.isBrand) return -1;
-			if (!a.isBrand && b.isBrand) return 1;
-			return a.name.localeCompare(b.name);
-		});
+			if (a.composite !== b.composite) return b.composite - a.composite
+			if (a.isBrand && !b.isBrand) return -1
+			if (!a.isBrand && b.isBrand) return 1
+			return a.name.localeCompare(b.name)
+		})
 
 	if (series.length <= 1 || totalResponses === 0) {
 		return (
@@ -205,49 +197,48 @@ export function BrandComparisonChart({
 					</div>
 				</div>
 			</Card>
-		);
+		)
 	}
 
-	const isCompactChart = containerWidth > 0 && containerWidth < 640;
-	const isLaptopChart = containerWidth >= 640 && containerWidth < 1024;
-	const width = 760;
-	const height = isCompactChart ? 308 : 292;
-	const left = isCompactChart ? 56 : isLaptopChart ? 54 : 50;
-	const right = isCompactChart ? 72 : isLaptopChart ? 68 : 60;
-	const top = 20;
-	const bottom = isCompactChart ? 72 : 56;
-	const plotWidth = width - left - right;
-	const plotHeight = height - top - bottom;
+	const isCompactChart = containerWidth > 0 && containerWidth < 640
+	const isLaptopChart = containerWidth >= 640 && containerWidth < 1024
+	const width = 760
+	const height = isCompactChart ? 308 : 292
+	const left = isCompactChart ? 56 : isLaptopChart ? 54 : 50
+	const right = isCompactChart ? 72 : isLaptopChart ? 68 : 60
+	const top = 20
+	const bottom = isCompactChart ? 72 : 56
+	const plotWidth = width - left - right
+	const plotHeight = height - top - bottom
 
-	const xFor = (index: number) =>
-		left + (index * plotWidth) / Math.max(1, METRIC_CONFIG.length - 1);
-	const yFor = (score: number) => top + ((100 - score) / 100) * plotHeight;
+	const xFor = (index: number) => left + (index * plotWidth) / Math.max(1, METRIC_CONFIG.length - 1)
+	const yFor = (score: number) => top + ((100 - score) / 100) * plotHeight
 	const getTooltipPosition = (x: number, y: number) => {
 		if (!svgRef.current || !containerRef.current) {
-			return { leftPx: x, topPx: y };
+			return { leftPx: x, topPx: y }
 		}
 
-		const containerRect = containerRef.current.getBoundingClientRect();
-		const ctm = svgRef.current.getScreenCTM();
+		const containerRect = containerRef.current.getBoundingClientRect()
+		const ctm = svgRef.current.getScreenCTM()
 
 		if (!ctm) {
-			return { leftPx: x, topPx: y };
+			return { leftPx: x, topPx: y }
 		}
 
-		const point = svgRef.current.createSVGPoint();
-		point.x = x;
-		point.y = y;
-		const screenPoint = point.matrixTransform(ctm);
+		const point = svgRef.current.createSVGPoint()
+		point.x = x
+		point.y = y
+		const screenPoint = point.matrixTransform(ctm)
 
-		const rawLeft = screenPoint.x - containerRect.left;
-		const rawTop = screenPoint.y - containerRect.top;
+		const rawLeft = screenPoint.x - containerRect.left
+		const rawTop = screenPoint.y - containerRect.top
 		return {
 			leftPx: Math.max(72, Math.min(containerRect.width - 72, rawLeft)),
 			topPx: Math.max(24, rawTop),
-		};
-	};
+		}
+	}
 
-	const leader = [...series].sort((a, b) => b.composite - a.composite)[0];
+	const leader = [...series].sort((a, b) => b.composite - a.composite)[0]
 
 	return (
 		<Card className="min-w-0 p-5">
@@ -257,8 +248,7 @@ export function BrandComparisonChart({
 						Brand Comparison
 					</h1>
 					<p className="mt-2 text-xs text-muted-foreground">
-						Presence, recommendation strength, sentiment, and ranking strength
-						in one view.
+						Presence, recommendation strength, sentiment, and ranking strength in one view.
 					</p>
 				</div>
 				<span className="max-w-full self-start whitespace-normal break-words rounded-[var(--app-radius)] border border-transparent bg-stone-50 px-3 py-1 text-[11px] font-semibold text-gray-600 shadow-[0_14px_36px_-28px_rgba(15,23,42,0.18)] dark:bg-neutral-900/80 dark:text-gray-300 dark:shadow-[0_14px_36px_-28px_rgba(0,0,0,0.44)]">
@@ -280,7 +270,7 @@ export function BrandComparisonChart({
 						aria-label="Brand comparison chart"
 					>
 						{[0, 25, 50, 75, 100].map((tick) => {
-							const y = yFor(tick);
+							const y = yFor(tick)
 							return (
 								<g key={`grid-${tick}`}>
 									<line
@@ -301,18 +291,18 @@ export function BrandComparisonChart({
 										{tick}
 									</text>
 								</g>
-							);
+							)
 						})}
 
 						{series.map((s, idx) => {
-							const color = getSeriesColor(idx);
+							const color = getSeriesColor(idx)
 							const points = METRIC_CONFIG.map((metric, metricIndex) => ({
 								x: xFor(metricIndex),
 								y: yFor(s.values[metric.key]),
-							}));
-							const d = buildPath(points);
-							const isHovered = hoveredBrand === s.name;
-							const isFaded = hoveredBrand && hoveredBrand !== s.name;
+							}))
+							const d = buildPath(points)
+							const isHovered = hoveredBrand === s.name
+							const isFaded = hoveredBrand && hoveredBrand !== s.name
 							return (
 								<g key={s.name}>
 									<path
@@ -336,9 +326,9 @@ export function BrandComparisonChart({
 											className="cursor-pointer"
 											opacity={isFaded ? 0.2 : 1}
 											onMouseEnter={() => {
-												const metric = METRIC_CONFIG[pointIdx];
-												if (!metric) return;
-												const { leftPx, topPx } = getTooltipPosition(p.x, p.y);
+												const metric = METRIC_CONFIG[pointIdx]
+												if (!metric) return
+												const { leftPx, topPx } = getTooltipPosition(p.x, p.y)
 												setHoveredPoint({
 													name: s.name,
 													metric: metric.label,
@@ -346,16 +336,16 @@ export function BrandComparisonChart({
 													leftPx,
 													topPx,
 													color,
-												});
+												})
 											}}
 										/>
 									))}
 								</g>
-							);
+							)
 						})}
 
 						{METRIC_CONFIG.map((metric, idx) => {
-							const labelLines = getMetricLabelLines(metric, isCompactChart);
+							const labelLines = getMetricLabelLines(metric, isCompactChart)
 
 							return (
 								<text
@@ -375,7 +365,7 @@ export function BrandComparisonChart({
 										</tspan>
 									))}
 								</text>
-							);
+							)
 						})}
 					</svg>
 
@@ -407,19 +397,17 @@ export function BrandComparisonChart({
 
 					{hoveredBrand &&
 						(() => {
-							const brandData = series.find((s) => s.name === hoveredBrand);
-							const brandIndex = series.findIndex(
-								(s) => s.name === hoveredBrand,
-							);
-							const color = getSeriesColor(brandIndex);
+							const brandData = series.find((s) => s.name === hoveredBrand)
+							const brandIndex = series.findIndex((s) => s.name === hoveredBrand)
+							const color = getSeriesColor(brandIndex)
 
-							if (!brandData) return null;
+							if (!brandData) return null
 
 							return METRIC_CONFIG.map((metric, metricIdx) => {
-								const value = brandData.values[metric.key];
-								const x = xFor(metricIdx);
-								const y = yFor(value);
-								const { leftPx, topPx } = getTooltipPosition(x, y);
+								const value = brandData.values[metric.key]
+								const x = xFor(metricIdx)
+								const y = yFor(value)
+								const { leftPx, topPx } = getTooltipPosition(x, y)
 
 								return (
 									<div
@@ -446,14 +434,14 @@ export function BrandComparisonChart({
 											</span>
 										</p>
 									</div>
-								);
-							});
+								)
+							})
 						})()}
 				</div>
 
 				<div className="min-w-0 space-y-2">
 					{series.map((s, idx) => {
-						const color = getSeriesColor(idx);
+						const color = getSeriesColor(idx)
 						return (
 							<div
 								key={`legend-${s.name}`}
@@ -480,10 +468,10 @@ export function BrandComparisonChart({
 									</span>
 								</div>
 							</div>
-						);
+						)
 					})}
 				</div>
 			</div>
 		</Card>
-	);
+	)
 }

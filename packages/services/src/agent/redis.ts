@@ -1,6 +1,6 @@
-import { DatabaseError, Logger } from "@oneglanse/errors";
-import { Redis } from "ioredis";
-import { env } from "../env.js";
+import { DatabaseError, Logger } from "@oneglanse/errors"
+import { Redis } from "ioredis"
+import { env } from "../env.js"
 
 export const redis = new Redis({
 	host: env.REDIS_HOST,
@@ -15,36 +15,36 @@ export const redis = new Redis({
 	// Re-queue commands that were in-flight when the connection dropped
 	autoResendUnfulfilledCommands: true,
 	retryStrategy: (times) => {
-		if (times > 10) return null;
-		return Math.min(times * 200, 2_000);
+		if (times > 10) return null
+		return Math.min(times * 200, 2_000)
 	},
 	lazyConnect: true,
-});
+})
 
 redis.on("connect", () => {
-	Logger.info("Redis connected");
-});
+	Logger.info("Redis connected")
+})
 
 redis.on("error", (err) => {
-	Logger.error("Redis error", err);
-});
+	Logger.error("Redis error", err)
+})
 
-let redisReadyLogged = false;
+let redisReadyLogged = false
 
 export async function waitForRedis(): Promise<void> {
 	for (let i = 0; i < 10; i++) {
 		try {
-			await redis.ping();
+			await redis.ping()
 			if (!redisReadyLogged) {
-				Logger.info("Redis ready");
-				redisReadyLogged = true;
+				Logger.info("Redis ready")
+				redisReadyLogged = true
 			}
-			return;
+			return
 		} catch {
-			Logger.info("Waiting for Redis...");
-			await new Promise((r) => setTimeout(r, 1000));
+			Logger.info("Waiting for Redis...")
+			await new Promise((r) => setTimeout(r, 1000))
 		}
 	}
 
-	throw new DatabaseError("Redis not available");
+	throw new DatabaseError("Redis not available")
 }

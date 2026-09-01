@@ -1,4 +1,4 @@
-"use client";
+"use client"
 
 import {
 	formDialogContentClassName,
@@ -7,17 +7,17 @@ import {
 	formPanelClassName,
 	formPrimaryButtonClassName,
 	formSecondaryButtonClassName,
-} from "@/components/forms/auth-form-chrome";
+} from "@/components/forms/auth-form-chrome"
 import {
 	useProviderConnectionAction,
 	useProviderConnections,
 	useResetAllProviders,
-} from "@/lib/provider-connections/client";
-import { writeSkipProviderGate } from "@/lib/provider-connections/provider-gate";
-import type { ProviderConnectionCard } from "@/lib/provider-connections/types";
-import { api } from "@/trpc/react";
-import { AUTH_PROVIDER_LIST } from "@oneglanse/types";
-import type { AuthProvider } from "@oneglanse/types";
+} from "@/lib/provider-connections/client"
+import { writeSkipProviderGate } from "@/lib/provider-connections/provider-gate"
+import type { ProviderConnectionCard } from "@/lib/provider-connections/types"
+import { api } from "@/trpc/react"
+import { AUTH_PROVIDER_LIST } from "@oneglanse/types"
+import type { AuthProvider } from "@oneglanse/types"
 import {
 	Button,
 	Dialog,
@@ -27,18 +27,11 @@ import {
 	DialogHeader,
 	DialogTitle,
 	toast,
-} from "@oneglanse/ui";
-import { cn, getModelFavicon } from "@oneglanse/utils";
-import {
-	AlertTriangle,
-	ArrowRight,
-	CheckCircle2,
-	Loader2,
-	RotateCcw,
-	RotateCw,
-} from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+} from "@oneglanse/ui"
+import { cn, getModelFavicon } from "@oneglanse/utils"
+import { AlertTriangle, ArrowRight, CheckCircle2, Loader2, RotateCcw, RotateCw } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { useEffect, useRef, useState } from "react"
 
 const CARD_ORDER: Array<ProviderConnectionCard["provider"]> = [
 	"google",
@@ -46,58 +39,50 @@ const CARD_ORDER: Array<ProviderConnectionCard["provider"]> = [
 	"chatgpt",
 	"perplexity",
 	"claude",
-];
+]
 
 function getConnectionCardTitle(card: ProviderConnectionCard): string {
-	return card.provider === "google" ? "AI Overview" : card.displayName;
+	return card.provider === "google" ? "AI Overview" : card.displayName
 }
 
-function sortConnectionCards(
-	cards: ProviderConnectionCard[],
-): ProviderConnectionCard[] {
+function sortConnectionCards(cards: ProviderConnectionCard[]): ProviderConnectionCard[] {
 	return [...cards].sort((left, right) => {
-		const leftIndex = CARD_ORDER.indexOf(left.provider);
-		const rightIndex = CARD_ORDER.indexOf(right.provider);
-		const normalizedLeftIndex =
-			leftIndex === -1 ? Number.MAX_SAFE_INTEGER : leftIndex;
-		const normalizedRightIndex =
-			rightIndex === -1 ? Number.MAX_SAFE_INTEGER : rightIndex;
+		const leftIndex = CARD_ORDER.indexOf(left.provider)
+		const rightIndex = CARD_ORDER.indexOf(right.provider)
+		const normalizedLeftIndex = leftIndex === -1 ? Number.MAX_SAFE_INTEGER : leftIndex
+		const normalizedRightIndex = rightIndex === -1 ? Number.MAX_SAFE_INTEGER : rightIndex
 
 		if (normalizedLeftIndex !== normalizedRightIndex) {
-			return normalizedLeftIndex - normalizedRightIndex;
+			return normalizedLeftIndex - normalizedRightIndex
 		}
 
-		return getConnectionCardTitle(left).localeCompare(
-			getConnectionCardTitle(right),
-		);
-	});
+		return getConnectionCardTitle(left).localeCompare(getConnectionCardTitle(right))
+	})
 }
 
 function getConnectionStatusLabel(card: ProviderConnectionCard): string {
 	if (card.status.connecting) {
-		return "Connecting";
+		return "Connecting"
 	}
 
-	return card.status.connected ? "" : "Disconnected";
+	return card.status.connected ? "" : "Disconnected"
 }
 
-function getConnectionStatusMessage(
-	card: ProviderConnectionCard,
-): string | null {
+function getConnectionStatusMessage(card: ProviderConnectionCard): string | null {
 	if (card.status.connecting) {
-		return "Finish the sign-in flow and close the provider browser window to activate this provider.";
+		return "Finish the sign-in flow and close the provider browser window to activate this provider."
 	}
 
 	if (!card.status.connected) {
-		return null;
+		return null
 	}
 
-	return card.status.error;
+	return card.status.error
 }
 
 function formatConnectionUpdatedAt(timestamp: string | null): string | null {
 	if (!timestamp) {
-		return null;
+		return null
 	}
 
 	return new Date(timestamp).toLocaleString(undefined, {
@@ -107,51 +92,49 @@ function formatConnectionUpdatedAt(timestamp: string | null): string | null {
 		hour: "2-digit",
 		minute: "2-digit",
 		hour12: true,
-	});
+	})
 }
 
 function getConnectionCardClasses(card: ProviderConnectionCard): string {
 	if (card.status.connecting) {
-		return `${formPanelClassName} border-gray-200/40 bg-stone-50 shadow-[0_20px_60px_-32px_rgba(15,23,42,0.18)] dark:border-white/5 dark:bg-neutral-900 dark:shadow-[0_20px_60px_-32px_rgba(0,0,0,0.55)]`;
+		return `${formPanelClassName} border-gray-200/40 bg-stone-50 shadow-[0_20px_60px_-32px_rgba(15,23,42,0.18)] dark:border-white/5 dark:bg-neutral-900 dark:shadow-[0_20px_60px_-32px_rgba(0,0,0,0.55)]`
 	}
 
-	return `${formPanelClassName} border-gray-200/40 bg-white shadow-[0_20px_60px_-32px_rgba(15,23,42,0.18)] dark:border-white/5 dark:bg-neutral-950 dark:shadow-[0_20px_60px_-32px_rgba(0,0,0,0.55)]`;
+	return `${formPanelClassName} border-gray-200/40 bg-white shadow-[0_20px_60px_-32px_rgba(15,23,42,0.18)] dark:border-white/5 dark:bg-neutral-950 dark:shadow-[0_20px_60px_-32px_rgba(0,0,0,0.55)]`
 }
 
 function getConnectionBadgeClasses(card: ProviderConnectionCard): string {
 	if (card.status.connecting) {
-		return "border border-gray-200/80 bg-stone-100 text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200";
+		return "border border-gray-200/80 bg-stone-100 text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200"
 	}
 
-	return "border border-gray-200/80 bg-white text-gray-500 dark:border-gray-800 dark:bg-neutral-950 dark:text-gray-400";
+	return "border border-gray-200/80 bg-white text-gray-500 dark:border-gray-800 dark:bg-neutral-950 dark:text-gray-400"
 }
 
 function getCardMutationState(args: {
-	card: ProviderConnectionCard;
-	isMutationPending: boolean;
-	variables: ReturnType<typeof useProviderConnectionAction>["variables"];
+	card: ProviderConnectionCard
+	isMutationPending: boolean
+	variables: ReturnType<typeof useProviderConnectionAction>["variables"]
 }) {
-	const { card, isMutationPending, variables } = args;
-	const isPendingForProvider =
-		isMutationPending && variables?.provider === card.provider;
+	const { card, isMutationPending, variables } = args
+	const isPendingForProvider = isMutationPending && variables?.provider === card.provider
 
 	return {
 		isPendingForProvider,
-		isPendingConnect:
-			isPendingForProvider && (variables?.action ?? "connect") === "connect",
+		isPendingConnect: isPendingForProvider && (variables?.action ?? "connect") === "connect",
 		isPendingRefresh: isPendingForProvider && variables?.action === "refresh",
-	};
+	}
 }
 
 export function ProviderConnectionsPanel(props: {
-	title?: string | null;
-	description?: string | null;
-	helperText?: string | null;
-	nextHref?: string | null;
-	showSetupNotice?: boolean;
-	workspaceId?: string | null;
-	showOnboardingActions?: boolean;
-	watchForExternalUpdates?: boolean;
+	title?: string | null
+	description?: string | null
+	helperText?: string | null
+	nextHref?: string | null
+	showSetupNotice?: boolean
+	workspaceId?: string | null
+	showOnboardingActions?: boolean
+	watchForExternalUpdates?: boolean
 }) {
 	const {
 		title = "Providers",
@@ -162,24 +145,22 @@ export function ProviderConnectionsPanel(props: {
 		workspaceId = null,
 		showOnboardingActions = false,
 		watchForExternalUpdates = false,
-	} = props;
-	const router = useRouter();
+	} = props
+	const router = useRouter()
 	const authProvidersQuery = useProviderConnections({
 		watchForExternalUpdates,
-	});
-	const resolvedWorkspaceId = workspaceId ?? "";
+	})
+	const resolvedWorkspaceId = workspaceId ?? ""
 
 	const enabledProvidersQuery = api.workspace.getEnabledProviders.useQuery(
 		{ workspaceId: resolvedWorkspaceId },
 		{ enabled: !!workspaceId },
-	);
+	)
 
 	// Local state for instant toggle feedback — synced from server on first load
-	const [localEnabled, setLocalEnabled] = useState<
-		AuthProvider[] | null | undefined
-	>(undefined);
-	const [showSkipDialog, setShowSkipDialog] = useState(false);
-	const toggleDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+	const [localEnabled, setLocalEnabled] = useState<AuthProvider[] | null | undefined>(undefined)
+	const [showSkipDialog, setShowSkipDialog] = useState(false)
+	const toggleDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
 	useEffect(() => {
 		if (
@@ -187,69 +168,62 @@ export function ProviderConnectionsPanel(props: {
 			enabledProvidersQuery.data !== undefined &&
 			!enabledProvidersQuery.isFetching
 		) {
-			setLocalEnabled(enabledProvidersQuery.data.enabledProviders ?? null);
+			setLocalEnabled(enabledProvidersQuery.data.enabledProviders ?? null)
 		}
-	}, [
-		enabledProvidersQuery.data,
-		enabledProvidersQuery.isFetching,
-		localEnabled,
-	]);
+	}, [enabledProvidersQuery.data, enabledProvidersQuery.isFetching, localEnabled])
 
-	const utils = api.useUtils();
+	const utils = api.useUtils()
 	const setEnabledMutation = api.workspace.setEnabledProviders.useMutation({
 		onSuccess: () => {
 			if (!workspaceId) {
-				return;
+				return
 			}
 
 			void utils.workspace.getEnabledProviders.invalidate({
 				workspaceId,
-			});
+			})
 		},
 		onError: () => {
 			// Revert to server state on error
-			setLocalEnabled(enabledProvidersQuery.data?.enabledProviders ?? null);
-			toast.error("Failed to update provider. Please try again.");
+			setLocalEnabled(enabledProvidersQuery.data?.enabledProviders ?? null)
+			toast.error("Failed to update provider. Please try again.")
 		},
-	});
+	})
 
 	const isProviderEnabled = (provider: AuthProvider): boolean => {
 		const state =
 			localEnabled !== undefined
 				? localEnabled
-				: (enabledProvidersQuery.data?.enabledProviders ?? null);
-		return state === null || state.includes(provider);
-	};
+				: (enabledProvidersQuery.data?.enabledProviders ?? null)
+		return state === null || state.includes(provider)
+	}
 
 	const handleProviderToggle = (provider: AuthProvider) => {
-		if (!workspaceId) return;
+		if (!workspaceId) return
 		const currentState =
 			localEnabled !== undefined
 				? localEnabled
-				: (enabledProvidersQuery.data?.enabledProviders ?? null);
+				: (enabledProvidersQuery.data?.enabledProviders ?? null)
 		const currentList =
-			currentState === null
-				? ([...AUTH_PROVIDER_LIST] as AuthProvider[])
-				: currentState;
-		const currentlyEnabled =
-			currentState === null || currentState.includes(provider);
+			currentState === null ? ([...AUTH_PROVIDER_LIST] as AuthProvider[]) : currentState
+		const currentlyEnabled = currentState === null || currentState.includes(provider)
 
-		let next: AuthProvider[] | null;
+		let next: AuthProvider[] | null
 		if (currentlyEnabled) {
-			const remaining = currentList.filter((p) => p !== provider);
-			next = remaining as AuthProvider[];
+			const remaining = currentList.filter((p) => p !== provider)
+			next = remaining as AuthProvider[]
 		} else {
-			const nextList = [...currentList, provider] as AuthProvider[];
-			next = nextList.length === AUTH_PROVIDER_LIST.length ? null : nextList;
+			const nextList = [...currentList, provider] as AuthProvider[]
+			next = nextList.length === AUTH_PROVIDER_LIST.length ? null : nextList
 		}
 
-		setLocalEnabled(next);
+		setLocalEnabled(next)
 
-		if (toggleDebounceRef.current) clearTimeout(toggleDebounceRef.current);
+		if (toggleDebounceRef.current) clearTimeout(toggleDebounceRef.current)
 		toggleDebounceRef.current = setTimeout(() => {
-			setEnabledMutation.mutate({ workspaceId, enabledProviders: next });
-		}, 300);
-	};
+			setEnabledMutation.mutate({ workspaceId, enabledProviders: next })
+		}, 300)
+	}
 
 	const providerActionMutation = useProviderConnectionAction({
 		onSuccess: (result, variables) => {
@@ -259,38 +233,34 @@ export function ProviderConnectionsPanel(props: {
 						? "Connection flow restarted on this machine."
 						: "Connection flow started on this machine."
 					: "Connection flow is already running.",
-			);
+			)
 		},
 		onError: (error) => {
-			toast.error(error.message);
+			toast.error(error.message)
 		},
-	});
+	})
 	const resetAllMutation = useResetAllProviders({
 		onSuccess: () => {
-			toast.success("All provider sessions have been reset.");
+			toast.success("All provider sessions have been reset.")
 		},
 		onError: (error) => {
-			toast.error(error.message);
+			toast.error(error.message)
 		},
-	});
-	const cards = sortConnectionCards(authProvidersQuery.data?.cards ?? []);
-	const hasAtLeastOneConnection = cards.some((card) => card.status.connected);
+	})
+	const cards = sortConnectionCards(authProvidersQuery.data?.cards ?? [])
+	const hasAtLeastOneConnection = cards.some((card) => card.status.connected)
 	const isAnyConnectionPending =
-		providerActionMutation.isPending ||
-		cards.some((card) => card.status.connecting);
+		providerActionMutation.isPending || cards.some((card) => card.status.connecting)
 
 	const handleSkipForNow = () => {
-		writeSkipProviderGate(true);
-		setShowSkipDialog(false);
-		router.push(nextHref ?? "/workspace");
-	};
+		writeSkipProviderGate(true)
+		setShowSkipDialog(false)
+		router.push(nextHref ?? "/workspace")
+	}
 
-	const canInteractivelyConnect =
-		authProvidersQuery.data?.interactiveConnectAllowed ?? true;
+	const canInteractivelyConnect = authProvidersQuery.data?.interactiveConnectAllowed ?? true
 	const shouldShowExternalContinueAction =
-		showOnboardingActions &&
-		!canInteractivelyConnect &&
-		!hasAtLeastOneConnection;
+		showOnboardingActions && !canInteractivelyConnect && !hasAtLeastOneConnection
 
 	return (
 		<section>
@@ -310,9 +280,7 @@ export function ProviderConnectionsPanel(props: {
 							)}
 							onClick={() => resetAllMutation.mutate()}
 							disabled={
-								!hasAtLeastOneConnection ||
-								resetAllMutation.isPending ||
-								isAnyConnectionPending
+								!hasAtLeastOneConnection || resetAllMutation.isPending || isAnyConnectionPending
 							}
 							title="Reset all provider sessions"
 						>
@@ -325,9 +293,7 @@ export function ProviderConnectionsPanel(props: {
 						</Button>
 					</div>
 					{description ? (
-						<p className="text-sm leading-6 text-gray-500 dark:text-gray-400">
-							{description}
-						</p>
+						<p className="text-sm leading-6 text-gray-500 dark:text-gray-400">{description}</p>
 					) : null}
 					{helperText && canInteractivelyConnect ? (
 						<div className="w-full rounded-[var(--app-radius)] border border-amber-200/60 bg-amber-50/45 px-3.5 py-2.5 text-amber-900 dark:border-amber-900/30 dark:bg-amber-950/15 dark:text-amber-100">
@@ -358,12 +324,10 @@ export function ProviderConnectionsPanel(props: {
 			{showSetupNotice && !canInteractivelyConnect ? (
 				<p className="mb-6 rounded-[var(--app-radius)] border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-900 dark:border-amber-900/40 dark:bg-amber-950/30 dark:text-amber-200">
 					To connect or refresh providers, run{" "}
-					<code className="rounded px-1 font-mono text-xs">pnpm auth</code> on
-					your local machine, finish sign-in on the local{" "}
-					<code className="rounded px-1 font-mono text-xs">
-						/providers/local
-					</code>{" "}
-					page, then upload the saved sessions to this VPS.{" "}
+					<code className="rounded px-1 font-mono text-xs">pnpm auth</code> on your local machine,
+					finish sign-in on the local{" "}
+					<code className="rounded px-1 font-mono text-xs">/providers/local</code> page, then upload
+					the saved sessions to this VPS.{" "}
 					{watchForExternalUpdates
 						? "This page updates automatically as soon as uploaded sessions are detected."
 						: "Refresh this page after the upload completes to see the updated provider status."}
@@ -372,29 +336,26 @@ export function ProviderConnectionsPanel(props: {
 
 			<div className="grid grid-cols-1 gap-3 lg:grid-cols-2 lg:gap-3">
 				{cards.map((card) => {
-					const status = card.status;
-					const { isPendingForProvider, isPendingConnect, isPendingRefresh } =
-						getCardMutationState({
+					const status = card.status
+					const { isPendingForProvider, isPendingConnect, isPendingRefresh } = getCardMutationState(
+						{
 							card,
 							isMutationPending: providerActionMutation.isPending,
 							variables: providerActionMutation.variables,
-						});
-					const isConnected = status.connected;
-					const primaryProvider = card.providers[0] ?? card.provider;
-					const cardTitle = getConnectionCardTitle(card);
-					const statusLabel = getConnectionStatusLabel(card);
-					const statusMessage = getConnectionStatusMessage(card);
-					const updatedAtLabel = formatConnectionUpdatedAt(
-						status.lastUpdatedAt,
-					);
+						},
+					)
+					const isConnected = status.connected
+					const primaryProvider = card.providers[0] ?? card.provider
+					const cardTitle = getConnectionCardTitle(card)
+					const statusLabel = getConnectionStatusLabel(card)
+					const statusMessage = getConnectionStatusMessage(card)
+					const updatedAtLabel = formatConnectionUpdatedAt(status.lastUpdatedAt)
 					const canInteractivelyReconnect = Boolean(
 						authProvidersQuery.data?.interactiveConnectAllowed,
-					);
-					const primaryButtonLabel = status.connecting
-						? "Connecting"
-						: "Connect";
+					)
+					const primaryButtonLabel = status.connecting ? "Connecting" : "Connect"
 
-					const isEnabled = isProviderEnabled(card.provider);
+					const isEnabled = isProviderEnabled(card.provider)
 
 					return (
 						<div
@@ -516,11 +477,7 @@ export function ProviderConnectionsPanel(props: {
 												aria-checked={isEnabled}
 												onClick={() => handleProviderToggle(card.provider)}
 												disabled={setEnabledMutation.isPending}
-												title={
-													isEnabled
-														? `Disable ${cardTitle}`
-														: `Enable ${cardTitle}`
-												}
+												title={isEnabled ? `Disable ${cardTitle}` : `Enable ${cardTitle}`}
 												className={cn(
 													"relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus-visible:outline-none disabled:cursor-not-allowed",
 													isEnabled
@@ -540,7 +497,7 @@ export function ProviderConnectionsPanel(props: {
 								</div>
 							</div>
 						</div>
-					);
+					)
 				})}
 			</div>
 
@@ -591,8 +548,8 @@ export function ProviderConnectionsPanel(props: {
 							Continue without providers?
 						</DialogTitle>
 						<DialogDescription className="text-sm leading-6 text-gray-500 dark:text-gray-400">
-							You can keep setting up your workspace, but prompt runs will not
-							work until at least one provider is connected.
+							You can keep setting up your workspace, but prompt runs will not work until at least
+							one provider is connected.
 						</DialogDescription>
 					</DialogHeader>
 					<DialogFooter className={formDialogFooterClassName}>
@@ -603,15 +560,12 @@ export function ProviderConnectionsPanel(props: {
 						>
 							No
 						</Button>
-						<Button
-							onClick={handleSkipForNow}
-							className={formPrimaryButtonClassName}
-						>
+						<Button onClick={handleSkipForNow} className={formPrimaryButtonClassName}>
 							Yes, continue anyway
 						</Button>
 					</DialogFooter>
 				</DialogContent>
 			</Dialog>
 		</section>
-	);
+	)
 }

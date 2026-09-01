@@ -1,18 +1,17 @@
-import { getDomain } from "./url/getDomain.js";
-import { PROVIDER_DISPLAY } from "./agent/providers.js";
+import { PROVIDER_DISPLAY } from "./agent/providers.js"
+import { getDomain } from "./url/getDomain.js"
 
 export const getModelFavicon = (model: string): string => {
 	// Normalize model name to lowercase provider key
-	const normalizedModel = model.toLowerCase();
+	const normalizedModel = model.toLowerCase()
 
 	// If "All Models", return empty string (we'll use Bot icon instead)
-	if (model === "All Models") return "";
+	if (model === "All Models") return ""
 
 	// Check known provider keys first (chatgpt, perplexity, gemini)
-	const providerConfig =
-		PROVIDER_DISPLAY[normalizedModel as keyof typeof PROVIDER_DISPLAY];
+	const providerConfig = PROVIDER_DISPLAY[normalizedModel as keyof typeof PROVIDER_DISPLAY]
 	if (providerConfig) {
-		return `https://www.google.com/s2/favicons?sz=64&domain=${providerConfig.domain}`;
+		return `https://www.google.com/s2/favicons?sz=64&domain=${providerConfig.domain}`
 	}
 
 	// Fallback: display name aliases and other models
@@ -24,16 +23,16 @@ export const getModelFavicon = (model: string): string => {
 		mistral: "mistral.ai",
 		meta: "about.fb.com",
 		cohere: "cohere.com",
-	};
+	}
 
-	const domain = fallbackDomains[normalizedModel] ?? `${normalizedModel}.com`;
-	return `https://www.google.com/s2/favicons?sz=64&domain=${domain}`;
-};
+	const domain = fallbackDomains[normalizedModel] ?? `${normalizedModel}.com`
+	return `https://www.google.com/s2/favicons?sz=64&domain=${domain}`
+}
 
 export const getFaviconUrls = (domain?: string, name?: string): string[] => {
-	const hostname = getDomain(domain ?? "");
+	const hostname = getDomain(domain ?? "")
 
-	if (!hostname) return [];
+	if (!hostname) return []
 
 	return [
 		// Google favicon (most reliable)
@@ -44,5 +43,5 @@ export const getFaviconUrls = (domain?: string, name?: string): string[] => {
 
 		// Clearbit logo
 		`https://logo.clearbit.com/${hostname}`,
-	].filter(Boolean);
-};
+	].filter(Boolean)
+}

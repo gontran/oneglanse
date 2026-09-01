@@ -1,8 +1,8 @@
-"use client";
+"use client"
 
-import { cn, getFaviconUrls } from "@oneglanse/utils";
-import { Globe, Link2, Trophy, Users } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
+import { cn, getFaviconUrls } from "@oneglanse/utils"
+import { Globe, Link2, Trophy, Users } from "lucide-react"
+import type { LucideIcon } from "lucide-react"
 
 function StatCard({
 	label,
@@ -12,19 +12,16 @@ function StatCard({
 	valueClassName = "text-gray-900 dark:text-gray-100",
 	domain,
 }: {
-	label: string;
-	value: string | number;
-	subtitle?: string;
-	icon: LucideIcon;
-	valueClassName?: string;
-	domain?: string;
+	label: string
+	value: string | number
+	subtitle?: string
+	icon: LucideIcon
+	valueClassName?: string
+	domain?: string
 }) {
-	const isStringValue = typeof value === "string";
-	const showFavicon =
-		isStringValue && (label === "Top Source" || label === "Top Competitor");
-	const faviconUrls = showFavicon
-		? getFaviconUrls(domain || String(value), String(value))
-		: [];
+	const isStringValue = typeof value === "string"
+	const showFavicon = isStringValue && (label === "Top Source" || label === "Top Competitor")
+	const faviconUrls = showFavicon ? getFaviconUrls(domain || String(value), String(value)) : []
 
 	return (
 		<div className="ui-list-item group flex min-h-[120px] min-w-0 flex-col justify-between rounded-[var(--app-radius)] border border-gray-100/80 bg-white p-4 shadow-[0_20px_60px_-32px_rgba(15,23,42,0.18)] transition hover:border-gray-200 hover:bg-stone-50 dark:border-gray-800 dark:bg-neutral-950 dark:shadow-[0_20px_60px_-32px_rgba(0,0,0,0.55)] dark:hover:bg-neutral-900">
@@ -42,7 +39,7 @@ function StatCard({
 						alt=""
 						className="h-5 w-5 shrink-0 rounded-[var(--app-radius)]"
 						onError={(e) => {
-							(e.target as HTMLImageElement).style.display = "none";
+							;(e.target as HTMLImageElement).style.display = "none"
 						}}
 					/>
 				)}
@@ -54,12 +51,10 @@ function StatCard({
 			</div>
 
 			{subtitle && (
-				<span className="mt-1 break-words text-xs text-muted-foreground">
-					{subtitle}
-				</span>
+				<span className="mt-1 break-words text-xs text-muted-foreground">{subtitle}</span>
 			)}
 		</div>
-	);
+	)
 }
 
 export function AggregateStatsRow({
@@ -70,20 +65,15 @@ export function AggregateStatsRow({
 	topCompetitorDomain,
 	className,
 }: {
-	presenceRate: number;
-	rank: number | null;
-	topSource: string;
-	topCompetitor: string;
-	topCompetitorDomain?: string;
-	className?: string;
+	presenceRate: number
+	rank: number | null
+	topSource: string
+	topCompetitor: string
+	topCompetitorDomain?: string
+	className?: string
 }) {
 	return (
-		<div
-			className={cn(
-				"grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4",
-				className,
-			)}
-		>
+		<div className={cn("grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4", className)}>
 			<StatCard
 				icon={Globe}
 				label="Presence Rate"
@@ -110,5 +100,5 @@ export function AggregateStatsRow({
 				domain={topCompetitorDomain}
 			/>
 		</div>
-	);
+	)
 }

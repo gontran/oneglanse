@@ -79,3 +79,33 @@ export interface AuditRun {
 	prompt_count: number
 	surface_count: number
 }
+
+export interface Project {
+	id: string
+	name: string
+	domain: string
+	country: string
+	country_custom: string | null
+	language: string
+	language_custom: string | null
+}
+
+export interface Competitor {
+	id: string
+	name: string
+	domain: string | null
+}
+
+export interface ProjectSurface {
+	id: string
+	surface: string
+	is_active: boolean
+}
+
+export interface ProjectPrompt extends UserPrompt {
+	is_active: boolean
+	sort_order: number
+}
+
+export type { SourceRef as ResultSource }
+export type { AnalysisRecord as AuditResult }

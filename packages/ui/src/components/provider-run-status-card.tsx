@@ -1,14 +1,9 @@
-"use client";
+"use client"
 
-import { cn, getModelFavicon, getProviderDisplayName } from "@oneglanse/utils";
-import { CheckCircle2, StopCircle, XCircle } from "lucide-react";
+import { cn, getModelFavicon, getProviderDisplayName } from "@oneglanse/utils"
+import { CheckCircle2, StopCircle, XCircle } from "lucide-react"
 
-export type ProviderRunDisplayPhase =
-	| "pending"
-	| "running"
-	| "completed"
-	| "failed"
-	| "stopped";
+export type ProviderRunDisplayPhase = "pending" | "running" | "completed" | "failed" | "stopped"
 
 function Spinner({ className }: { className?: string }) {
 	return (
@@ -18,52 +13,43 @@ function Spinner({ className }: { className?: string }) {
 				className,
 			)}
 		/>
-	);
+	)
 }
 
 export function ProviderRunStatusCard(props: {
-	provider: string;
-	phase: ProviderRunDisplayPhase;
-	onStop?: () => void | Promise<void>;
-	isStopping?: boolean;
-	promptNumber?: number;
-	totalPrompts?: number;
+	provider: string
+	phase: ProviderRunDisplayPhase
+	onStop?: () => void | Promise<void>
+	isStopping?: boolean
+	promptNumber?: number
+	totalPrompts?: number
 }) {
-	const {
-		provider,
-		phase,
-		onStop,
-		isStopping = false,
-		promptNumber,
-		totalPrompts,
-	} = props;
-	const title = getProviderDisplayName(provider);
-	const isActive = phase === "running" || phase === "pending";
-	const canStop = phase === "running" && Boolean(onStop) && !isStopping;
+	const { provider, phase, onStop, isStopping = false, promptNumber, totalPrompts } = props
+	const title = getProviderDisplayName(provider)
+	const isActive = phase === "running" || phase === "pending"
+	const canStop = phase === "running" && Boolean(onStop) && !isStopping
 
 	const showProgress =
 		phase === "running" &&
 		!isStopping &&
 		promptNumber !== undefined &&
 		totalPrompts !== undefined &&
-		totalPrompts > 0;
+		totalPrompts > 0
 
-	const progressPct = showProgress
-		? Math.round((promptNumber! / totalPrompts!) * 100)
-		: 0;
+	const progressPct = showProgress ? Math.round((promptNumber! / totalPrompts!) * 100) : 0
 
 	function getSubtitle() {
-		if (phase === "pending") return "Queued: waiting to start";
+		if (phase === "pending") return "Queued: waiting to start"
 		if (phase === "running") {
-			if (isStopping) return "Canceling prompts…";
+			if (isStopping) return "Canceling prompts…"
 			if (showProgress) {
-				return `Prompt ${promptNumber} of ${totalPrompts}`;
+				return `Prompt ${promptNumber} of ${totalPrompts}`
 			}
-			return "Running prompts, please wait…";
+			return "Running prompts, please wait…"
 		}
-		if (phase === "completed") return "Responses saved.";
-		if (phase === "stopped") return "Stopped at your request.";
-		return "This provider needs another attempt.";
+		if (phase === "completed") return "Responses saved."
+		if (phase === "stopped") return "Stopped at your request."
+		return "This provider needs another attempt."
 	}
 
 	const logoGlow =
@@ -73,7 +59,7 @@ export function ProviderRunStatusCard(props: {
 				? "bg-red-400/25 dark:bg-red-500/20"
 				: phase === "stopped"
 					? "bg-slate-400/20 dark:bg-slate-500/15"
-					: "bg-gray-300/30 dark:bg-white/10";
+					: "bg-gray-300/30 dark:bg-white/10"
 
 	return (
 		<div className="pointer-events-auto w-[min(360px,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-gray-100/80 bg-white shadow-[0_4px_20px_-4px_rgba(0,0,0,0.10),0_1px_4px_-1px_rgba(0,0,0,0.05)] animate-in fade-in-0 slide-in-from-bottom-2 zoom-in-95 duration-200 dark:border-white/[0.06] dark:bg-neutral-900 dark:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.45)]">
@@ -126,9 +112,7 @@ export function ProviderRunStatusCard(props: {
 							<Spinner
 								className={cn(
 									"h-5 w-5",
-									phase === "pending"
-										? "animate-[spin_2.4s_linear_infinite]"
-										: "animate-spin",
+									phase === "pending" ? "animate-[spin_2.4s_linear_infinite]" : "animate-spin",
 								)}
 							/>
 						)}
@@ -142,12 +126,8 @@ export function ProviderRunStatusCard(props: {
 								<StopCircle className="h-5 w-5" />
 							</button>
 						)}
-						{phase === "completed" && (
-							<CheckCircle2 className="h-5 w-5 text-emerald-500" />
-						)}
-						{phase === "failed" && (
-							<XCircle className="h-5 w-5 text-red-500" />
-						)}
+						{phase === "completed" && <CheckCircle2 className="h-5 w-5 text-emerald-500" />}
+						{phase === "failed" && <XCircle className="h-5 w-5 text-red-500" />}
 					</div>
 				</div>
 
@@ -164,5 +144,5 @@ export function ProviderRunStatusCard(props: {
 				)}
 			</div>
 		</div>
-	);
+	)
 }

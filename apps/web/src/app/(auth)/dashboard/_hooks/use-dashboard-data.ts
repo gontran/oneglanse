@@ -1,13 +1,13 @@
-import type { AnalysisRecord, BrandAnalysisResult } from "@oneglanse/types";
+import type { AnalysisRecord, BrandAnalysisResult } from "@oneglanse/types"
 import {
 	buildSourceOccurrenceKey,
 	compareDashboardCompetitors,
 	filterAnalysisRecords,
 	getDomain,
 	removeUrlParams,
-} from "@oneglanse/utils";
-import { useMemo } from "react";
-import type { CompetitorData, DashboardMetrics } from "../_utils/types";
+} from "@oneglanse/utils"
+import { useMemo } from "react"
+import type { CompetitorData, DashboardMetrics } from "../_utils/types"
 
 export function useDashboardData(
 	analysedPromptData: AnalysisRecord[],
@@ -18,9 +18,9 @@ export function useDashboardData(
 	// ─── 1. Filter step ──────────────────────────────────────────────────────
 
 	const filteredRecords = useMemo(() => {
-		const records = Array.isArray(analysedPromptData) ? analysedPromptData : [];
-		return filterAnalysisRecords(records, { modelFilter, timeFilter });
-	}, [analysedPromptData, modelFilter, timeFilter]);
+		const records = Array.isArray(analysedPromptData) ? analysedPromptData : []
+		return filterAnalysisRecords(records, { modelFilter, timeFilter })
+	}, [analysedPromptData, modelFilter, timeFilter])
 
 	// ─── 2. Analyzed-only subset ──────────────────────────────────────────────
 
@@ -28,14 +28,14 @@ export function useDashboardData(
 		return filteredRecords.filter(
 			(r): r is AnalysisRecord & { brand_analysis: BrandAnalysisResult } =>
 				!!r.is_analysed && !!r.brand_analysis,
-		);
-	}, [filteredRecords]);
+		)
+	}, [filteredRecords])
 
 	// ─── 3. Single-pass aggregation (replaces 9 separate memos) ──────────────
 
 	const aggregatedMetrics = useMemo(() => {
-		const fallbackBrandName = workspaceBrand?.name?.trim() || "Your Brand";
-		const fallbackBrandDomain = workspaceBrand?.domain?.trim() || "";
+		const fallbackBrandName = workspaceBrand?.name?.trim() || "Your Brand"
+		const fallbackBrandDomain = workspaceBrand?.domain?.trim() || ""
 		const emptyReturn = {
 			brandName: fallbackBrandName,
 			brandDomain: fallbackBrandDomain,
@@ -60,109 +60,101 @@ export function useDashboardData(
 				differentiators: [] as string[],
 			},
 			competitorData: [] as CompetitorData[],
-		};
+		}
 
-		if (analyzedRecords.length === 0) return emptyReturn;
+		if (analyzedRecords.length === 0) return emptyReturn
 
-		const total = analyzedRecords.length;
+		const total = analyzedRecords.length
 
 		// brandName / brandDomain
-		let brandName = fallbackBrandName;
-		let brandDomain = fallbackBrandDomain;
+		let brandName = fallbackBrandName
+		let brandDomain = fallbackBrandDomain
 
 		// avgRank accumulators
-		let rankSum = 0;
-		let rankCount = 0;
+		let rankSum = 0
+		let rankCount = 0
 
 		// avgSentiment
-		let sentimentSum = 0;
+		let sentimentSum = 0
 
 		// impactMetrics
-		let visibilitySum = 0;
-		let recommendedCount = 0;
-		let topPickCount = 0;
-		let criticalRiskCount = 0;
+		let visibilitySum = 0
+		let recommendedCount = 0
+		let topPickCount = 0
+		let criticalRiskCount = 0
 
 		// aggregateStats
-		let mentionedCount = 0;
+		let mentionedCount = 0
 
 		// brandPerception
-		const bestKnownForCounts = new Map<string, number>();
-		const pricingCounts = new Map<string, number>();
-		const claimCounts = new Map<string, number>();
-		const diffCounts = new Map<string, number>();
+		const bestKnownForCounts = new Map<string, number>()
+		const pricingCounts = new Map<string, number>()
+		const claimCounts = new Map<string, number>()
+		const diffCounts = new Map<string, number>()
 
 		// competitorData
 		const competitorMap = new Map<
 			string,
 			{
-				name: string;
-				domain: string;
-				appearances: number;
-				visibilitySum: number;
-				visibilityCount: number;
-				sentimentSum: number;
-				rankSum: number;
-				rankCount: number;
-				recCount: number;
+				name: string
+				domain: string
+				appearances: number
+				visibilitySum: number
+				visibilityCount: number
+				sentimentSum: number
+				rankSum: number
+				rankCount: number
+				recCount: number
 			}
-		>();
+		>()
 
 		for (const record of analyzedRecords) {
-			const analysis = record.brand_analysis;
+			const analysis = record.brand_analysis
 
 			// brandName / brandDomain (first occurrence)
 			if (brandName === fallbackBrandName && analysis.metadata?.brandName) {
-				brandName = analysis.metadata.brandName;
+				brandName = analysis.metadata.brandName
 			}
 			if (!brandDomain && analysis.metadata?.brandDomain) {
-				brandDomain = analysis.metadata.brandDomain;
+				brandDomain = analysis.metadata.brandDomain
 			}
 
 			// avgRank
 			if (analysis.position.rankPosition !== null) {
-				rankSum += analysis.position.rankPosition;
-				rankCount++;
+				rankSum += analysis.position.rankPosition
+				rankCount++
 			}
 
 			// avgSentiment
-			sentimentSum += analysis.sentiment.score;
+			sentimentSum += analysis.sentiment.score
 
 			// impactMetrics
-			visibilitySum += analysis.presence.visibility;
+			visibilitySum += analysis.presence.visibility
 
 			if (
 				analysis.recommendation.type === "top_pick" ||
 				analysis.recommendation.type === "strong_alternative"
 			) {
-				recommendedCount++;
+				recommendedCount++
 			}
 			if (analysis.recommendation.type === "top_pick") {
-				topPickCount++;
+				topPickCount++
 			}
 			for (const risk of analysis.risks.items) {
-				if (risk.severity === "critical") criticalRiskCount++;
+				if (risk.severity === "critical") criticalRiskCount++
 			}
 
 			// aggregateStats
-			if (analysis.presence.mentioned) mentionedCount++;
+			if (analysis.presence.mentioned) mentionedCount++
 
 			// brandPerception
-			const p = analysis.perception;
+			const p = analysis.perception
 			if (p.bestKnownFor) {
-				bestKnownForCounts.set(
-					p.bestKnownFor,
-					(bestKnownForCounts.get(p.bestKnownFor) ?? 0) + 1,
-				);
+				bestKnownForCounts.set(p.bestKnownFor, (bestKnownForCounts.get(p.bestKnownFor) ?? 0) + 1)
 			}
-			pricingCounts.set(
-				p.pricingPerception,
-				(pricingCounts.get(p.pricingPerception) ?? 0) + 1,
-			);
-			for (const c of p.coreClaims)
-				claimCounts.set(c, (claimCounts.get(c) ?? 0) + 1);
-			for (const d of p.differentiators)
-				diffCounts.set(d, (diffCounts.get(d) ?? 0) + 1);
+			pricingCounts.set(p.pricingPerception, (pricingCounts.get(p.pricingPerception) ?? 0) + 1)
+			for (const c of p.coreClaims) claimCounts.set(c, (claimCounts.get(c) ?? 0) + 1)
+			for (const d of p.differentiators) diffCounts.set(d, (diffCounts.get(d) ?? 0) + 1)
 
 			// competitorData
 			for (const c of analysis.competitors) {
@@ -176,43 +168,39 @@ export function useDashboardData(
 					rankSum: 0,
 					rankCount: 0,
 					recCount: 0,
-				};
-				existing.appearances++;
-				existing.visibilitySum += c.visibility;
-				existing.visibilityCount++;
-				existing.sentimentSum += c.sentiment;
-				if (c.rankPosition !== null) {
-					existing.rankSum += c.rankPosition;
-					existing.rankCount++;
 				}
-				if (c.isRecommended) existing.recCount++;
-				competitorMap.set(c.name, existing);
+				existing.appearances++
+				existing.visibilitySum += c.visibility
+				existing.visibilityCount++
+				existing.sentimentSum += c.sentiment
+				if (c.rankPosition !== null) {
+					existing.rankSum += c.rankPosition
+					existing.rankCount++
+				}
+				if (c.isRecommended) existing.recCount++
+				competitorMap.set(c.name, existing)
 			}
 		}
 
 		// ── Derived values ────────────────────────────────────────────────────
 
-		const avgRankPosition =
-			rankCount > 0 ? Math.round(rankSum / rankCount) : null;
+		const avgRankPosition = rankCount > 0 ? Math.round(rankSum / rankCount) : null
 
-		const avgSentimentScore = Math.round(sentimentSum / total);
+		const avgSentimentScore = Math.round(sentimentSum / total)
 
 		const competitorList = [...competitorMap.values()]
 			.map((c) => ({
 				name: c.name,
 				domain: c.domain,
 				appearances: c.appearances,
-				visibility:
-					c.visibilityCount > 0
-						? Math.round(c.visibilitySum / c.visibilityCount)
-						: 0,
+				visibility: c.visibilityCount > 0 ? Math.round(c.visibilitySum / c.visibilityCount) : 0,
 				avgSentiment: Math.round(c.sentimentSum / c.appearances),
 				avgRank: c.rankCount > 0 ? Math.round(c.rankSum / c.rankCount) : null,
 				recCount: c.recCount,
 			}))
-			.sort(compareDashboardCompetitors);
+			.sort(compareDashboardCompetitors)
 
-		const topCompetitorEntry = competitorList[0];
+		const topCompetitorEntry = competitorList[0]
 
 		const brandEntry: CompetitorData = {
 			name: brandName,
@@ -223,7 +211,7 @@ export function useDashboardData(
 			avgRank: avgRankPosition,
 			recCount: 0,
 			isBrand: true,
-		};
+		}
 
 		return {
 			brandName,
@@ -243,13 +231,9 @@ export function useDashboardData(
 				topCompetitorDomain: topCompetitorEntry?.domain ?? null,
 			},
 			brandPerception: {
-				bestKnownFor:
-					[...bestKnownForCounts.entries()].sort(
-						(a, b) => b[1] - a[1],
-					)[0]?.[0] ?? null,
+				bestKnownFor: [...bestKnownForCounts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? null,
 				pricingPerception:
-					[...pricingCounts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ??
-					"not_mentioned",
+					[...pricingCounts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? "not_mentioned",
 				coreClaims: [...claimCounts.entries()]
 					.sort((a, b) => b[1] - a[1])
 					.slice(0, 8)
@@ -260,8 +244,8 @@ export function useDashboardData(
 					.map(([t]) => t),
 			},
 			competitorData: [brandEntry, ...competitorList],
-		};
-	}, [analyzedRecords, workspaceBrand?.name, workspaceBrand?.domain]);
+		}
+	}, [analyzedRecords, workspaceBrand?.name, workspaceBrand?.domain])
 
 	// ─── 4. Sources intelligence (separate input: filteredRecords) ─────────────
 
@@ -269,22 +253,22 @@ export function useDashboardData(
 		const domainMap = new Map<
 			string,
 			{
-				domain: string;
-				favicon: string | null;
-				citationCount: number;
-				uniqueRecords: Set<string>;
-				models: Set<string>;
-				excerpts: { text: string; model: string }[];
-				urls: Set<string>;
+				domain: string
+				favicon: string | null
+				citationCount: number
+				uniqueRecords: Set<string>
+				models: Set<string>
+				excerpts: { text: string; model: string }[]
+				urls: Set<string>
 			}
-		>();
-		const seenCitations = new Set<string>();
+		>()
+		const seenCitations = new Set<string>()
 
 		for (const r of filteredRecords) {
 			for (const s of r.sources) {
-				const cleanUrl = removeUrlParams(s.url);
-				const domain = getDomain(cleanUrl);
-				if (!domain) continue;
+				const cleanUrl = removeUrlParams(s.url)
+				const domain = getDomain(cleanUrl)
+				if (!domain) continue
 
 				// Use URL as the canonical deduplication key — matching the
 				// groupSourcesByUrl logic on the sources page. Deduping by title
@@ -294,9 +278,9 @@ export function useDashboardData(
 					url: cleanUrl,
 					cited_text: s.cited_text ?? "",
 					modelProvider: r.model_provider,
-				});
-				if (seenCitations.has(dedupeKey)) continue;
-				seenCitations.add(dedupeKey);
+				})
+				if (seenCitations.has(dedupeKey)) continue
+				seenCitations.add(dedupeKey)
 
 				const existing = domainMap.get(domain) ?? {
 					domain,
@@ -306,35 +290,30 @@ export function useDashboardData(
 					models: new Set<string>(),
 					excerpts: [],
 					urls: new Set<string>(),
-				};
-				existing.citationCount += 1;
-				existing.uniqueRecords.add(r.id);
-				existing.models.add(r.model_provider);
-				existing.urls.add(cleanUrl);
+				}
+				existing.citationCount += 1
+				existing.uniqueRecords.add(r.id)
+				existing.models.add(r.model_provider)
+				existing.urls.add(cleanUrl)
 				if (s.cited_text) {
 					existing.excerpts.push({
 						text: s.cited_text,
 						model: r.model_provider,
-					});
+					})
 				}
-				domainMap.set(domain, existing);
+				domainMap.set(domain, existing)
 			}
 		}
 
-		const allDomains = [...domainMap.values()].sort(
-			(a, b) => b.citationCount - a.citationCount,
-		);
-		const totalCitations = allDomains.reduce(
-			(sum, d) => sum + d.citationCount,
-			0,
-		);
-		return { sources: allDomains, totalCitations };
-	}, [filteredRecords]);
+		const allDomains = [...domainMap.values()].sort((a, b) => b.citationCount - a.citationCount)
+		const totalCitations = allDomains.reduce((sum, d) => sum + d.citationCount, 0)
+		return { sources: allDomains, totalCitations }
+	}, [filteredRecords])
 
 	return {
 		...aggregatedMetrics,
 		sourcesIntelligence: sourcesIntelligence.sources,
 		totalCitations: sourcesIntelligence.totalCitations,
 		analyzedRecords,
-	};
+	}
 }

@@ -1,14 +1,11 @@
-import { cancelProviderRun, redis, waitForRedis } from "@oneglanse/services";
-import { PROVIDER_LIST } from "@oneglanse/types";
-import { z } from "zod";
-import { createRateLimiter } from "../../middleware/rateLimit";
-import { validWorkspace } from "../../middleware/validWorkspace";
-import {
-	authorizedWorkspaceProcedure,
-	protectedProcedure,
-} from "../../procedures";
-import { createTRPCRouter } from "../../trpc";
-import { submitAgentRun } from "../_shared/submitAgentRun";
+import { cancelProviderRun, redis, waitForRedis } from "@oneglanse/services"
+import { PROVIDER_LIST } from "@oneglanse/types"
+import { z } from "zod"
+import { createRateLimiter } from "../../middleware/rateLimit"
+import { validWorkspace } from "../../middleware/validWorkspace"
+import { authorizedWorkspaceProcedure, protectedProcedure } from "../../procedures"
+import { createTRPCRouter } from "../../trpc"
+import { submitAgentRun } from "../_shared/submitAgentRun"
 
 export const agentRouter = createTRPCRouter({
 	run: authorizedWorkspaceProcedure
@@ -17,9 +14,9 @@ export const agentRouter = createTRPCRouter({
 			const {
 				user: { id: userId },
 				workspaceId,
-			} = ctx;
+			} = ctx
 
-			return submitAgentRun({ workspaceId, userId });
+			return submitAgentRun({ workspaceId, userId })
 		}),
 
 	status: authorizedWorkspaceProcedure
@@ -31,18 +28,18 @@ export const agentRouter = createTRPCRouter({
 			}),
 		)
 		.query(async ({ input }) => {
-			await waitForRedis();
-			const result = await redis.get(`job:${input.jobId}:result`);
+			await waitForRedis()
+			const result = await redis.get(`job:${input.jobId}:result`)
 
 			if (!result) {
-				return { status: "pending" as const, response: null };
+				return { status: "pending" as const, response: null }
 			}
 
-			const parsed = JSON.parse(result);
+			const parsed = JSON.parse(result)
 			return {
 				status: parsed?.status === "completed" ? "completed" : "pending",
 				response: parsed,
-			};
+			}
 		}),
 
 	stopProvider: protectedProcedure
@@ -58,6 +55,6 @@ export const agentRouter = createTRPCRouter({
 			return cancelProviderRun({
 				jobGroupId: input.jobId,
 				provider: input.provider,
-			});
+			})
 		}),
-});
+})

@@ -1,12 +1,12 @@
-import { ExternalServiceError, toErrorMessage } from "@oneglanse/errors";
-import { RETRYABLE_ERRORS, logger } from "@oneglanse/utils";
-import type { Page } from "playwright";
+import { ExternalServiceError, toErrorMessage } from "@oneglanse/errors"
+import { RETRYABLE_ERRORS, logger } from "@oneglanse/utils"
+import type { Page } from "playwright"
 
 function jitter(baseMs: number, factor = 0.3): number {
-	const delta = Math.round(baseMs * factor);
-	const min = Math.max(0, baseMs - delta);
-	const max = baseMs + delta;
-	return Math.round(min + Math.random() * (max - min));
+	const delta = Math.round(baseMs * factor)
+	const min = Math.max(0, baseMs - delta)
+	const max = baseMs + delta
+	return Math.round(min + Math.random() * (max - min))
 }
 
 export async function navigateWithRetry(
@@ -19,12 +19,12 @@ export async function navigateWithRetry(
 	// Scope the Referer to just this navigation request (not all sub-resources).
 	// page.goto referer option is per-navigation; setExtraHTTPHeaders would
 	// leak the header to every subsequent request (images, scripts, etc.).
-	let referer = options?.referer;
+	let referer = options?.referer
 	if (referer === undefined) {
 		try {
-			const currentUrl = page.url();
+			const currentUrl = page.url()
 			if (currentUrl && currentUrl !== "about:blank") {
-				referer = currentUrl;
+				referer = currentUrl
 			}
 			// No synthetic referer injection for cold starts — sending a hardcoded
 			// Google referer on every first navigation is a detectable behavioral
@@ -35,15 +35,15 @@ export async function navigateWithRetry(
 		}
 	}
 
-	const gotoOptions = referer !== undefined ? { ...options, referer } : options;
+	const gotoOptions = referer !== undefined ? { ...options, referer } : options
 
 	for (let attempt = 1; attempt <= maxRetries; attempt++) {
 		try {
-			await page.goto(url, gotoOptions);
-			return;
+			await page.goto(url, gotoOptions)
+			return
 		} catch (err) {
-			const message = toErrorMessage(err);
-			const isRetryable = RETRYABLE_ERRORS.some((e) => message.includes(e));
+			const message = toErrorMessage(err)
+			const isRetryable = RETRYABLE_ERRORS.some((e) => message.includes(e))
 
 			if (!isRetryable || attempt === maxRetries) {
 				throw new ExternalServiceError(
@@ -52,14 +52,14 @@ export async function navigateWithRetry(
 					502,
 					{ url, attempt },
 					err,
-				);
+				)
 			}
 
 			logger.warn(
 				`navigation failed (attempt ${attempt}/${maxRetries}): ${message} — retrying in ${Math.round(jitter(delayMs) / 100) / 10}s`,
-			);
+			)
 
-			await page.waitForTimeout(jitter(delayMs));
+			await page.waitForTimeout(jitter(delayMs))
 		}
 	}
 }

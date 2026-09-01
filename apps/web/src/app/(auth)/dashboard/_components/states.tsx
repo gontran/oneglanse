@@ -1,18 +1,13 @@
-import {
-	Button,
-	EmptyStatePanel,
-	Skeleton,
-	WorkspaceRequiredState,
-} from "@oneglanse/ui";
-import { BarChart3, Building2, Link2, Trophy, Users } from "lucide-react";
-import Link from "next/link";
+import { Button, EmptyStatePanel, Skeleton, WorkspaceRequiredState } from "@oneglanse/ui"
+import { BarChart3, Building2, Link2, Trophy, Users } from "lucide-react"
+import Link from "next/link"
 
 const DASHBOARD_SKELETON_KEYS = [
 	"dashboard-skeleton-a",
 	"dashboard-skeleton-b",
 	"dashboard-skeleton-c",
 	"dashboard-skeleton-d",
-] as const;
+] as const
 
 export function DashboardSkeleton() {
 	return (
@@ -48,7 +43,7 @@ export function DashboardSkeleton() {
 				</div>
 			</div>
 		</div>
-	);
+	)
 }
 
 export function NoWorkspaceState() {
@@ -58,7 +53,7 @@ export function NoWorkspaceState() {
 			title="Pick a Workspace"
 			description="Open a workspace to see your brand dashboard."
 		/>
-	);
+	)
 }
 
 export function EmptyState({ workspaceId }: { workspaceId: string }) {
@@ -79,17 +74,17 @@ export function EmptyState({ workspaceId }: { workspaceId: string }) {
 				</Button>
 			}
 		/>
-	);
+	)
 }
 
 export function FilteredDashboardState({
 	workspaceId,
 	modelFilter,
 }: {
-	workspaceId: string;
-	modelFilter: string;
+	workspaceId: string
+	modelFilter: string
 }) {
-	const isModelSpecific = modelFilter !== "All Models";
+	const isModelSpecific = modelFilter !== "All Models"
 
 	return (
 		<EmptyStatePanel
@@ -110,7 +105,7 @@ export function FilteredDashboardState({
 				</Button>
 			}
 		/>
-	);
+	)
 }
 
 export function NoAnalysisState({ workspaceId }: { workspaceId: string }) {
@@ -125,5 +120,5 @@ export function NoAnalysisState({ workspaceId }: { workspaceId: string }) {
 				</Button>
 			}
 		/>
-	);
+	)
 }

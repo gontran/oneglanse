@@ -1,17 +1,17 @@
-import { clickhouse } from "@oneglanse/db";
-import type { StorePromptsForWorkspaceArgs } from "@oneglanse/types";
-import { formatDateToClickHouse } from "@oneglanse/utils";
-import { v4 as uuidv4 } from "uuid";
-import { insertClickHouseWithFallback } from "./lib/insertClickHouseWithFallback.js";
+import { clickhouse } from "@oneglanse/db"
+import type { StorePromptsForWorkspaceArgs } from "@oneglanse/types"
+import { formatDateToClickHouse } from "@oneglanse/utils"
+import { v4 as uuidv4 } from "uuid"
+import { insertClickHouseWithFallback } from "./lib/insertClickHouseWithFallback.js"
 
 export async function storePromptsForWorkspace(
 	args: StorePromptsForWorkspaceArgs,
 ): Promise<string[]> {
-	const { prompts, workspaceId, userId } = args;
+	const { prompts, workspaceId, userId } = args
 
 	const normalizedPrompts = Array.from(
 		new Set(prompts.map((p) => p.trim()).filter((p) => p !== "")),
-	);
+	)
 
 	const existing = await clickhouse.query({
 		query: `
@@ -21,18 +21,16 @@ export async function storePromptsForWorkspace(
         `,
 		query_params: { workspaceId },
 		format: "JSONEachRow",
-	});
+	})
 
-	const existingRows = (await existing.json()) as Array<{ prompt: string }>;
-	const existingPrompts = new Set(existingRows.map((r) => r.prompt));
+	const existingRows = (await existing.json()) as Array<{ prompt: string }>
+	const existingPrompts = new Set(existingRows.map((r) => r.prompt))
 
-	const promptsToInsert = normalizedPrompts.filter(
-		(p) => !existingPrompts.has(p),
-	);
+	const promptsToInsert = normalizedPrompts.filter((p) => !existingPrompts.has(p))
 
 	const promptsToDelete = existingRows
 		.map((r) => r.prompt)
-		.filter((p) => !normalizedPrompts.includes(p));
+		.filter((p) => !normalizedPrompts.includes(p))
 
 	if (promptsToInsert.length > 0) {
 		const values = promptsToInsert.map((p) => ({
@@ -41,16 +39,14 @@ export async function storePromptsForWorkspace(
 			workspace_id: workspaceId,
 			prompt: p,
 			created_at: formatDateToClickHouse(new Date()),
-		}));
+		}))
 
 		await insertClickHouseWithFallback("analytics.user_prompts", values, {
 			throwOnAllFailed: true,
 			onRecordFailed: (value) => {
-				console.error(
-					`Failed to insert prompt: "${value.prompt.slice(0, 50)}..."`,
-				);
+				console.error(`Failed to insert prompt: "${value.prompt.slice(0, 50)}..."`)
 			},
-		});
+		})
 	}
 
 	if (promptsToDelete.length > 0) {
@@ -64,8 +60,8 @@ export async function storePromptsForWorkspace(
 				workspaceId,
 				promptsToDelete,
 			},
-		});
+		})
 	}
 
-	return normalizedPrompts;
+	return normalizedPrompts
 }

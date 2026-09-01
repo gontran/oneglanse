@@ -1,17 +1,14 @@
-"use client";
+"use client"
 import {
 	AuthFormChrome,
 	formFieldClassName,
 	formLabelClassName,
 	formPrimaryButtonClassName,
-} from "@/components/forms/auth-form-chrome";
-import { PasswordField } from "@/components/forms/password-field";
-import { authClient } from "@/lib/auth/auth-client";
-import {
-	getPostAuthProvidersPath,
-	getSafeAuthRedirectPath,
-} from "@/lib/auth/redirect";
-import { zodResolver } from "@hookform/resolvers/zod";
+} from "@/components/forms/auth-form-chrome"
+import { PasswordField } from "@/components/forms/password-field"
+import { authClient } from "@/lib/auth/auth-client"
+import { getPostAuthProvidersPath, getSafeAuthRedirectPath } from "@/lib/auth/redirect"
+import { zodResolver } from "@hookform/resolvers/zod"
 import {
 	Button,
 	Form,
@@ -23,38 +20,36 @@ import {
 	Input,
 	toast,
 	useForm,
-} from "@oneglanse/ui";
-import { Loader2 } from "lucide-react";
-import { useSearchParams } from "next/navigation";
-import { useState } from "react";
-import { z } from "zod";
+} from "@oneglanse/ui"
+import { Loader2 } from "lucide-react"
+import { useSearchParams } from "next/navigation"
+import { useState } from "react"
+import { z } from "zod"
 
 const formSchema = z.object({
 	email: z.string().email(),
 	password: z.string().min(8),
-});
+})
 
 export function LoginForm({
 	className,
 	showGoogle = false,
 	...props
 }: React.ComponentProps<"div"> & { showGoogle?: boolean }) {
-	const searchParams = useSearchParams();
-	const [isLoading, setIsLoading] = useState(false);
-	const rawNext = searchParams?.get("next");
-	const redirectPath = getSafeAuthRedirectPath(rawNext);
-	const postAuthRedirectPath = getPostAuthProvidersPath(rawNext);
+	const searchParams = useSearchParams()
+	const [isLoading, setIsLoading] = useState(false)
+	const rawNext = searchParams?.get("next")
+	const redirectPath = getSafeAuthRedirectPath(rawNext)
+	const postAuthRedirectPath = getPostAuthProvidersPath(rawNext)
 	const signupHref =
-		redirectPath === "/"
-			? "/signup"
-			: `/signup?next=${encodeURIComponent(redirectPath)}`;
+		redirectPath === "/" ? "/signup" : `/signup?next=${encodeURIComponent(redirectPath)}`
 
 	const signInWithGoogle = async () => {
 		await authClient.signIn.social({
 			provider: "google",
 			callbackURL: postAuthRedirectPath,
-		});
-	};
+		})
+	}
 
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
@@ -62,23 +57,23 @@ export function LoginForm({
 			email: "",
 			password: "",
 		},
-	});
+	})
 
 	async function onSubmit(values: z.infer<typeof formSchema>) {
-		setIsLoading(true);
+		setIsLoading(true)
 
 		const { error } = await authClient.signIn.email({
 			email: values.email,
 			password: values.password,
-		});
+		})
 
 		if (error) {
-			toast.error(error.message ?? "Failed to sign in.");
-			setIsLoading(false);
-			return;
+			toast.error(error.message ?? "Failed to sign in.")
+			setIsLoading(false)
+			return
 		}
 
-		window.location.href = postAuthRedirectPath;
+		window.location.href = postAuthRedirectPath
 	}
 
 	return (
@@ -116,20 +111,12 @@ export function LoginForm({
 							/>
 						</div>
 						<PasswordField control={form.control} name="password" />
-						<Button
-							type="submit"
-							className={formPrimaryButtonClassName}
-							disabled={isLoading}
-						>
-							{isLoading ? (
-								<Loader2 className="size-4 animate-spin" />
-							) : (
-								"Sign in"
-							)}
+						<Button type="submit" className={formPrimaryButtonClassName} disabled={isLoading}>
+							{isLoading ? <Loader2 className="size-4 animate-spin" /> : "Sign in"}
 						</Button>
 					</div>
 				</form>
 			</Form>
 		</AuthFormChrome>
-	);
+	)
 }

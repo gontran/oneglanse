@@ -1,9 +1,9 @@
-import type { DashboardCompetitorData } from "@oneglanse/ui";
+import type { DashboardCompetitorData } from "@oneglanse/ui"
 
 export const PREVIEW_BRAND = {
 	name: "HubSpot",
 	domain: "hubspot.com",
-} as const;
+} as const
 
 export const PREVIEW_COMPETITORS: DashboardCompetitorData[] = [
 	{
@@ -61,10 +61,10 @@ export const PREVIEW_COMPETITORS: DashboardCompetitorData[] = [
 		avgRank: 4.8,
 		recCount: 52,
 	},
-];
+]
 
-export const PREVIEW_TOTAL_RESPONSES = 428;
-export const PREVIEW_TOTAL_CITATIONS = 952;
+export const PREVIEW_TOTAL_RESPONSES = 428
+export const PREVIEW_TOTAL_CITATIONS = 952
 
 export const PREVIEW_PERCEPTION = {
 	bestKnownFor: "unified CRM and marketing automation for revenue teams",
@@ -82,7 +82,7 @@ export const PREVIEW_PERCEPTION = {
 		"fast onboarding for growth teams",
 		"cross-hub governance controls",
 	],
-} as const;
+} as const
 
 export const PREVIEW_SOURCE_GROUPS = [
 	{
@@ -149,7 +149,7 @@ export const PREVIEW_SOURCE_GROUPS = [
 		brandMentions: 58,
 		providers: ["chatgpt", "perplexity"],
 	},
-] as const;
+] as const
 
 export const PREVIEW_CITATION_ROWS = [
 	{
@@ -157,8 +157,7 @@ export const PREVIEW_CITATION_ROWS = [
 		title: "HubSpot Marketing Hub Review Grid",
 		provider: "chatgpt",
 		citations: 19,
-		excerpt:
-			"Strong CRM depth, automation breadth, and quick time-to-value for revenue teams.",
+		excerpt: "Strong CRM depth, automation breadth, and quick time-to-value for revenue teams.",
 	},
 	{
 		domain: "capterra.com",
@@ -173,34 +172,30 @@ export const PREVIEW_CITATION_ROWS = [
 		title: "HubSpot Marketing Hub User Ratings",
 		provider: "perplexity",
 		citations: 14,
-		excerpt:
-			"Cited for campaign orchestration, segmentation, and dependable reporting layers.",
+		excerpt: "Cited for campaign orchestration, segmentation, and dependable reporting layers.",
 	},
 	{
 		domain: "forrester.com",
 		title: "B2B Revenue Platforms Wave",
 		provider: "gemini",
 		citations: 12,
-		excerpt:
-			"Noted for ecosystem strength and measurable pipeline influence across channels.",
+		excerpt: "Noted for ecosystem strength and measurable pipeline influence across channels.",
 	},
 	{
 		domain: "gartner.com",
 		title: "CRM and Marketing Suites Market Guide",
 		provider: "gemini",
 		citations: 11,
-		excerpt:
-			"Balanced on extensibility, operational governance, and total cost considerations.",
+		excerpt: "Balanced on extensibility, operational governance, and total cost considerations.",
 	},
 	{
 		domain: "salesforce.com",
 		title: "Marketing Cloud Competitive Overview",
 		provider: "chatgpt",
 		citations: 9,
-		excerpt:
-			"Compared on enterprise depth and integration strategy in complex buying cycles.",
+		excerpt: "Compared on enterprise depth and integration strategy in complex buying cycles.",
 	},
-] as const;
+] as const
 
 // Derived from PREVIEW_COMPETITORS[0]: presenceRate=86, recommendationRate=68, sentimentScore=83, avgRank=1.4
 export const PREVIEW_BRAND_METRICS = {
@@ -208,7 +203,7 @@ export const PREVIEW_BRAND_METRICS = {
 	recommendationRate: 68,
 	sentimentScore: 83,
 	avgRank: 1.4,
-} as const;
+} as const
 
 export const PREVIEW_AGGREGATE_STATS = {
 	presenceRate: 86,
@@ -216,7 +211,7 @@ export const PREVIEW_AGGREGATE_STATS = {
 	topSource: "g2.com",
 	topCompetitor: "Salesforce",
 	topCompetitorDomain: "salesforce.com",
-} as const;
+} as const
 
 export const PREVIEW_COMPETITOR_PROVIDERS: Record<string, string[]> = {
 	HubSpot: ["chatgpt", "perplexity", "gemini"],
@@ -225,7 +220,7 @@ export const PREVIEW_COMPETITOR_PROVIDERS: Record<string, string[]> = {
 	Mailchimp: ["chatgpt", "gemini", "perplexity"],
 	ActiveCampaign: ["chatgpt", "gemini", "perplexity"],
 	Pardot: ["perplexity", "gemini"],
-} as const;
+} as const
 
 export const PREVIEW_PROMPT_RESPONSES = [
 	{
@@ -363,4 +358,4 @@ export const PREVIEW_PROMPT_RESPONSES = [
 			{ title: "Bigin by Zoho for Small Teams", url: "https://www.bigin.com/" },
 		],
 	},
-] as const;
+] as const

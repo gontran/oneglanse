@@ -1,41 +1,40 @@
-import type { LucideIcon } from "lucide-react";
-import type * as React from "react";
+import type { LucideIcon } from "lucide-react"
+import type * as React from "react"
 
-import { cn } from "@oneglanse/utils";
+import { cn } from "@oneglanse/utils"
 
 export const EMPTY_STATE_PANEL_WIDTH_CLASS =
-	"w-full max-w-[19rem] sm:max-w-[20.5rem] xl:max-w-[22rem]";
+	"w-full max-w-[19rem] sm:max-w-[20.5rem] xl:max-w-[22rem]"
 
 export const EMPTY_STATE_PANEL_HEIGHT_CLASS =
-	"min-h-[17.5rem] sm:min-h-[18.5rem] xl:min-h-[19.5rem]";
+	"min-h-[17.5rem] sm:min-h-[18.5rem] xl:min-h-[19.5rem]"
 
 export const DASHBOARD_EMPTY_STATE_WIDTH_CLASS =
-	"w-full max-w-[13.75rem] sm:max-w-[14.75rem] xl:max-w-[16rem]";
+	"w-full max-w-[13.75rem] sm:max-w-[14.75rem] xl:max-w-[16rem]"
 
-export const DASHBOARD_EMPTY_STATE_HEIGHT_CLASS =
-	"min-h-[214px] sm:min-h-[228px] xl:min-h-[244px]";
+export const DASHBOARD_EMPTY_STATE_HEIGHT_CLASS = "min-h-[214px] sm:min-h-[228px] xl:min-h-[244px]"
 
 export type EmptyStateExample =
 	| string
 	| {
-			label: string;
-			icon?: LucideIcon;
-	  };
+			label: string
+			icon?: LucideIcon
+	  }
 
 export type EmptyStatePanelProps = {
-	icon?: LucideIcon;
-	eyebrow?: string;
-	title: string;
-	description: string;
-	examples?: EmptyStateExample[];
-	examplesLabel?: string;
-	highlights?: string[];
-	action?: React.ReactNode;
-	className?: string;
-	contentClassName?: string;
-};
+	icon?: LucideIcon
+	eyebrow?: string
+	title: string
+	description: string
+	examples?: EmptyStateExample[]
+	examplesLabel?: string
+	highlights?: string[]
+	action?: React.ReactNode
+	className?: string
+	contentClassName?: string
+}
 
-type PresetEmptyStateProps = Omit<EmptyStatePanelProps, "eyebrow">;
+type PresetEmptyStateProps = Omit<EmptyStatePanelProps, "eyebrow">
 
 export function EmptyStatePanel({
 	icon: _icon,
@@ -49,9 +48,9 @@ export function EmptyStatePanel({
 	className,
 	contentClassName,
 }: EmptyStatePanelProps) {
-	const hasExamples = Boolean(examples && examples.length > 0);
-	const hasHighlights = Boolean(highlights && highlights.length > 0);
-	const hasSupportingContent = hasExamples || hasHighlights;
+	const hasExamples = Boolean(examples && examples.length > 0)
+	const hasHighlights = Boolean(highlights && highlights.length > 0)
+	const hasSupportingContent = hasExamples || hasHighlights
 
 	return (
 		<div className={cn("web-centered-state", className)}>
@@ -135,7 +134,7 @@ export function EmptyStatePanel({
 				) : null}
 			</div>
 		</div>
-	);
+	)
 }
 
 export function WorkspaceRequiredState({
@@ -158,7 +157,7 @@ export function WorkspaceRequiredState({
 			className={className}
 			contentClassName={contentClassName}
 		/>
-	);
+	)
 }
 
 export function TemporaryIssueState({
@@ -181,7 +180,7 @@ export function TemporaryIssueState({
 			className={className}
 			contentClassName={contentClassName}
 		/>
-	);
+	)
 }
 
 function PresetEmptyState({
@@ -205,5 +204,5 @@ function PresetEmptyState({
 			className={className}
 			contentClassName={contentClassName}
 		/>
-	);
+	)
 }

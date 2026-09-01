@@ -1,4 +1,4 @@
-"use client";
+"use client"
 
 import {
 	formDialogBodyClassName,
@@ -6,7 +6,7 @@ import {
 	formDialogFooterClassName,
 	formDialogHeaderClassName,
 	formSecondaryButtonClassName,
-} from "@/components/forms/auth-form-chrome";
+} from "@/components/forms/auth-form-chrome"
 import {
 	Button,
 	Dialog,
@@ -15,19 +15,19 @@ import {
 	DialogFooter,
 	DialogHeader,
 	DialogTitle,
-} from "@oneglanse/ui";
-import { cn } from "@oneglanse/utils";
-import type { ReactNode } from "react";
+} from "@oneglanse/ui"
+import { cn } from "@oneglanse/utils"
+import type { ReactNode } from "react"
 
 type WorkspaceDialogShellProps = {
-	open: boolean;
-	onOpenChange: (open: boolean) => void;
-	onCloseReset: () => void;
-	title: string;
-	description: string;
-	children: ReactNode;
-	footerActions: ReactNode;
-};
+	open: boolean
+	onOpenChange: (open: boolean) => void
+	onCloseReset: () => void
+	title: string
+	description: string
+	children: ReactNode
+	footerActions: ReactNode
+}
 
 export function WorkspaceDialogShell({
 	open,
@@ -42,8 +42,8 @@ export function WorkspaceDialogShell({
 		<Dialog
 			open={open}
 			onOpenChange={(isOpen) => {
-				if (!isOpen) onCloseReset();
-				onOpenChange(isOpen);
+				if (!isOpen) onCloseReset()
+				onOpenChange(isOpen)
 			}}
 		>
 			<DialogContent className={formDialogContentClassName}>
@@ -68,5 +68,5 @@ export function WorkspaceDialogShell({
 				</DialogFooter>
 			</DialogContent>
 		</Dialog>
-	);
+	)
 }

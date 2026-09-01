@@ -1,9 +1,9 @@
-import { Card } from "@oneglanse/ui";
+import { Card } from "@oneglanse/ui"
 
 type FaqItem = {
-	question: string;
-	answer: string;
-};
+	question: string
+	answer: string
+}
 
 const FAQ_ITEMS: FaqItem[] = [
 	{
@@ -46,7 +46,7 @@ const FAQ_ITEMS: FaqItem[] = [
 		answer:
 			"Clone the repository, copy .env.example to .env, set your OpenAI or Anthropic API key, and run pnpm local. The script starts Postgres, ClickHouse, Redis, runs migrations, and opens the app at localhost:3000. Go to /providers to connect your AI accounts, then add prompts and run. Full instructions are at docs.oneglanse.com.",
 	},
-];
+]
 
 const jsonLd = {
 	"@context": "https://schema.org",
@@ -59,25 +59,18 @@ const jsonLd = {
 			text: answer,
 		},
 	})),
-};
+}
 
 export function FaqSection(): React.JSX.Element {
 	return (
-		<section
-			className="section-shell py-12 sm:py-14"
-			id="faq"
-			aria-labelledby="faq-title"
-		>
+		<section className="section-shell py-12 sm:py-14" id="faq" aria-labelledby="faq-title">
 			<script
 				type="application/ld+json"
 				// biome-ignore lint/security/noDangerouslySetInnerHtml: structured data for search engines
 				dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
 			/>
 			<Card className="landing-surface p-6">
-				<h2
-					id="faq-title"
-					className="text-2xl font-semibold tracking-tight sm:text-3xl"
-				>
+				<h2 id="faq-title" className="text-2xl font-semibold tracking-tight sm:text-3xl">
 					Frequently asked questions
 				</h2>
 				<p className="mt-3 text-sm leading-6 text-muted-foreground sm:text-base">
@@ -87,13 +80,11 @@ export function FaqSection(): React.JSX.Element {
 					{FAQ_ITEMS.map(({ question, answer }) => (
 						<div key={question} className="landing-muted-card px-4 py-4">
 							<dt className="text-sm font-semibold leading-6">{question}</dt>
-							<dd className="mt-2 text-sm leading-6 text-muted-foreground">
-								{answer}
-							</dd>
+							<dd className="mt-2 text-sm leading-6 text-muted-foreground">{answer}</dd>
 						</div>
 					))}
 				</dl>
 			</Card>
 		</section>
-	);
+	)
 }

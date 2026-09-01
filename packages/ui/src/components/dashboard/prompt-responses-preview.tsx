@@ -1,41 +1,41 @@
-"use client";
+"use client"
 
 import {
 	formatDate,
 	formatMarkdown,
 	getModelFavicon,
 	getProviderDisplayName,
-} from "@oneglanse/utils";
-import { cn } from "@oneglanse/utils";
-import { ChevronDown } from "lucide-react";
-import { useState } from "react";
-import { PositionMetricCell, SentimentMetricCell } from "../cell.js";
-import { SourcesHoverLinks } from "./sources-hover-links.js";
+} from "@oneglanse/utils"
+import { cn } from "@oneglanse/utils"
+import { ChevronDown } from "lucide-react"
+import { useState } from "react"
+import { PositionMetricCell, SentimentMetricCell } from "../cell.js"
+import { SourcesHoverLinks } from "./sources-hover-links.js"
 
 export type PromptResponsePreviewSource = {
-	title: string;
-	url: string;
-};
+	title: string
+	url: string
+}
 
 export type PromptResponsePreviewRow = {
-	id: string;
-	modelProvider: string;
-	modelName?: string;
-	promptRunAt: string;
-	response: string;
-	isAnalysed: boolean;
+	id: string
+	modelProvider: string
+	modelName?: string
+	promptRunAt: string
+	response: string
+	isAnalysed: boolean
 	metrics?: {
-		geoScore: number;
-		sentiment: number;
-		visibility: number;
-		position: number | null;
-	};
-	sources: PromptResponsePreviewSource[];
-};
+		geoScore: number
+		sentiment: number
+		visibility: number
+		position: number | null
+	}
+	sources: PromptResponsePreviewSource[]
+}
 
 function getProviderName(row: PromptResponsePreviewRow): string {
-	if (row.modelName) return row.modelName;
-	return getProviderDisplayName(row.modelProvider);
+	if (row.modelName) return row.modelName
+	return getProviderDisplayName(row.modelProvider)
 }
 
 export function PromptResponsesPreview({
@@ -43,21 +43,19 @@ export function PromptResponsesPreview({
 	description,
 	rows,
 }: {
-	title: string;
-	description: string;
-	rows: PromptResponsePreviewRow[];
+	title: string
+	description: string
+	rows: PromptResponsePreviewRow[]
 }): React.JSX.Element {
-	const [expandedResponses, setExpandedResponses] = useState<Set<number>>(
-		new Set(),
-	);
+	const [expandedResponses, setExpandedResponses] = useState<Set<number>>(new Set())
 
 	const toggleResponse = (index: number) => {
 		setExpandedResponses((prev) => {
-			const next = new Set(prev);
-			next.has(index) ? next.delete(index) : next.add(index);
-			return next;
-		});
-	};
+			const next = new Set(prev)
+			next.has(index) ? next.delete(index) : next.add(index)
+			return next
+		})
+	}
 
 	return (
 		<section aria-label="Prompt responses preview" className="space-y-5">
@@ -69,24 +67,22 @@ export function PromptResponsesPreview({
 						</h1>
 					)}
 					{description && (
-						<p className="mt-2 max-w-2xl text-xs text-muted-foreground">
-							{description}
-						</p>
+						<p className="mt-2 max-w-2xl text-xs text-muted-foreground">{description}</p>
 					)}
 				</div>
 			)}
 
 			<div className="space-y-4.5">
 				{rows.map((row, index) => {
-					const isExpanded = expandedResponses.has(index);
+					const isExpanded = expandedResponses.has(index)
 					return (
 						<div
 							key={row.id}
 							onClick={() => toggleResponse(index)}
 							onKeyDown={(event) => {
 								if (event.key === "Enter" || event.key === " ") {
-									event.preventDefault();
-									toggleResponse(index);
+									event.preventDefault()
+									toggleResponse(index)
 								}
 							}}
 							className={cn(
@@ -145,9 +141,7 @@ export function PromptResponsesPreview({
 												Sentiment
 											</span>
 											<div className="text-xs">
-												<SentimentMetricCell
-													sentiment={row.metrics.sentiment}
-												/>
+												<SentimentMetricCell sentiment={row.metrics.sentiment} />
 											</div>
 										</div>
 										<div className="flex items-center gap-1.5">
@@ -176,9 +170,7 @@ export function PromptResponsesPreview({
 
 							<div
 								className={`prose max-w-none text-gray-700 dark:prose-invert dark:text-gray-300 ${
-									isExpanded
-										? "max-h-[400px] overflow-y-auto"
-										: "line-clamp-3 overflow-hidden"
+									isExpanded ? "max-h-[400px] overflow-y-auto" : "line-clamp-3 overflow-hidden"
 								}`}
 								// biome-ignore lint/security/noDangerouslySetInnerHtml: markdown is sanitized by shared formatter before rendering
 								dangerouslySetInnerHTML={{
@@ -188,8 +180,8 @@ export function PromptResponsesPreview({
 
 							<button
 								onClick={(e) => {
-									e.stopPropagation();
-									toggleResponse(index);
+									e.stopPropagation()
+									toggleResponse(index)
 								}}
 								className="mt-4 inline-flex items-center rounded-[var(--app-radius)] px-0 py-0 text-xs font-medium text-gray-500 transition-colors hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
 								type="button"
@@ -199,9 +191,9 @@ export function PromptResponsesPreview({
 
 							<SourcesHoverLinks items={row.sources} />
 						</div>
-					);
+					)
 				})}
 			</div>
 		</section>
-	);
+	)
 }

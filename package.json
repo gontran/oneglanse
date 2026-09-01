@@ -1,50 +1,51 @@
 {
-  "name": "playvod-dashboard",
-  "description": "Dashboard d'audit de visibilite IA pour PlayVOD",
-  "license": "MIT",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
-    "preview": "vite preview",
-    "typecheck": "tsc --noEmit",
-    "lint": "biome check .",
-    "lint:fix": "biome check . --fix"
-  },
-  "dependencies": {
-    "@radix-ui/react-dialog": "^1.1.6",
-    "@radix-ui/react-dropdown-menu": "^2.1.6",
-    "@radix-ui/react-select": "^2.1.6",
-    "@radix-ui/react-separator": "^1.1.2",
-    "@radix-ui/react-slot": "^1.1.2",
-    "@radix-ui/react-tooltip": "^1.1.8",
-    "@tailwindcss/typography": "^0.5.19",
-    "class-variance-authority": "^0.7.1",
-    "clsx": "^2.1.1",
-    "lucide-react": "^0.544.0",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "react-markdown": "^9.0.3",
-    "react-router-dom": "^7.1.1",
-    "rehype-sanitize": "^6.0.0",
-    "remark-gfm": "^4.0.1",
-    "tailwind-merge": "^2.6.0"
-  },
-  "devDependencies": {
-    "@biomejs/biome": "1.9.4",
-    "@tailwindcss/postcss": "^4.0.15",
-    "@types/node": "^20.14.10",
-    "@types/react": "^19.0.0",
-    "@types/react-dom": "^19.0.0",
-    "@vitejs/plugin-react": "^4.3.4",
-    "postcss": "^8.5.3",
-    "tailwindcss": "^4.0.15",
-    "tw-animate-css": "^1.3.8",
-    "typescript": "^5.9.3",
-    "vite": "^6.0.7"
-  },
-  "engines": {
-    "node": ">=20"
-  }
+	"name": "playvod-dashboard",
+	"description": "Dashboard d'audit de visibilite IA pour PlayVOD",
+	"license": "MIT",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"dev": "vite",
+		"build": "tsc -b && vite build",
+		"preview": "vite preview",
+		"typecheck": "tsc --noEmit",
+		"lint": "biome check .",
+		"lint:fix": "biome check . --fix"
+	},
+	"dependencies": {
+		"@radix-ui/react-dialog": "^1.1.6",
+		"@radix-ui/react-dropdown-menu": "^2.1.6",
+		"@radix-ui/react-select": "^2.1.6",
+		"@radix-ui/react-separator": "^1.1.2",
+		"@radix-ui/react-slot": "^1.1.2",
+		"@radix-ui/react-tooltip": "^1.1.8",
+		"@supabase/supabase-js": "^2.112.4",
+		"@tailwindcss/typography": "^0.5.19",
+		"class-variance-authority": "^0.7.1",
+		"clsx": "^2.1.1",
+		"lucide-react": "^0.544.0",
+		"react": "^19.0.0",
+		"react-dom": "^19.0.0",
+		"react-markdown": "^9.0.3",
+		"react-router-dom": "^7.1.1",
+		"rehype-sanitize": "^6.0.0",
+		"remark-gfm": "^4.0.1",
+		"tailwind-merge": "^2.6.0"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "1.9.4",
+		"@tailwindcss/postcss": "^4.0.15",
+		"@types/node": "^20.14.10",
+		"@types/react": "^19.0.0",
+		"@types/react-dom": "^19.0.0",
+		"@vitejs/plugin-react": "^4.3.4",
+		"postcss": "^8.5.3",
+		"tailwindcss": "^4.0.15",
+		"tw-animate-css": "^1.3.8",
+		"typescript": "^5.9.3",
+		"vite": "^6.0.7"
+	},
+	"engines": {
+		"node": ">=20"
+	}
 }

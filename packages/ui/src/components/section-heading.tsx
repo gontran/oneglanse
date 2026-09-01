@@ -1,20 +1,20 @@
-import { cn } from "@oneglanse/utils";
-import type { ReactNode } from "react";
+import { cn } from "@oneglanse/utils"
+import type { ReactNode } from "react"
 
-type HeadingTag = "h1" | "h2" | "h3";
+type HeadingTag = "h1" | "h2" | "h3"
 
 export type SectionHeadingProps = {
-	eyebrow?: string;
-	title: ReactNode;
-	description?: ReactNode;
-	trailing?: ReactNode;
-	as?: HeadingTag;
-	titleId?: string;
-	className?: string;
-	titleClassName?: string;
-	descriptionClassName?: string;
-	eyebrowClassName?: string;
-};
+	eyebrow?: string
+	title: ReactNode
+	description?: ReactNode
+	trailing?: ReactNode
+	as?: HeadingTag
+	titleId?: string
+	className?: string
+	titleClassName?: string
+	descriptionClassName?: string
+	eyebrowClassName?: string
+}
 
 export function SectionHeading({
 	eyebrow,
@@ -28,7 +28,7 @@ export function SectionHeading({
 	descriptionClassName,
 	eyebrowClassName,
 }: SectionHeadingProps): React.JSX.Element {
-	const TitleTag = as;
+	const TitleTag = as
 
 	return (
 		<div
@@ -64,5 +64,5 @@ export function SectionHeading({
 			</div>
 			{trailing}
 		</div>
-	);
+	)
 }

@@ -1,18 +1,14 @@
-import { clickhouse } from "@oneglanse/db";
-import type {
-	AnalysisRecord,
-	BrandAnalysisResult,
-	PromptResponse,
-} from "@oneglanse/types";
+import { clickhouse } from "@oneglanse/db"
+import type { AnalysisRecord, BrandAnalysisResult, PromptResponse } from "@oneglanse/types"
 
 /**
  * Fetch ALL responses (analyzed and unanalyzed) with metadata
  */
 export async function fetchAnalysedPrompts(args: {
-	workspaceId: string;
-	limit?: number;
+	workspaceId: string
+	limit?: number
 }): Promise<AnalysisRecord[]> {
-	const { workspaceId, limit = 10_000 } = args;
+	const { workspaceId, limit = 10_000 } = args
 
 	// Query from prompt_responses (source of truth) and join analysis data
 	const result = await clickhouse.query({
@@ -42,11 +38,11 @@ export async function fetchAnalysedPrompts(args: {
         `,
 		query_params: { workspaceId, limit },
 		format: "JSONEachRow",
-	});
+	})
 
 	const rows = (await result.json()) as Array<
 		PromptResponse & { brand_analysis?: string | BrandAnalysisResult }
-	>;
+	>
 
 	// Transform to flat array - handle both analyzed and unanalyzed
 	const records: AnalysisRecord[] = rows.map((row) => {
@@ -58,7 +54,7 @@ export async function fetchAnalysedPrompts(args: {
 				? typeof row.brand_analysis === "string"
 					? JSON.parse(row.brand_analysis)
 					: row.brand_analysis
-				: undefined;
+				: undefined
 
 		return {
 			id: row.id,
@@ -75,16 +71,16 @@ export async function fetchAnalysedPrompts(args: {
 			// ClickHouse ALTER UPDATE is asynchronous, so prompt_analysis may exist
 			// before prompt_responses.is_analysed flips to true.
 			is_analysed: row.is_analysed === true || parsedBrandAnalysis !== undefined,
-		};
-	});
+		}
+	})
 
-	return records;
+	return records
 }
 
 export async function getLastPromptRunTime(args: {
-	workspaceId: string;
+	workspaceId: string
 }): Promise<string | null> {
-	const { workspaceId } = args;
+	const { workspaceId } = args
 	const result = await clickhouse.query({
 		query: `
             SELECT toUnixTimestamp(MAX(prompt_run_at)) as last_run_ts
@@ -93,10 +89,10 @@ export async function getLastPromptRunTime(args: {
         `,
 		query_params: { workspaceId },
 		format: "JSONEachRow",
-	});
-	const data = (await result.json()) as Array<{ last_run_ts: number }>;
+	})
+	const data = (await result.json()) as Array<{ last_run_ts: number }>
 	if (data.length > 0 && data[0]?.last_run_ts && data[0].last_run_ts > 0) {
-		return new Date(data[0].last_run_ts * 1000).toISOString();
+		return new Date(data[0].last_run_ts * 1000).toISOString()
 	}
-	return null;
+	return null
 }

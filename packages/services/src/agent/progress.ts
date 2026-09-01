@@ -1,16 +1,11 @@
-import type { Provider } from "@oneglanse/types";
-import { redis } from "./redis.js";
+import type { Provider } from "@oneglanse/types"
+import { redis } from "./redis.js"
 
-const AGENT_PROGRESS_TTL_SECONDS = 24 * 60 * 60;
+const AGENT_PROGRESS_TTL_SECONDS = 24 * 60 * 60
 
-export type ProviderExecutionStatus =
-	| "pending"
-	| "running"
-	| "completed"
-	| "failed"
-	| "stopped";
+export type ProviderExecutionStatus = "pending" | "running" | "completed" | "failed" | "stopped"
 
-const COMPLETED_TTL_SECONDS = 120;
+const COMPLETED_TTL_SECONDS = 120
 
 const UPDATE_PROGRESS_LUA = `
 local raw = redis.call('GET', KEYS[1])
@@ -35,22 +30,20 @@ if allDone then
 end
 redis.call('SET', KEYS[1], cjson.encode(data), 'EX', ttl)
 return cjson.encode(data)
-`;
+`
 
 export function buildProgressKey(jobGroupId: string): string {
-	return `job:${jobGroupId}:result`;
+	return `job:${jobGroupId}:result`
 }
 
 export async function updateProviderProgress(args: {
-	jobGroupId: string;
-	provider: Provider;
-	status: ProviderExecutionStatus;
-	resultCount?: number | null;
+	jobGroupId: string
+	provider: Provider
+	status: ProviderExecutionStatus
+	resultCount?: number | null
 }): Promise<void> {
 	const countArg =
-		args.resultCount === undefined || args.resultCount === null
-			? ""
-			: String(args.resultCount);
+		args.resultCount === undefined || args.resultCount === null ? "" : String(args.resultCount)
 
 	await redis.eval(
 		UPDATE_PROGRESS_LUA,
@@ -59,5 +52,5 @@ export async function updateProviderProgress(args: {
 		args.provider,
 		args.status,
 		countArg,
-	);
+	)
 }
