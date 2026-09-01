@@ -1,12 +1,14 @@
 import { AuditButton } from "@/components/configuration/audit-button"
 import { CompetitorsManager } from "@/components/configuration/competitors-manager"
+import { PerplexityTestPanel } from "@/components/configuration/perplexity-test-panel"
 import { ProjectInfoForm } from "@/components/configuration/project-info-form"
 import { PromptsManager } from "@/components/configuration/prompts-manager"
 import { AppSidebar } from "@/components/layout/app-sidebar"
 import { SidebarTrigger } from "@/components/ui/sidebar"
+import { isDatabaseMode } from "@/lib/auth/auth-context"
 import { dataService } from "@/lib/services"
 import type { Competitor, Project, ProjectPrompt } from "@/types/analysis"
-import { MessageSquare, Settings, Users } from "lucide-react"
+import { FlaskConical, MessageSquare, Settings, Users } from "lucide-react"
 import { useEffect, useState } from "react"
 
 export function ConfigurationPage() {
@@ -52,9 +54,9 @@ export function ConfigurationPage() {
 					<h1 className="truncate text-[0.95rem] font-medium tracking-[-0.01em] text-gray-950 dark:text-gray-50">
 						Configuration
 					</h1>
-					<div className="ml-auto">
-						<AuditButton />
-					</div>
+						<div className="ml-auto">
+							<AuditButton />
+						</div>
 				</header>
 
 				<div className="web-app-scroll">
@@ -131,6 +133,16 @@ export function ConfigurationPage() {
 											}}
 										/>
 									</ConfigSection>
+
+									{isDatabaseMode && project && (
+										<ConfigSection
+											icon={FlaskConical}
+											title="Test Perplexity"
+											description="Envoyez un prompt a l'API Perplexity Sonar pour un audit reel."
+										>
+											<PerplexityTestPanel projectId={project.id} prompts={prompts} />
+										</ConfigSection>
+									)}
 								</div>
 							) : null}
 						</div>

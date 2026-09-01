@@ -18,6 +18,9 @@ export interface SourceRef {
 	cited_text?: string
 	is_owned_domain: boolean
 	is_fictional: boolean
+	domain?: string | null
+	snippet?: string | null
+	position?: number | null
 }
 
 export interface CompetitorMention {
@@ -63,6 +66,12 @@ export interface AnalysisRecord {
 	is_analysed: boolean
 	sources: SourceRef[]
 	brand_analysis: BrandAnalysisResult | null
+	collection_method?: string
+	error_message?: string | null
+	usage_data?: Record<string, unknown> | null
+	cost_data?: Record<string, unknown> | null
+	brand_mentioned?: boolean | null
+	brand_position?: number | null
 }
 
 export interface UserPrompt {
@@ -78,7 +87,11 @@ export interface AuditRun {
 	run_at: string
 	prompt_count: number
 	surface_count: number
+	status?: AuditRunStatus
+	organization_id?: string
 }
+
+export type AuditRunStatus = "pending" | "running" | "completed" | "failed" | "partial"
 
 export interface Project {
 	id: string
@@ -105,6 +118,44 @@ export interface ProjectSurface {
 export interface ProjectPrompt extends UserPrompt {
 	is_active: boolean
 	sort_order: number
+}
+
+export interface Organization {
+	id: string
+	name: string
+}
+
+export interface OrganizationMember {
+	id: string
+	organization_id: string
+	user_id: string
+	role: string
+}
+
+export interface UserProfile {
+	id: string
+	display_name: string | null
+}
+
+export interface AuditResultDetail {
+	id: string
+	audit_run_id: string
+	prompt_id: string
+	prompt: string
+	surface: string
+	provider: string
+	model: string
+	collection_method: string
+	response: string
+	prompt_run_at: string
+	is_analysed: boolean
+	brand_mentioned: boolean | null
+	brand_position: number | null
+	error_message: string | null
+	usage_data: Record<string, unknown> | null
+	cost_data: Record<string, unknown> | null
+	run_status: AuditRunStatus
+	sources: SourceRef[]
 }
 
 export type { SourceRef as ResultSource }

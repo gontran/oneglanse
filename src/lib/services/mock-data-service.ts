@@ -4,6 +4,7 @@ import { PROMPTS } from "@/lib/data/prompts"
 import { SURFACES } from "@/types/analysis"
 import type {
 	AnalysisRecord,
+	AuditResultDetail,
 	Competitor,
 	Project,
 	ProjectPrompt,
@@ -143,5 +144,13 @@ export class MockDataService implements IDataService {
 
 	async getAnalysisRecords(): Promise<AnalysisRecord[]> {
 		return ANALYSIS_RECORDS
+	}
+
+	async getAuditResult(_resultId: string): Promise<AuditResultDetail | null> {
+		return null
+	}
+
+	async runPerplexityAudit(_projectId: string, _promptId: string): Promise<{ auditRunId: string; auditResultId: string }> {
+		throw new Error("Audit reel non disponible en mode demonstration.")
 	}
 }

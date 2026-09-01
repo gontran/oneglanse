@@ -9,21 +9,42 @@ import { TopSources } from "@/components/dashboard/top-sources"
 import { AppSidebar } from "@/components/layout/app-sidebar"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import { isDatabaseMode } from "@/lib/auth/auth-context"
 import { ANALYSIS_RECORDS } from "@/lib/data/analysis-records"
 import { BRAND } from "@/lib/data/brand"
 import { PROMPTS } from "@/lib/data/prompts"
+import { dataService } from "@/lib/services"
 import { filterAnalysisRecords } from "@/lib/utils/filter"
 import { computeDashboardMetrics } from "@/lib/utils/metrics"
-import { ALL_SURFACES } from "@/types/analysis"
+import { ALL_SURFACES, type AnalysisRecord } from "@/types/analysis"
 import type { TimeRange } from "@/types/dashboard"
-import { Info } from "lucide-react"
-import { useMemo, useState } from "react"
+import { Info, Loader2 } from "lucide-react"
+import { useEffect, useMemo, useState } from "react"
 
 export function DashboardPage() {
 	const [surfaceFilter, setSurfaceFilter] = useState<string>(ALL_SURFACES)
 	const [timeFilter, setTimeFilter] = useState<TimeRange>("all")
+	const [records, setRecords] = useState<AnalysisRecord[]>(
+		isDatabaseMode ? [] : ANALYSIS_RECORDS,
+	)
+	const [loading, setLoading] = useState(isDatabaseMode)
 
-	const records = ANALYSIS_RECORDS
+	useEffect(() => {
+		if (!isDatabaseMode) return
+		let cancelled = false
+		const load = async () => {
+			try {
+				const data = await dataService.getAnalysisRecords()
+				if (!cancelled) setRecords(data)
+			} catch {
+				// Keep empty state on error
+			} finally {
+				if (!cancelled) setLoading(false)
+			}
+		}
+		load()
+		return () => { cancelled = true }
+	}, [])
 
 	const metrics = useMemo(() => {
 		const filtered = filterAnalysisRecords(records, {
@@ -121,23 +142,26 @@ export function DashboardPage() {
 						Tableau de bord
 					</h1>
 					<div className="ml-auto flex items-center gap-2">
-						<Tooltip>
-							<TooltipTrigger asChild>
-								<button
-									type="button"
-									className="inline-flex items-center gap-1 rounded-[var(--app-radius)] border border-amber-200 bg-amber-50/80 px-2.5 py-1 text-[10px] font-medium text-amber-600 dark:border-amber-900/50 dark:bg-amber-950/25 dark:text-amber-400"
-								>
-									<Info className="h-3 w-3" />
-									Donnees de demonstration
-								</button>
-							</TooltipTrigger>
-							<TooltipContent side="bottom">
-								<p className="max-w-[260px]">
-									Toutes les donnees affichees sont fictives et simulees. Aucun audit reel n'a ete
-									effectue.
-								</p>
-							</TooltipContent>
-						</Tooltip>
+						{loading && <Loader2 className="size-4 animate-spin text-gray-400" />}
+						{!isDatabaseMode && (
+							<Tooltip>
+								<TooltipTrigger asChild>
+									<button
+										type="button"
+										className="inline-flex items-center gap-1 rounded-[var(--app-radius)] border border-amber-200 bg-amber-50/80 px-2.5 py-1 text-[10px] font-medium text-amber-600 dark:border-amber-900/50 dark:bg-amber-950/25 dark:text-amber-400"
+									>
+										<Info className="h-3 w-3" />
+										Donnees de demonstration
+									</button>
+								</TooltipTrigger>
+								<TooltipContent side="bottom">
+									<p className="max-w-[260px]">
+										Toutes les donnees affichees sont fictives et simulees. Aucun audit reel n'a ete
+										effectue.
+									</p>
+								</TooltipContent>
+							</Tooltip>
+						)}
 					</div>
 				</header>
 
@@ -193,7 +217,7 @@ export function DashboardPage() {
 									<span className="text-xs text-muted-foreground">/ 100</span>
 								</div>
 
-								{!hasData ? (
+								{loading ? null : !hasData ? (
 									<EmptyDashboardState />
 								) : (
 									<>

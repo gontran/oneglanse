@@ -1,18 +1,15 @@
+import { supabase } from "@/lib/auth/auth-context"
 import { ANALYSIS_RECORDS } from "@/lib/data/analysis-records"
 import type {
 	AnalysisRecord,
+	AuditResultDetail,
 	Competitor,
 	Project,
 	ProjectPrompt,
 	ProjectSurface,
+	SourceRef,
 } from "@/types/analysis"
-import { createClient } from "@supabase/supabase-js"
 import type { IDataService } from "./data-service"
-
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string
-
-const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
 interface ProjectRow {
 	id: string
@@ -252,19 +249,141 @@ export class SupabaseDataService implements IDataService {
 		try {
 			const { data, error } = await supabase
 				.from("audit_results")
-				.select(
-					"id, audit_run_id, prompt_id, prompt, surface, provider, model, country, language, device, response, prompt_run_at, is_analysed",
-				)
-				.limit(1)
+				.select(`
+					id, audit_run_id, prompt_id, prompt, surface, provider, model,
+					country, language, device, response, prompt_run_at, is_analysed,
+					collection_method, error_message, brand_mentioned, brand_position,
+					result_sources (id, title, url, domain, snippet, position, is_owned_domain, cited_text)
+				`)
+				.order("prompt_run_at", { ascending: false })
+				.limit(100)
+
 			if (error) throw error
-			if (!data || data.length === 0) {
-				return ANALYSIS_RECORDS
-			}
-			// Full fetch would require joining sources and brand_analyses;
-			// for now, fall back to mock data until the audit pipeline is built
-			return ANALYSIS_RECORDS
+			if (!data || data.length === 0) return []
+
+			return (data as unknown[]).map((row) => {
+				const r = row as Record<string, unknown>
+				const sources = (r.result_sources as Record<string, unknown>[]) || []
+				return {
+					id: r.id as string,
+					audit_run_id: r.audit_run_id as string,
+					prompt_id: r.prompt_id as string,
+					prompt: r.prompt as string,
+					surface: r.surface as AnalysisRecord["surface"],
+					provider: r.provider as string,
+					model: r.model as string,
+					country: r.country as string,
+					language: r.language as string,
+					device: r.device as AnalysisRecord["device"],
+					response: r.response as string,
+					prompt_run_at: r.prompt_run_at as string,
+					is_analysed: r.is_analysed as boolean,
+					collection_method: r.collection_method as string | undefined,
+					brand_mentioned: r.brand_mentioned as boolean | null | undefined,
+					brand_position: r.brand_position as number | null | undefined,
+					sources: sources.map((s): SourceRef => ({
+						title: s.title as string,
+						url: s.url as string,
+						cited_text: (s.cited_text as string) || undefined,
+						is_owned_domain: s.is_owned_domain as boolean,
+						is_fictional: false,
+						domain: (s.domain as string) || null,
+						snippet: (s.snippet as string) || null,
+						position: s.position as number | null,
+					})),
+					brand_analysis: null,
+				}
+			})
 		} catch {
-			return ANALYSIS_RECORDS
+			return []
+		}
+	}
+
+	async getAuditResult(resultId: string): Promise<AuditResultDetail | null> {
+		const { data: result, error } = await supabase
+			.from("audit_results")
+			.select(`
+				id, audit_run_id, prompt_id, prompt, surface, provider, model,
+				collection_method, response, prompt_run_at, is_analysed,
+				brand_mentioned, brand_position, error_message, usage_data, cost_data,
+				audit_runs!inner (id, status)
+			`)
+			.eq("id", resultId)
+			.maybeSingle()
+
+		if (error || !result) return null
+
+		const r = result as Record<string, unknown>
+		const runInfo = (r.audit_runs as Record<string, unknown>[]) || []
+		const runRow = runInfo[0] || {}
+
+		const { data: sourcesData } = await supabase
+			.from("result_sources")
+			.select("title, url, domain, snippet, position, is_owned_domain, cited_text")
+			.eq("audit_result_id", resultId)
+			.order("position", { ascending: true })
+
+		const sources: SourceRef[] = ((sourcesData as Record<string, unknown>[]) || []).map((s) => ({
+			title: s.title as string,
+			url: s.url as string,
+			cited_text: (s.cited_text as string) || undefined,
+			is_owned_domain: s.is_owned_domain as boolean,
+			is_fictional: false,
+			domain: (s.domain as string) || null,
+			snippet: (s.snippet as string) || null,
+			position: s.position as number | null,
+		}))
+
+		return {
+			id: r.id as string,
+			audit_run_id: r.audit_run_id as string,
+			prompt_id: r.prompt_id as string,
+			prompt: r.prompt as string,
+			surface: r.surface as string,
+			provider: r.provider as string,
+			model: r.model as string,
+			collection_method: r.collection_method as string,
+			response: r.response as string,
+			prompt_run_at: r.prompt_run_at as string,
+			is_analysed: r.is_analysed as boolean,
+			brand_mentioned: (r.brand_mentioned as boolean | null) ?? null,
+			brand_position: (r.brand_position as number | null) ?? null,
+			error_message: (r.error_message as string | null) ?? null,
+			usage_data: (r.usage_data as Record<string, unknown> | null) ?? null,
+			cost_data: (r.cost_data as Record<string, unknown> | null) ?? null,
+			run_status: (runRow.status as AuditResultDetail["run_status"]) ?? "completed",
+			sources,
+		}
+	}
+
+	async runPerplexityAudit(projectId: string, promptId: string): Promise<{ auditRunId: string; auditResultId: string }> {
+		const { data: sessionData } = await supabase.auth.getSession()
+		const token = sessionData.session?.access_token
+		if (!token) throw new Error("Non authentifie.")
+
+		const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/run-perplexity-audit`
+		const response = await fetch(apiUrl, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+				Authorization: `Bearer ${token}`,
+			},
+			body: JSON.stringify({ project_id: projectId, prompt_id: promptId }),
+		})
+
+		if (!response.ok) {
+			const body = await response.json().catch(() => ({}))
+			throw new Error(body.error || `Erreur ${response.status}`)
+		}
+
+		const body = await response.json()
+		if (!body.audit_run_id || !body.audit_result_id) {
+			throw new Error("Reponse invalide du serveur.")
+		}
+
+		return {
+			auditRunId: body.audit_run_id as string,
+			auditResultId: body.audit_result_id as string,
 		}
 	}
 }

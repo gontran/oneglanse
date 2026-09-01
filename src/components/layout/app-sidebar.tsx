@@ -11,12 +11,14 @@ import {
 	SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import { BRAND } from "@/lib/data/brand"
-import { Globe, LayoutGrid, MessageSquare, Settings, TrendingUp, Users } from "lucide-react"
-import { Link, useLocation } from "react-router-dom"
+import { isDatabaseMode, useAuth } from "@/lib/auth/auth-context"
+import { Globe, LayoutGrid, LogOut, MessageSquare, Settings, TrendingUp, User, Users } from "lucide-react"
+import { Link, useLocation, useNavigate } from "react-router-dom"
 
 const navItems = [
 	{ title: "Tableau de bord", url: "/dashboard", icon: LayoutGrid, active: true },
 	{ title: "Configuration", url: "/configuration", icon: Settings, active: true },
+	{ title: "Profil", url: "/profile", icon: User, active: isDatabaseMode },
 	{ title: "Prompts", url: "#", icon: MessageSquare, active: false, badge: "Bientot disponible" },
 	{ title: "Sources", url: "#", icon: Globe, active: false, badge: "Bientot disponible" },
 	{ title: "Concurrents", url: "#", icon: Users, active: false, badge: "Bientot disponible" },
@@ -26,6 +28,13 @@ const navItems = [
 export function AppSidebar() {
 	const location = useLocation()
 	const pathname = location.pathname
+	const navigate = useNavigate()
+	const { user, signOut, profile } = useAuth()
+
+	const handleSignOut = async () => {
+		await signOut()
+		navigate("/login")
+	}
 
 	return (
 		<Sidebar className="flex h-full min-h-full flex-col self-stretch bg-white dark:bg-neutral-950">
@@ -88,6 +97,27 @@ export function AppSidebar() {
 						</SidebarMenu>
 					</SidebarGroupContent>
 				</SidebarGroup>
+				{isDatabaseMode && user && (
+					<div className="mt-auto border-t border-gray-100 p-3 dark:border-gray-800">
+						<div className="flex items-center justify-between gap-2 rounded-[var(--app-radius)] px-3 py-2">
+							<div className="min-w-0">
+								<p className="truncate text-[12px] font-medium text-gray-700 dark:text-gray-300">
+									{profile?.display_name || user.email}
+								</p>
+								{profile?.display_name && (
+									<p className="truncate text-[10px] text-gray-400">{user.email}</p>
+								)}
+							</div>
+							<button
+								type="button"
+								onClick={() => void handleSignOut()}
+								className="shrink-0 rounded-[var(--app-radius)] p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-neutral-800 dark:hover:text-gray-300"
+							>
+								<LogOut className="size-4" />
+							</button>
+						</div>
+					</div>
+				)}
 			</SidebarContent>
 		</Sidebar>
 	)
