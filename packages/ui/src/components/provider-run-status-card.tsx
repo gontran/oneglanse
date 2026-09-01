@@ -1,7 +1,7 @@
 "use client"
 
 import { cn, getModelFavicon, getProviderDisplayName } from "@oneglanse/utils"
-import { CheckCircle2, StopCircle, XCircle } from "lucide-react"
+import { CircleCheck as CheckCircle2, CircleStop as StopCircle, Circle as XCircle } from "lucide-react"
 
 export type ProviderRunDisplayPhase = "pending" | "running" | "completed" | "failed" | "stopped"
 
