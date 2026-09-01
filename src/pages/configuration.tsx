@@ -28,19 +28,26 @@ export function ConfigurationPage() {
 		let cancelled = false
 		const load = async () => {
 			try {
-				const [p, c, pr] = await Promise.all([
-					dataService.getProject(),
+				const p = await dataService.getProject()
+				if (cancelled) return
+				setProject(p)
+				const [c, pr] = await Promise.all([
 					dataService.getCompetitors(),
 					dataService.getPrompts(),
 				])
 				if (cancelled) return
-				setProject(p)
 				setCompetitors(c)
 				setPrompts(pr)
 				setError(null)
 			} catch (err) {
 				if (cancelled) return
-				setError(err instanceof Error ? err.message : "Erreur de chargement.")
+				const msg = err instanceof Error ? err.message : "Erreur de chargement."
+				if (msg === "Aucun projet configure.") {
+					setProject(null)
+					setError(null)
+				} else {
+					setError(msg)
+				}
 			} finally {
 				if (!cancelled) setLoading(false)
 			}
@@ -61,7 +68,7 @@ export function ConfigurationPage() {
 						Configuration
 					</h1>
 					<div className="ml-auto">
-						<AuditButton onClick={scrollToTestPanel} />
+						<AuditButton onClick={scrollToTestPanel} projectExists={!!project} />
 					</div>
 				</header>
 
@@ -91,7 +98,7 @@ export function ConfigurationPage() {
 										}}
 									/>
 								</ConfigSection>
-							) : project ? (
+							) : (
 								<div className="space-y-6">
 									<ConfigSection
 										icon={Settings}
@@ -167,7 +174,7 @@ export function ConfigurationPage() {
 										</div>
 									)}
 								</div>
-							) : null}
+							)}
 						</div>
 					</div>
 				</div>
