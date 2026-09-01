@@ -1,25 +1,23 @@
 {
-	"compilerOptions": {
-		"target": "ES2022",
-		"strict": true,
-		"skipLibCheck": true,
-		"noUncheckedIndexedAccess": true,
-
-		/* Typechecking only */
-		"noEmit": true,
-		"baseUrl": ".",
-		"paths": {
-			"@oneglanse/*": ["packages/*/src", "packages/*/dist"],
-			"playwright": ["apps/agent/src/lib/browser/runtimeTypes.ts"]
-		}
-	},
-	"references": [
-		{ "path": "packages/types" },
-		{ "path": "packages/errors" },
-		{ "path": "packages/utils" },
-		{ "path": "packages/db" },
-		{ "path": "packages/services" },
-		{ "path": "packages/ui" },
-		{ "path": "apps/agent" }
-	]
+  "compilerOptions": {
+    "target": "ES2017",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "plugins": [{ "name": "next" }],
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules", "apps", "packages", "docs", "scripts"]
 }

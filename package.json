@@ -1,43 +1,49 @@
 {
-	"name": "oneglanse",
-	"description": "The open-source GEO and AI visibility tracker",
-	"license": "MIT",
-	"homepage": "https://oneglanse.com",
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/aryamantodkar/oneglanse"
-	},
-	"private": true,
-	"scripts": {
-		"build": "turbo build",
-		"dev": "turbo dev",
-		"dev:web": "turbo dev --filter=@oneglanse/web",
-		"dev:landing": "turbo dev --filter=@oneglanse/landing",
-		"dev:agent": "turbo dev --filter=@oneglanse/agent",
-		"local": "node scripts/run-local.mjs",
-		"auth": "node scripts/run-auth.mjs",
-		"upload:vps": "node scripts/run-auth.mjs --upload-existing-only",
-		"self-host": "node scripts/run-compose.mjs bootstrap",
-		"self-host:build": "node scripts/run-compose.mjs up -d --build",
-		"self-host:pull": "node scripts/run-compose.mjs pull --ignore-buildable",
-		"lint": "turbo lint",
-		"typecheck": "turbo typecheck",
-		"clean": "turbo clean && rm -rf node_modules",
-		"db:generate": "pnpm --filter @oneglanse/db db:generate",
-		"db:migrate": "pnpm --filter @oneglanse/db db:migrate",
-		"db:push": "pnpm --filter @oneglanse/db db:push",
-		"db:studio": "pnpm --filter @oneglanse/db db:studio",
-		"start:worker": "pnpm --filter=@oneglanse/agent start:worker",
-		"lint:fix": "biome check . --fix"
-	},
-	"devDependencies": {
-		"@biomejs/biome": "1.9.4",
-		"knip": "^5.85.0",
-		"turbo": "^2.3.3",
-		"typescript": "^5.9.3"
-	},
-	"packageManager": "pnpm@10.16.0",
-	"engines": {
-		"node": ">=20"
-	}
+  "name": "playvod-dashboard",
+  "description": "Dashboard d'audit de visibilite IA pour PlayVOD",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev --turbo",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check .",
+    "lint:fix": "biome check . --fix"
+  },
+  "dependencies": {
+    "@radix-ui/react-dialog": "^1.1.6",
+    "@radix-ui/react-dropdown-menu": "^2.1.6",
+    "@radix-ui/react-select": "^2.1.6",
+    "@radix-ui/react-separator": "^1.1.2",
+    "@radix-ui/react-slot": "^1.1.2",
+    "@radix-ui/react-tooltip": "^1.1.8",
+    "@tailwindcss/typography": "^0.5.19",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.544.0",
+    "next": "^15.5.5",
+    "next-themes": "^0.4.6",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-markdown": "^9.0.3",
+    "rehype-sanitize": "^6.0.0",
+    "remark-gfm": "^4.0.1",
+    "tailwind-merge": "^2.6.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "1.9.4",
+    "@tailwindcss/postcss": "^4.0.15",
+    "@types/node": "^20.14.10",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "postcss": "^8.5.3",
+    "tailwindcss": "^4.0.15",
+    "tw-animate-css": "^1.3.8",
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": ">=20"
+  }
 }
