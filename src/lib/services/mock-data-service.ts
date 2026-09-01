@@ -55,6 +55,26 @@ export class MockDataService implements IDataService {
 		return { ...this.project }
 	}
 
+	async createProject(data: {
+		name: string
+		domain: string
+		country: string
+		country_custom: string | null
+		language: string
+		language_custom: string | null
+	}): Promise<Project> {
+		this.project = {
+			id: genId(),
+			name: data.name.trim(),
+			domain: data.domain.trim(),
+			country: data.country,
+			country_custom: data.country_custom,
+			language: data.language,
+			language_custom: data.language_custom,
+		}
+		return { ...this.project }
+	}
+
 	async updateProject(patch: Partial<Omit<Project, "id">>): Promise<Project> {
 		this.project = { ...this.project, ...patch }
 		return { ...this.project }

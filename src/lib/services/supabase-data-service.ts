@@ -87,6 +87,28 @@ export class SupabaseDataService implements IDataService {
 		return toProject(data as ProjectRow)
 	}
 
+	async createProject(data: {
+		name: string
+		domain: string
+		country: string
+		country_custom: string | null
+		language: string
+		language_custom: string | null
+	}): Promise<Project> {
+		const { data: result, error } = await supabase.rpc("create_project", {
+			p_name: data.name.trim(),
+			p_domain: data.domain.trim(),
+			p_country: data.country,
+			p_country_custom: data.country_custom,
+			p_language: data.language,
+			p_language_custom: data.language_custom,
+		})
+		if (error) throw error
+		const rows = result as ProjectRow[]
+		if (!rows || rows.length === 0) throw new Error("Echec de la creation du projet.")
+		return toProject(rows[0])
+	}
+
 	async updateProject(patch: Partial<Omit<Project, "id">>): Promise<Project> {
 		const current = await this.getProject()
 		const { data, error } = await supabase

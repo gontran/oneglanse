@@ -10,6 +10,14 @@ import type {
 
 export interface IDataService {
 	getProject(): Promise<Project>
+	createProject(data: {
+		name: string
+		domain: string
+		country: string
+		country_custom: string | null
+		language: string
+		language_custom: string | null
+	}): Promise<Project>
 	updateProject(patch: Partial<Omit<Project, "id">>): Promise<Project>
 
 	getCompetitors(): Promise<Competitor[]>

@@ -1,5 +1,6 @@
 import { AuditButton } from "@/components/configuration/audit-button"
 import { CompetitorsManager } from "@/components/configuration/competitors-manager"
+import { NewProjectForm } from "@/components/configuration/new-project-form"
 import { PerplexityTestPanel } from "@/components/configuration/perplexity-test-panel"
 import { ProjectInfoForm } from "@/components/configuration/project-info-form"
 import { PromptsManager } from "@/components/configuration/prompts-manager"
@@ -8,7 +9,7 @@ import { SidebarTrigger } from "@/components/ui/sidebar"
 import { isDatabaseMode } from "@/lib/auth/auth-context"
 import { dataService } from "@/lib/services"
 import type { Competitor, Project, ProjectPrompt } from "@/types/analysis"
-import { FlaskConical, MessageSquare, Settings, Users } from "lucide-react"
+import { FlaskConical, MessageSquare, Plus, Settings, Users } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 
 export function ConfigurationPage() {
@@ -75,6 +76,21 @@ export function ConfigurationPage() {
 								<div className="flex items-center justify-center py-20">
 									<p className="text-sm text-red-600 dark:text-red-400">{error}</p>
 								</div>
+							) : !project ? (
+								<ConfigSection
+									icon={Plus}
+									title="Creer un projet"
+									description="Configurez votre marque et sa zone geographique pour demarrer les audits."
+								>
+									<NewProjectForm
+										onCreate={async (data) => {
+											const created = await dataService.createProject(data)
+											setProject(created)
+											setCompetitors(await dataService.getCompetitors())
+											setPrompts(await dataService.getPrompts())
+										}}
+									/>
+								</ConfigSection>
 							) : project ? (
 								<div className="space-y-6">
 									<ConfigSection
