@@ -384,33 +384,20 @@ export class SupabaseDataService implements IDataService {
 		projectId: string,
 		promptId: string,
 	): Promise<{ auditRunId: string; auditResultId: string }> {
-		const { data: sessionData } = await supabase.auth.getSession()
-		const token = sessionData.session?.access_token
-		if (!token) throw new Error("Non authentifie.")
-
-		const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/run-perplexity-audit`
-		const response = await fetch(apiUrl, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-				Authorization: `Bearer ${token}`,
-			},
-			body: JSON.stringify({ project_id: projectId, prompt_id: promptId }),
+		const { data, error } = await supabase.functions.invoke("run-perplexity-audit", {
+			body: { project_id: projectId, prompt_id: promptId },
 		})
 
-		if (!response.ok) {
-			const body = await response.json().catch(() => ({}))
-			throw new Error(body.error || `Erreur ${response.status}`)
-		}
-
-		const body = await response.json()
+		if (error) throw new Error(error.message || "Erreur lors de l'audit.")
+		const body = data as { audit_run_id?: string; audit_result_id?: string; error?: string }
+		if (body.error) throw new Error(body.error)
 		if (!body.audit_run_id || !body.audit_result_id) {
 			throw new Error("Reponse invalide du serveur.")
 		}
 
 		return {
-			auditRunId: body.audit_run_id as string,
-			auditResultId: body.audit_result_id as string,
+			auditRunId: body.audit_run_id,
+			auditResultId: body.audit_result_id,
 		}
 	}
 }
