@@ -62,8 +62,13 @@ export function AppSidebar() {
 			}
 		}
 		loadProject()
+		const onProjectChange = () => {
+			if (!cancelled) loadProject()
+		}
+		window.addEventListener("playvod:active-project-changed", onProjectChange)
 		return () => {
 			cancelled = true
+			window.removeEventListener("playvod:active-project-changed", onProjectChange)
 		}
 	}, [pathname])
 

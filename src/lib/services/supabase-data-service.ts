@@ -85,6 +85,7 @@ export class SupabaseDataService implements IDataService {
 
 	setActiveProject(projectId: string): void {
 		localStorage.setItem(ACTIVE_PROJECT_KEY, projectId)
+		window.dispatchEvent(new CustomEvent("playvod:active-project-changed"))
 	}
 
 	async getAllProjects(): Promise<Project[]> {
@@ -303,6 +304,7 @@ export class SupabaseDataService implements IDataService {
 
 	async getAnalysisRecords(): Promise<AnalysisRecord[]> {
 		try {
+			const project = await this.getProject()
 			const { data, error } = await supabase
 				.from("audit_results")
 				.select(`
@@ -317,6 +319,7 @@ export class SupabaseDataService implements IDataService {
 						competitor_mentions (name, domain, mention_count, sentiment, visibility)
 					)
 				`)
+				.eq("project_id", project.id)
 				.order("prompt_run_at", { ascending: false })
 				.limit(100)
 

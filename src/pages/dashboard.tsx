@@ -31,6 +31,7 @@ export function DashboardPage() {
 		if (!isDatabaseMode) return
 		let cancelled = false
 		const load = async () => {
+			setLoading(true)
 			try {
 				const p = await dataService.getProject().catch(() => null)
 				if (!cancelled) setProject(p)
@@ -43,8 +44,13 @@ export function DashboardPage() {
 			}
 		}
 		load()
+		const onProjectChange = () => {
+			if (!cancelled) load()
+		}
+		window.addEventListener("playvod:active-project-changed", onProjectChange)
 		return () => {
 			cancelled = true
+			window.removeEventListener("playvod:active-project-changed", onProjectChange)
 		}
 	}, [])
 

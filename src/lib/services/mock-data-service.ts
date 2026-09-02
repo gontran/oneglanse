@@ -63,6 +63,7 @@ export class MockDataService implements IDataService {
 
 	setActiveProject(projectId: string): void {
 		this.activeProjectId = projectId
+		window.dispatchEvent(new CustomEvent("playvod:active-project-changed"))
 	}
 
 	async createProject(data: {
