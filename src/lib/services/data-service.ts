@@ -41,9 +41,10 @@ export interface IDataService {
 
 	getAnalysisRecords(): Promise<AnalysisRecord[]>
 	getAuditResult(resultId: string): Promise<AuditResultDetail | null>
-	runPerplexityAudit(
+	runAudit(
 		projectId: string,
 		promptId: string,
+		providerId: string,
 	): Promise<{ auditRunId: string; auditResultId: string }>
 }
 

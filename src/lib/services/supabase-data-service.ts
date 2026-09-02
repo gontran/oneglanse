@@ -460,15 +460,16 @@ export class SupabaseDataService implements IDataService {
 		}
 	}
 
-	async runPerplexityAudit(
+	async runAudit(
 		projectId: string,
 		promptId: string,
+		providerId: string,
 	): Promise<{ auditRunId: string; auditResultId: string }> {
 		const { data: sessionData } = await supabase.auth.getSession()
 		const token = sessionData.session?.access_token
 		if (!token) throw new Error("Non authentifie.")
 
-		const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/run-perplexity-audit`
+		const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/run-audit`
 		const response = await fetch(apiUrl, {
 			method: "POST",
 			headers: {
@@ -476,7 +477,7 @@ export class SupabaseDataService implements IDataService {
 				Authorization: `Bearer ${token}`,
 				apikey: import.meta.env.VITE_SUPABASE_ANON_KEY,
 			},
-			body: JSON.stringify({ project_id: projectId, prompt_id: promptId }),
+			body: JSON.stringify({ project_id: projectId, prompt_id: promptId, provider: providerId }),
 		})
 
 		if (!response.ok) {

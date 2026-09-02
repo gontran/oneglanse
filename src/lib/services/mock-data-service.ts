@@ -185,9 +185,10 @@ export class MockDataService implements IDataService {
 		return null
 	}
 
-	async runPerplexityAudit(
+	async runAudit(
 		_projectId: string,
 		_promptId: string,
+		_providerId: string,
 	): Promise<{ auditRunId: string; auditResultId: string }> {
 		throw new Error("Audit reel non disponible en mode demonstration.")
 	}

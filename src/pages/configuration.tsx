@@ -1,7 +1,7 @@
 import { AuditButton } from "@/components/configuration/audit-button"
 import { CompetitorsManager } from "@/components/configuration/competitors-manager"
 import { NewProjectForm } from "@/components/configuration/new-project-form"
-import { PerplexityTestPanel } from "@/components/configuration/perplexity-test-panel"
+import { AuditTestPanel } from "@/components/configuration/audit-test-panel"
 import { ProjectInfoForm } from "@/components/configuration/project-info-form"
 import { ProjectSwitcher } from "@/components/configuration/project-switcher"
 import { PromptsManager } from "@/components/configuration/prompts-manager"
@@ -211,10 +211,10 @@ export function ConfigurationPage() {
 												<div ref={testSectionRef}>
 													<ConfigSection
 														icon={FlaskConical}
-														title="Test Perplexity"
-														description="Envoyez un prompt a l'API Perplexity Sonar pour un audit reel."
+														title="Lancer un audit"
+														description="Choisissez une API de recherche et envoyez un prompt pour un audit reel."
 													>
-														<PerplexityTestPanel projectId={project.id} prompts={prompts} />
+														<AuditTestPanel projectId={project.id} prompts={prompts} />
 													</ConfigSection>
 												</div>
 											)}

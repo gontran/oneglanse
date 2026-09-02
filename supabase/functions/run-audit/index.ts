@@ -6,6 +6,112 @@ const corsHeaders = {
 	"Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
 }
 
+interface ProviderConfig {
+	id: string
+	label: string
+	model: string
+	envKey: string
+	endpoint: string
+	extractResponse: (data: Record<string, unknown>) => { text: string; citations: string[]; usage: Record<string, unknown> | null }
+}
+
+const PROVIDERS: Record<string, ProviderConfig> = {
+	perplexity: {
+		id: "perplexity",
+		label: "Perplexity",
+		model: "sonar",
+		envKey: "PERPLEXITY_API_KEY",
+		endpoint: "https://api.perplexity.ai/chat/completions",
+		extractResponse: (data) => ({
+			text: (data?.choices?.[0]?.message?.content as string) ?? "",
+			citations: (data?.citations as string[]) ?? [],
+			usage: (data?.usage as Record<string, unknown>) ?? null,
+		}),
+	},
+	openai: {
+		id: "openai",
+		label: "OpenAI",
+		model: "gpt-4o",
+		envKey: "OPENAI_API_KEY",
+		endpoint: "https://api.openai.com/v1/chat/completions",
+		extractResponse: (data) => ({
+			text: (data?.choices?.[0]?.message?.content as string) ?? "",
+			citations: [],
+			usage: (data?.usage as Record<string, unknown>) ?? null,
+		}),
+	},
+	gemini: {
+		id: "gemini",
+		label: "Google Gemini",
+		model: "gemini-2.0-flash",
+		envKey: "GEMINI_API_KEY",
+		endpoint: "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent",
+		extractResponse: (data) => ({
+			text: (data?.candidates?.[0]?.content?.parts?.[0]?.text as string) ?? "",
+			citations: [],
+			usage: (data?.usageMetadata as Record<string, unknown>) ?? null,
+		}),
+	},
+}
+
+function getProvider(id: string): ProviderConfig | null {
+	return PROVIDERS[id] ?? null
+}
+
+function buildApiRequest(provider: ProviderConfig, apiKey: string, promptText: string): { url: string; headers: Record<string, string>; body: string } {
+	if (provider.id === "gemini") {
+		return {
+			url: `${provider.endpoint}?key=${apiKey}`,
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({
+				contents: [{ parts: [{ text: promptText }] }],
+			}),
+		}
+	}
+	return {
+		url: provider.endpoint,
+		headers: {
+			Authorization: `Bearer ${apiKey}`,
+			"Content-Type": "application/json",
+		},
+		body: JSON.stringify({
+			model: provider.model,
+			messages: [{ role: "user", content: promptText }],
+		}),
+	}
+}
+
+function buildAnalysisRequest(provider: ProviderConfig, apiKey: string, analysisPrompt: string): { url: string; headers: Record<string, string>; body: string } {
+	if (provider.id === "gemini") {
+		return {
+			url: `${provider.endpoint}?key=${apiKey}`,
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({
+				contents: [{ parts: [{ text: analysisPrompt }] }],
+				generationConfig: { responseMimeType: "application/json" },
+			}),
+		}
+	}
+	return {
+		url: provider.endpoint,
+		headers: {
+			Authorization: `Bearer ${apiKey}`,
+			"Content-Type": "application/json",
+		},
+		body: JSON.stringify({
+			model: provider.model,
+			messages: [{ role: "user", content: analysisPrompt }],
+		}),
+	}
+}
+
+function extractAnalysisText(provider: ProviderConfig, data: Record<string, unknown>): string {
+	if (provider.id === "gemini") {
+		return (data?.candidates?.[0]?.content?.parts?.[0]?.text as string) ?? ""
+	}
+	return (data?.choices?.[0]?.message?.content as string) ?? ""
+}
+
 Deno.serve(async (req: Request) => {
 	if (req.method === "OPTIONS") {
 		return new Response(null, { status: 200, headers: corsHeaders })
@@ -21,12 +127,10 @@ Deno.serve(async (req: Request) => {
 		const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY") ?? ""
 		const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
 
-		// Auth client: verify the user's JWT
 		const authClient = createClient(supabaseUrl, supabaseAnonKey, {
 			global: { headers: { Authorization: authHeader } },
 		})
 
-		// Service client: bypass RLS for internal DB operations
 		const admin = createClient(supabaseUrl, serviceRoleKey)
 
 		const { data: userData, error: userError } = await authClient.auth.getUser()
@@ -38,12 +142,17 @@ Deno.serve(async (req: Request) => {
 		const body = await req.json()
 		const projectId = body?.project_id
 		const promptId = body?.prompt_id
+		const providerId = body?.provider ?? "perplexity"
 
 		if (!projectId || !promptId) {
 			return json({ error: "project_id et prompt_id sont requis" }, 400)
 		}
 
-		// Verify project exists
+		const provider = getProvider(providerId)
+		if (!provider) {
+			return json({ error: `Fournisseur "${providerId}" non supporte` }, 400)
+		}
+
 		const { data: project, error: projectError } = await admin
 			.from("projects")
 			.select("id, organization_id, domain, name")
@@ -54,7 +163,6 @@ Deno.serve(async (req: Request) => {
 			return json({ error: "Projet introuvable" }, 404)
 		}
 
-		// Verify user is org member
 		const { data: membership } = await admin
 			.from("organization_members")
 			.select("id, role")
@@ -66,7 +174,6 @@ Deno.serve(async (req: Request) => {
 			return json({ error: "Acces refuse" }, 403)
 		}
 
-		// Verify prompt belongs to project and is active
 		const { data: prompt, error: promptError } = await admin
 			.from("project_prompts")
 			.select("id, text, is_active")
@@ -81,7 +188,6 @@ Deno.serve(async (req: Request) => {
 			return json({ error: "Prompt inactif" }, 400)
 		}
 
-		// Create audit_run with status pending
 		const { data: auditRun, error: runError } = await admin
 			.from("audit_runs")
 			.insert({
@@ -101,12 +207,10 @@ Deno.serve(async (req: Request) => {
 
 		const auditRunId = auditRun.id
 
-		// Set status to running
 		await admin.from("audit_runs").update({ status: "running" }).eq("id", auditRunId)
 
-		// Call Perplexity API
-		const perplexityKey = Deno.env.get("PERPLEXITY_API_KEY")
-		if (!perplexityKey) {
+		const apiKey = Deno.env.get(provider.envKey)
+		if (!apiKey) {
 			await admin.from("audit_runs").update({ status: "failed" }).eq("id", auditRunId)
 			await admin.from("audit_results").insert({
 				audit_run_id: auditRunId,
@@ -114,48 +218,44 @@ Deno.serve(async (req: Request) => {
 				project_id: projectId,
 				prompt_id: promptId,
 				prompt: prompt.text,
-				surface: "Perplexity API",
-				provider: "Perplexity",
-				model: "sonar",
+				surface: `${provider.label} API`,
+				provider: provider.label,
+				model: provider.model,
 				collection_method: "api",
 				response: "",
 				is_analysed: false,
-				error_message: "Configuration serveur incomplete",
+				error_message: `Cle API manquante pour ${provider.label}`,
 			})
-			return json({ error: "Configuration serveur incomplete" }, 500)
+			return json({ error: `Cle API non configuree pour ${provider.label}` }, 500)
 		}
 
 		const controller = new AbortController()
 		const timeout = setTimeout(() => controller.abort(), 30000)
 
-		let perplexityResponse: Response
+		const apiReq = buildApiRequest(provider, apiKey, prompt.text)
+
+		let apiResponse: Response
 		try {
-			perplexityResponse = await fetch("https://api.perplexity.ai/chat/completions", {
+			apiResponse = await fetch(apiReq.url, {
 				method: "POST",
-				headers: {
-					Authorization: `Bearer ${perplexityKey}`,
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify({
-					model: "sonar",
-					messages: [{ role: "user", content: prompt.text }],
-				}),
+				headers: apiReq.headers,
+				body: apiReq.body,
 				signal: controller.signal,
 			})
 		} catch (err) {
 			clearTimeout(timeout)
 			await admin.from("audit_runs").update({ status: "failed" }).eq("id", auditRunId)
 			const isTimeout = err instanceof DOMException && err.name === "AbortError"
-			const errorMsg = isTimeout ? "Delai depasse" : "Erreur de connexion au fournisseur IA"
+			const errorMsg = isTimeout ? "Delai depasse" : `Erreur de connexion a ${provider.label}`
 			await admin.from("audit_results").insert({
 				audit_run_id: auditRunId,
 				organization_id: project.organization_id,
 				project_id: projectId,
 				prompt_id: promptId,
 				prompt: prompt.text,
-				surface: "Perplexity API",
-				provider: "Perplexity",
-				model: "sonar",
+				surface: `${provider.label} API`,
+				provider: provider.label,
+				model: provider.model,
 				collection_method: "api",
 				response: "",
 				is_analysed: false,
@@ -165,7 +265,7 @@ Deno.serve(async (req: Request) => {
 		}
 		clearTimeout(timeout)
 
-		if (!perplexityResponse.ok) {
+		if (!apiResponse.ok) {
 			await admin.from("audit_runs").update({ status: "failed" }).eq("id", auditRunId)
 			await admin.from("audit_results").insert({
 				audit_run_id: auditRunId,
@@ -173,23 +273,23 @@ Deno.serve(async (req: Request) => {
 				project_id: projectId,
 				prompt_id: promptId,
 				prompt: prompt.text,
-				surface: "Perplexity API",
-				provider: "Perplexity",
-				model: "sonar",
+				surface: `${provider.label} API`,
+				provider: provider.label,
+				model: provider.model,
 				collection_method: "api",
 				response: "",
 				is_analysed: false,
-				error_message: "Le fournisseur IA a rejete la requete",
+				error_message: `${provider.label} a rejete la requete`,
 			})
-			return json({ error: "Le fournisseur IA a rejete la requete" }, 502)
+			return json({ error: `${provider.label} a rejete la requete` }, 502)
 		}
 
-		const perplexityData = await perplexityResponse.json()
-		const responseText = perplexityData?.choices?.[0]?.message?.content ?? ""
-		const citations: string[] = perplexityData?.citations ?? []
-		const usage = perplexityData?.usage ?? null
+		const apiData = await apiResponse.json() as Record<string, unknown>
+		const extracted = provider.extractResponse(apiData)
+		const responseText = extracted.text
+		const citations = extracted.citations
+		const usage = extracted.usage
 
-		// Deterministic brand detection
 		const brandName = project.name ?? "PlayVOD"
 		const brandDomain = project.domain ?? "playvod.com"
 		const lowerResponse = responseText.toLowerCase()
@@ -200,7 +300,6 @@ Deno.serve(async (req: Request) => {
 		]
 		const brandMentioned = brandPatterns.some((p) => p.length > 2 && lowerResponse.includes(p))
 
-		// Calculate brand position (character offset of first mention)
 		let brandPosition: number | null = null
 		if (brandMentioned) {
 			for (const pattern of brandPatterns) {
@@ -212,7 +311,6 @@ Deno.serve(async (req: Request) => {
 			}
 		}
 
-		// Create audit_result
 		const { data: auditResult, error: resultError } = await admin
 			.from("audit_results")
 			.insert({
@@ -221,9 +319,9 @@ Deno.serve(async (req: Request) => {
 				project_id: projectId,
 				prompt_id: promptId,
 				prompt: prompt.text,
-				surface: "Perplexity API",
-				provider: "Perplexity",
-				model: "sonar",
+				surface: `${provider.label} API`,
+				provider: provider.label,
+				model: provider.model,
 				collection_method: "api",
 				response: responseText,
 				is_analysed: false,
@@ -242,7 +340,6 @@ Deno.serve(async (req: Request) => {
 
 		const auditResultId = auditResult.id
 
-		// Insert citations as result_sources
 		const projectDomain = project.domain?.toLowerCase().replace(/^www\./, "")
 		if (citations.length > 0) {
 			const sourceRows = citations.map((url, index) => {
@@ -264,12 +361,11 @@ Deno.serve(async (req: Request) => {
 			await admin.from("result_sources").insert(sourceRows)
 		}
 
-		// Run brand analysis via Perplexity (using the same API key)
-		// This analyzes the response to extract sentiment, competitors, perception, etc.
 		let analysisDone = false
 		try {
 			const analysisResult = await analyzeBrandResponse(
-				perplexityKey,
+				provider,
+				apiKey,
 				prompt.text,
 				responseText,
 				brandName,
@@ -277,7 +373,6 @@ Deno.serve(async (req: Request) => {
 			)
 
 			if (analysisResult) {
-				// Insert brand_analysis
 				const { data: brandAnalysisRow, error: baError } = await admin
 					.from("brand_analyses")
 					.insert({
@@ -298,7 +393,6 @@ Deno.serve(async (req: Request) => {
 					.maybeSingle()
 
 				if (!baError && brandAnalysisRow) {
-					// Insert competitor_mentions
 					if (analysisResult.competitors.length > 0) {
 						const compRows = analysisResult.competitors.map((c) => ({
 							brand_analysis_id: brandAnalysisRow.id,
@@ -317,7 +411,6 @@ Deno.serve(async (req: Request) => {
 			console.error("Brand analysis failed:", err)
 		}
 
-		// Mark as analysed (or not) and set run status
 		await admin
 			.from("audit_results")
 			.update({ is_analysed: analysisDone })
@@ -327,7 +420,7 @@ Deno.serve(async (req: Request) => {
 
 		return json({ audit_run_id: auditRunId, audit_result_id: auditResultId }, 200)
 	} catch (err) {
-		console.error("run-perplexity-audit error:", err)
+		console.error("run-audit error:", err)
 		return json({ error: "Erreur interne du serveur" }, 500)
 	}
 })
@@ -354,6 +447,7 @@ interface BrandAnalysisLLMResult {
 }
 
 async function analyzeBrandResponse(
+	provider: ProviderConfig,
 	apiKey: string,
 	originalPrompt: string,
 	aiResponse: string,
@@ -398,32 +492,25 @@ Regles:
 	const timeout = setTimeout(() => controller.abort(), 30000)
 
 	try {
-		const response = await fetch("https://api.perplexity.ai/chat/completions", {
+		const req = buildAnalysisRequest(provider, apiKey, analysisPrompt)
+		const response = await fetch(req.url, {
 			method: "POST",
-			headers: {
-				Authorization: `Bearer ${apiKey}`,
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify({
-				model: "sonar",
-				messages: [{ role: "user", content: analysisPrompt }],
-			}),
+			headers: req.headers,
+			body: req.body,
 			signal: controller.signal,
 		})
 		clearTimeout(timeout)
 
 		if (!response.ok) return null
 
-		const data = await response.json()
-		const content = data?.choices?.[0]?.message?.content ?? ""
+		const data = await response.json() as Record<string, unknown>
+		const content = extractAnalysisText(provider, data)
 
-		// Extract JSON from the response (it may be wrapped in markdown code blocks)
 		const jsonMatch = content.match(/\{[\s\S]*\}/)
 		if (!jsonMatch) return null
 
 		const parsed = JSON.parse(jsonMatch[0]) as BrandAnalysisLLMResult
 
-		// Validate required fields with safe defaults
 		return {
 			brand_mentioned: parsed.brand_mentioned ?? false,
 			position: parsed.position ?? null,

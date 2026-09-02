@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button"
 import { SearchableSelect } from "@/components/ui/searchable-select"
+import { AUDIT_PROVIDERS, DEFAULT_AUDIT_PROVIDER } from "@/lib/data/audit-providers"
 import { dataService } from "@/lib/services"
 import type { ProjectPrompt } from "@/types/analysis"
 import {
@@ -14,25 +15,28 @@ import {
 import { useState } from "react"
 import { Link } from "react-router-dom"
 
-interface PerplexityTestPanelProps {
+interface AuditTestPanelProps {
 	projectId: string
 	prompts: ProjectPrompt[]
 }
 
-export function PerplexityTestPanel({ projectId, prompts }: PerplexityTestPanelProps) {
+export function AuditTestPanel({ projectId, prompts }: AuditTestPanelProps) {
 	const activePrompts = prompts.filter((p) => p.is_active)
 	const [selectedPromptId, setSelectedPromptId] = useState(activePrompts[0]?.id ?? "")
+	const [selectedProviderId, setSelectedProviderId] = useState(DEFAULT_AUDIT_PROVIDER.id)
 	const [confirming, setConfirming] = useState(false)
 	const [running, setRunning] = useState(false)
 	const [result, setResult] = useState<{ auditResultId: string } | null>(null)
 	const [error, setError] = useState<string | null>(null)
+
+	const selectedProvider = AUDIT_PROVIDERS.find((p) => p.id === selectedProviderId) ?? DEFAULT_AUDIT_PROVIDER
 
 	const handleRun = async () => {
 		setRunning(true)
 		setError(null)
 		setResult(null)
 		try {
-			const res = await dataService.runPerplexityAudit(projectId, selectedPromptId)
+			const res = await dataService.runAudit(projectId, selectedPromptId, selectedProviderId)
 			setResult({ auditResultId: res.auditResultId })
 		} catch (err) {
 			setError(err instanceof Error ? err.message : "Erreur lors de l'audit.")
@@ -47,13 +51,31 @@ export function PerplexityTestPanel({ projectId, prompts }: PerplexityTestPanelP
 		label: p.text.length > 80 ? `${p.text.slice(0, 80)}...` : p.text,
 	}))
 
+	const providerOptions = AUDIT_PROVIDERS.map((p) => ({
+		value: p.id,
+		label: p.label,
+	}))
+
 	return (
 		<div className="space-y-4">
 			<div className="flex items-start gap-2 rounded-[var(--app-radius)] border border-blue-200 bg-blue-50/60 p-3 dark:border-blue-900/50 dark:bg-blue-950/20">
 				<Info className="mt-0.5 size-4 shrink-0 text-blue-500" />
 				<p className="text-[13px] text-blue-700 dark:text-blue-400">
-					Envoie un prompt selectionne a l'API Perplexity Sonar. Un seul prompt par execution.
+					Envoie un prompt selectionne a l'API de votre choix. Un seul prompt par execution.
 				</p>
+			</div>
+
+			<div className="space-y-1.5">
+				<span className="text-[13px] font-medium text-gray-700 dark:text-gray-300">
+					Fournisseur d'audit
+				</span>
+				<SearchableSelect
+					options={providerOptions}
+					value={selectedProviderId}
+					onValueChange={setSelectedProviderId}
+					placeholder="Selectionner un fournisseur"
+					searchPlaceholder="Rechercher un fournisseur..."
+				/>
 			</div>
 
 			<div className="space-y-1.5">
@@ -79,7 +101,7 @@ export function PerplexityTestPanel({ projectId, prompts }: PerplexityTestPanelP
 					disabled={!selectedPromptId || activePrompts.length === 0}
 				>
 					<Play className="size-4" />
-					Tester avec Perplexity
+					Tester avec {selectedProvider.label}
 				</Button>
 			)}
 
@@ -88,7 +110,7 @@ export function PerplexityTestPanel({ projectId, prompts }: PerplexityTestPanelP
 					<div className="flex items-start gap-2">
 						<AlertTriangle className="mt-0.5 size-4 shrink-0 text-amber-500" />
 						<p className="text-[13px] text-amber-700 dark:text-amber-400">
-							Voulez-vous envoyer ce prompt a l'API Perplexity Sonar ? Un appel reel sera effectue.
+							Voulez-vous envoyer ce prompt a l'API {selectedProvider.label} ? Un appel reel sera effectue.
 						</p>
 					</div>
 					<div className="flex gap-2">
@@ -125,7 +147,7 @@ export function PerplexityTestPanel({ projectId, prompts }: PerplexityTestPanelP
 								Audit complete avec succes
 							</p>
 							<p className="text-[11px] text-green-600 dark:text-green-500">
-								Resultat collecte via l'API Perplexity Sonar. Le contenu peut differe de l'interface
+								Resultat collecte via l'API {selectedProvider.label}. Le contenu peut differe de l'interface
 								grand public.
 							</p>
 						</div>
