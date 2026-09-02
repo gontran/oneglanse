@@ -495,4 +495,30 @@ export class SupabaseDataService implements IDataService {
 			auditResultId: body.audit_result_id as string,
 		}
 	}
+
+	async getProviderKeyStatuses(): Promise<Record<string, { configured: boolean; updatedAt: string | null }>> {
+		const { data, error } = await supabase.rpc("list_provider_api_keys")
+		if (error) throw error
+		const rows = (data as { provider_id: string; updated_at: string }[]) || []
+		const map: Record<string, { configured: boolean; updatedAt: string | null }> = {}
+		for (const row of rows) {
+			map[row.provider_id] = { configured: true, updatedAt: row.updated_at }
+		}
+		return map
+	}
+
+	async saveProviderApiKey(providerId: string, apiKey: string): Promise<void> {
+		const { error } = await supabase.rpc("upsert_provider_api_key", {
+			p_provider_id: providerId,
+			p_api_key: apiKey,
+		})
+		if (error) throw error
+	}
+
+	async deleteProviderApiKey(providerId: string): Promise<void> {
+		const { error } = await supabase.rpc("delete_provider_api_key", {
+			p_provider_id: providerId,
+		})
+		if (error) throw error
+	}
 }

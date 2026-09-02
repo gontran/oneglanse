@@ -4,13 +4,14 @@ import { NewProjectForm } from "@/components/configuration/new-project-form"
 import { AuditTestPanel } from "@/components/configuration/audit-test-panel"
 import { ProjectInfoForm } from "@/components/configuration/project-info-form"
 import { ProjectSwitcher } from "@/components/configuration/project-switcher"
+import { ProviderKeyManager } from "@/components/configuration/provider-key-manager"
 import { PromptsManager } from "@/components/configuration/prompts-manager"
 import { AppSidebar } from "@/components/layout/app-sidebar"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { isDatabaseMode } from "@/lib/auth/auth-context"
 import { dataService } from "@/lib/services"
 import type { Competitor, Project, ProjectPrompt } from "@/types/analysis"
-import { FlaskConical, MessageSquare, Plus, Settings, Users } from "lucide-react"
+import { FlaskConical, KeyRound, MessageSquare, Plus, Settings, Users } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 
 export function ConfigurationPage() {
@@ -206,6 +207,16 @@ export function ConfigurationPage() {
 													}}
 												/>
 											</ConfigSection>
+
+											{isDatabaseMode && project && (
+												<ConfigSection
+													icon={KeyRound}
+													title="Cles API des fournisseurs"
+													description="Renseignez les cles API de chaque fournisseur d'audit que vous souhaitez utiliser."
+												>
+													<ProviderKeyManager />
+												</ConfigSection>
+											)}
 
 											{isDatabaseMode && project && (
 												<div ref={testSectionRef}>

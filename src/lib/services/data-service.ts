@@ -46,6 +46,10 @@ export interface IDataService {
 		promptId: string,
 		providerId: string,
 	): Promise<{ auditRunId: string; auditResultId: string }>
+
+	getProviderKeyStatuses(): Promise<Record<string, { configured: boolean; updatedAt: string | null }>>
+	saveProviderApiKey(providerId: string, apiKey: string): Promise<void>
+	deleteProviderApiKey(providerId: string): Promise<void>
 }
 
 export type AuditRunStatusType = AuditRunStatus

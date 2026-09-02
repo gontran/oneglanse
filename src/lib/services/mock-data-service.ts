@@ -192,4 +192,16 @@ export class MockDataService implements IDataService {
 	): Promise<{ auditRunId: string; auditResultId: string }> {
 		throw new Error("Audit reel non disponible en mode demonstration.")
 	}
+
+	async getProviderKeyStatuses(): Promise<Record<string, { configured: boolean; updatedAt: string | null }>> {
+		return {}
+	}
+
+	async saveProviderApiKey(_providerId: string, _apiKey: string): Promise<void> {
+		throw new Error("Gestion des cles API non disponible en mode demonstration.")
+	}
+
+	async deleteProviderApiKey(_providerId: string): Promise<void> {
+		throw new Error("Gestion des cles API non disponible en mode demonstration.")
+	}
 }

@@ -209,7 +209,13 @@ Deno.serve(async (req: Request) => {
 
 		await admin.from("audit_runs").update({ status: "running" }).eq("id", auditRunId)
 
-		const apiKey = Deno.env.get(provider.envKey)
+		const { data: dbKeyData } = await admin
+			.rpc("get_provider_api_key", {
+				p_org_id: project.organization_id,
+				p_provider_id: provider.id,
+			})
+		const dbKey = (dbKeyData as string | null) ?? null
+		const apiKey = dbKey || Deno.env.get(provider.envKey) || null
 		if (!apiKey) {
 			await admin.from("audit_runs").update({ status: "failed" }).eq("id", auditRunId)
 			await admin.from("audit_results").insert({
@@ -226,7 +232,7 @@ Deno.serve(async (req: Request) => {
 				is_analysed: false,
 				error_message: `Cle API manquante pour ${provider.label}`,
 			})
-			return json({ error: `Cle API non configuree pour ${provider.label}` }, 500)
+			return json({ error: `Cle API non configuree pour ${provider.label}. Ajoutez-la dans Configuration > Cles API.` }, 500)
 		}
 
 		const controller = new AbortController()
