@@ -10,6 +10,8 @@ import type {
 
 export interface IDataService {
 	getProject(): Promise<Project>
+	getAllProjects(): Promise<Project[]>
+	setActiveProject(projectId: string): void
 	createProject(data: {
 		name: string
 		domain: string

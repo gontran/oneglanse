@@ -46,13 +46,23 @@ function genId(): string {
 }
 
 export class MockDataService implements IDataService {
-	private project: Project = { ...DEFAULT_PROJECT }
+	private projects: Project[] = [{ ...DEFAULT_PROJECT }]
+	private activeProjectId: string = DEFAULT_PROJECT.id
 	private competitors: Competitor[] = [...DEFAULT_COMPETITORS]
 	private prompts: ProjectPrompt[] = DEFAULT_PROMPTS.map((p) => ({ ...p }))
 	private surfaces: ProjectSurface[] = DEFAULT_SURFACES.map((s) => ({ ...s }))
 
 	async getProject(): Promise<Project> {
-		return { ...this.project }
+		const found = this.projects.find((p) => p.id === this.activeProjectId)
+		return { ...(found ?? this.projects[0]) }
+	}
+
+	async getAllProjects(): Promise<Project[]> {
+		return this.projects.map((p) => ({ ...p }))
+	}
+
+	setActiveProject(projectId: string): void {
+		this.activeProjectId = projectId
 	}
 
 	async createProject(data: {
@@ -63,7 +73,7 @@ export class MockDataService implements IDataService {
 		language: string
 		language_custom: string | null
 	}): Promise<Project> {
-		this.project = {
+		const project: Project = {
 			id: genId(),
 			name: data.name.trim(),
 			domain: data.domain.trim(),
@@ -72,12 +82,16 @@ export class MockDataService implements IDataService {
 			language: data.language,
 			language_custom: data.language_custom,
 		}
-		return { ...this.project }
+		this.projects.push(project)
+		this.activeProjectId = project.id
+		return { ...project }
 	}
 
 	async updateProject(patch: Partial<Omit<Project, "id">>): Promise<Project> {
-		this.project = { ...this.project, ...patch }
-		return { ...this.project }
+		const idx = this.projects.findIndex((p) => p.id === this.activeProjectId)
+		if (idx === -1) throw new Error("Aucun projet configure.")
+		this.projects[idx] = { ...this.projects[idx], ...patch }
+		return { ...this.projects[idx] }
 	}
 
 	async getCompetitors(): Promise<Competitor[]> {

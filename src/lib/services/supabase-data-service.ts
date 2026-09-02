@@ -76,16 +76,47 @@ function toPrompt(row: PromptRow): ProjectPrompt {
 	}
 }
 
+const ACTIVE_PROJECT_KEY = "playvod:active-project-id"
+
 export class SupabaseDataService implements IDataService {
-	async getProject(): Promise<Project> {
+	getActiveProjectId(): string | null {
+		return localStorage.getItem(ACTIVE_PROJECT_KEY)
+	}
+
+	setActiveProject(projectId: string): void {
+		localStorage.setItem(ACTIVE_PROJECT_KEY, projectId)
+	}
+
+	async getAllProjects(): Promise<Project[]> {
 		const { data, error } = await supabase
 			.from("projects")
 			.select("id, name, domain, country, country_custom, language, language_custom")
+			.order("created_at", { ascending: true })
+		if (error) throw error
+		return (data as ProjectRow[]).map(toProject)
+	}
+
+	async getProject(): Promise<Project> {
+		const activeId = this.getActiveProjectId()
+		if (activeId) {
+			const { data, error } = await supabase
+				.from("projects")
+				.select("id, name, domain, country, country_custom, language, language_custom")
+				.eq("id", activeId)
+				.maybeSingle()
+			if (!error && data) return toProject(data as ProjectRow)
+		}
+		const { data, error } = await supabase
+			.from("projects")
+			.select("id, name, domain, country, country_custom, language, language_custom")
+			.order("created_at", { ascending: true })
 			.limit(1)
 			.maybeSingle()
 		if (error) throw error
 		if (!data) throw new Error("Aucun projet configure.")
-		return toProject(data as ProjectRow)
+		const project = toProject(data as ProjectRow)
+		this.setActiveProject(project.id)
+		return project
 	}
 
 	async createProject(data: {
@@ -107,7 +138,9 @@ export class SupabaseDataService implements IDataService {
 		if (error) throw error
 		const rows = result as ProjectRow[]
 		if (!rows || rows.length === 0) throw new Error("Echec de la creation du projet.")
-		return toProject(rows[0])
+		const project = toProject(rows[0])
+		this.setActiveProject(project.id)
+		return project
 	}
 
 	async updateProject(patch: Partial<Omit<Project, "id">>): Promise<Project> {

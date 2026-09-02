@@ -12,6 +12,7 @@ import {
 	SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import { isDatabaseMode, useAuth } from "@/lib/auth/auth-context"
+import { dataService } from "@/lib/services"
 import {
 	Globe,
 	LayoutGrid,
@@ -48,7 +49,6 @@ export function AppSidebar() {
 		let cancelled = false
 		const loadProject = async () => {
 			try {
-				const { dataService } = await import("@/lib/services")
 				const project = await dataService.getProject()
 				if (!cancelled) {
 					setProjectName(project.name)
