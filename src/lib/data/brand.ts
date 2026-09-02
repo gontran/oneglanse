@@ -1,3 +1,5 @@
+export const APP_NAME = "Audit Visibilite IA"
+
 export const BRAND = {
 	name: "PlayVOD",
 	domain: "playvod.com",

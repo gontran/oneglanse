@@ -369,7 +369,8 @@ export class SupabaseDataService implements IDataService {
 				id, audit_run_id, prompt_id, prompt, surface, provider, model,
 				collection_method, response, prompt_run_at, is_analysed,
 				brand_mentioned, brand_position, error_message, usage_data, cost_data,
-				audit_runs!inner (id, status)
+				audit_runs!inner (id, status),
+				projects!inner (name)
 			`)
 			.eq("id", resultId)
 			.maybeSingle()
@@ -379,6 +380,9 @@ export class SupabaseDataService implements IDataService {
 		const r = result as Record<string, unknown>
 		const runInfo = (r.audit_runs as Record<string, unknown>[]) || []
 		const runRow = runInfo[0] || {}
+		const projectInfo = (r.projects as Record<string, unknown>[]) || []
+		const projectRow = projectInfo[0] || {}
+		const brandName = (projectRow.name as string) ?? null
 
 		const { data: sourcesData } = await supabase
 			.from("result_sources")
@@ -411,6 +415,7 @@ export class SupabaseDataService implements IDataService {
 			is_analysed: r.is_analysed as boolean,
 			brand_mentioned: (r.brand_mentioned as boolean | null) ?? null,
 			brand_position: (r.brand_position as number | null) ?? null,
+			brand_name: brandName,
 			error_message: (r.error_message as string | null) ?? null,
 			usage_data: (r.usage_data as Record<string, unknown> | null) ?? null,
 			cost_data: (r.cost_data as Record<string, unknown> | null) ?? null,

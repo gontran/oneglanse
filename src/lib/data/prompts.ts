@@ -31,16 +31,16 @@ export const PROMPTS: UserPrompt[] = [
 	},
 	{
 		id: "prompt-5",
-		text: "Quelles sont les differences entre PlayVOD et Netflix en matiere de prix et de catalogue ?",
+		text: "Que valent les tarifs, l'offre et les modalites de resiliation de cette plateforme en France ?",
 		category: "brand-specific",
-		intent: "informational",
+		intent: "transactional",
 		persona: null,
 	},
 	{
 		id: "prompt-6",
-		text: "Que valent les tarifs, l'offre et les modalites de resiliation de PlayVOD en France ?",
+		text: "Quelles sont les differences entre cette plateforme et Netflix en matiere de prix et de catalogue ?",
 		category: "brand-specific",
-		intent: "transactional",
+		intent: "informational",
 		persona: null,
 	},
 ]

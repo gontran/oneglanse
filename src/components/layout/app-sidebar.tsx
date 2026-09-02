@@ -1,3 +1,4 @@
+import { AppLogo } from "@/components/ui/app-logo"
 import { Favicon } from "@/components/ui/favicon"
 import {
 	Sidebar,
@@ -11,7 +12,6 @@ import {
 	SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import { isDatabaseMode, useAuth } from "@/lib/auth/auth-context"
-import { BRAND } from "@/lib/data/brand"
 import {
 	Globe,
 	LayoutGrid,
@@ -22,6 +22,7 @@ import {
 	User,
 	Users,
 } from "lucide-react"
+import { useEffect, useState } from "react"
 import { Link, useLocation, useNavigate } from "react-router-dom"
 
 const navItems = [
@@ -39,6 +40,32 @@ export function AppSidebar() {
 	const pathname = location.pathname
 	const navigate = useNavigate()
 	const { user, signOut, profile } = useAuth()
+	const [projectName, setProjectName] = useState<string | null>(null)
+	const [projectDomain, setProjectDomain] = useState<string | null>(null)
+
+	useEffect(() => {
+		if (!isDatabaseMode) return
+		let cancelled = false
+		const loadProject = async () => {
+			try {
+				const { dataService } = await import("@/lib/services")
+				const project = await dataService.getProject()
+				if (!cancelled) {
+					setProjectName(project.name)
+					setProjectDomain(project.domain)
+				}
+			} catch {
+				if (!cancelled) {
+					setProjectName(null)
+					setProjectDomain(null)
+				}
+			}
+		}
+		loadProject()
+		return () => {
+			cancelled = true
+		}
+	}, [pathname])
 
 	const handleSignOut = async () => {
 		await signOut()
@@ -50,14 +77,26 @@ export function AppSidebar() {
 			<SidebarHeader className="p-3">
 				<SidebarMenu>
 					<SidebarMenuItem>
-						<div className="flex items-center gap-2 rounded-[var(--app-radius)] px-4 py-2.5">
-							<Favicon domain={BRAND.domain} name={BRAND.name} size="h-6 w-6" />
-							<span className="text-base font-bold tracking-tight text-gray-950 dark:text-gray-50">
-								PlayVOD
-							</span>
+						<div className="px-4 py-2.5">
+							<AppLogo size="h-6 w-6" />
 						</div>
 					</SidebarMenuItem>
 				</SidebarMenu>
+				{projectName && (
+					<div className="mt-1 flex items-center gap-2 rounded-[var(--app-radius)] border border-gray-100 bg-stone-50 px-3 py-2 dark:border-gray-800 dark:bg-neutral-900">
+						{projectDomain && (
+							<Favicon domain={projectDomain} name={projectName} size="h-4 w-4" />
+						)}
+						<div className="min-w-0">
+							<p className="text-[10px] font-medium uppercase tracking-wide text-gray-400">
+								Site analyse
+							</p>
+							<p className="truncate text-[13px] font-semibold text-gray-700 dark:text-gray-300">
+								{projectName}
+							</p>
+						</div>
+					</div>
+				)}
 			</SidebarHeader>
 
 			<SidebarContent className="flex-1 overflow-y-auto">

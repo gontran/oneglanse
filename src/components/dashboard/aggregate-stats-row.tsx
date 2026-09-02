@@ -55,6 +55,7 @@ export function AggregateStatsRow({
 	topSource,
 	topCompetitor,
 	topCompetitorDomain,
+	brandName,
 }: {
 	visibilityScore: number
 	presenceRate: number
@@ -62,6 +63,7 @@ export function AggregateStatsRow({
 	topSource: string
 	topCompetitor: string
 	topCompetitorDomain?: string
+	brandName: string
 }) {
 	return (
 		<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -69,7 +71,7 @@ export function AggregateStatsRow({
 				icon={Globe}
 				label="Taux de presence"
 				value={formatPercent(presenceRate)}
-				subtitle="Reponses mentionnant PlayVOD"
+				subtitle={`Reponses mentionnant ${brandName}`}
 			/>
 			<StatCard
 				icon={Trophy}

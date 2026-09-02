@@ -15,15 +15,16 @@ import { PROMPTS } from "@/lib/data/prompts"
 import { dataService } from "@/lib/services"
 import { filterAnalysisRecords } from "@/lib/utils/filter"
 import { computeDashboardMetrics } from "@/lib/utils/metrics"
-import { ALL_SURFACES, type AnalysisRecord } from "@/types/analysis"
+import { ALL_SURFACES, type AnalysisRecord, type Project } from "@/types/analysis"
 import type { TimeRange } from "@/types/dashboard"
-import { Info, Loader as Loader2 } from "lucide-react"
+import { Info, Globe, Loader as Loader2 } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
 
 export function DashboardPage() {
 	const [surfaceFilter, setSurfaceFilter] = useState<string>(ALL_SURFACES)
 	const [timeFilter, setTimeFilter] = useState<TimeRange>("all")
 	const [records, setRecords] = useState<AnalysisRecord[]>([])
+	const [project, setProject] = useState<Project | null>(null)
 	const [loading, setLoading] = useState(isDatabaseMode)
 
 	useEffect(() => {
@@ -31,6 +32,8 @@ export function DashboardPage() {
 		let cancelled = false
 		const load = async () => {
 			try {
+				const p = await dataService.getProject().catch(() => null)
+				if (!cancelled) setProject(p)
 				const data = await dataService.getAnalysisRecords()
 				if (!cancelled) setRecords(data)
 			} catch {
@@ -45,13 +48,16 @@ export function DashboardPage() {
 		}
 	}, [])
 
+	const brandName = project?.name ?? BRAND.name
+	const brandDomain = project?.domain ?? BRAND.domain
+
 	const metrics = useMemo(() => {
 		const filtered = filterAnalysisRecords(records, {
 			surfaceFilter,
 			timeFilter,
 		})
-		return computeDashboardMetrics(filtered, BRAND.name, BRAND.domain)
-	}, [records, surfaceFilter, timeFilter])
+		return computeDashboardMetrics(filtered, brandName, brandDomain)
+	}, [records, surfaceFilter, timeFilter, brandName, brandDomain])
 
 	const promptGroups = useMemo((): PromptGroup[] => {
 		const filtered = filterAnalysisRecords(records, {
@@ -140,6 +146,12 @@ export function DashboardPage() {
 					<h1 className="truncate text-[0.95rem] font-medium tracking-[-0.01em] text-gray-950 dark:text-gray-50">
 						Tableau de bord
 					</h1>
+					{project && (
+						<span className="ml-2 hidden items-center gap-1.5 rounded-[var(--app-radius)] bg-stone-100 px-2.5 py-1 text-[11px] font-medium text-gray-600 dark:bg-neutral-800 dark:text-gray-400 sm:inline-flex">
+							<Globe className="h-3 w-3" />
+							{project.name}
+						</span>
+					)}
 					<div className="ml-auto flex items-center gap-2">
 						{loading && <Loader2 className="size-4 animate-spin text-gray-400" />}
 						{!isDatabaseMode && (
@@ -170,8 +182,8 @@ export function DashboardPage() {
 							<div className="space-y-5 sm:space-y-6">
 								<div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
 									<DashboardFilters
-										brandName={BRAND.name}
-										brandDomain={BRAND.domain}
+										brandName={brandName}
+										brandDomain={brandDomain}
 										surfaceFilter={surfaceFilter}
 										setSurfaceFilter={setSurfaceFilter}
 										timeFilter={timeFilter}
@@ -226,11 +238,12 @@ export function DashboardPage() {
 											topSource={metrics.sourcesIntelligence[0]?.domain ?? "N/A"}
 											topCompetitor={metrics.aggregateStats.topCompetitor}
 											topCompetitorDomain={metrics.aggregateStats.topCompetitorDomain ?? undefined}
+											brandName={brandName}
 										/>
 
 										<div className="space-y-4 sm:space-y-5">
 											{hasCompetitorRows ? (
-												<CompetitiveLandscape competitors={metrics.competitorData} />
+												<CompetitiveLandscape competitors={metrics.competitorData} brandName={brandName} />
 											) : null}
 
 											{insightCardCount > 0 ? (
@@ -251,6 +264,7 @@ export function DashboardPage() {
 															pricingPerception={metrics.brandPerception.pricingPerception}
 															coreClaims={metrics.brandPerception.coreClaims}
 															differentiators={metrics.brandPerception.differentiators}
+															brandName={brandName}
 														/>
 													) : null}
 												</div>

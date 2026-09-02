@@ -17,8 +17,10 @@ type SortColumn = "name" | "mentionCount" | "visibility" | "sentiment"
 
 export function CompetitiveLandscape({
 	competitors,
+	brandName,
 }: {
 	competitors: DashboardCompetitorData[]
+	brandName: string
 }) {
 	const { sortColumn, sortDirection, toggleSort } = useSortState<SortColumn>("desc")
 
@@ -36,7 +38,7 @@ export function CompetitiveLandscape({
 					Paysage concurrentiel
 				</h1>
 				<p className="mt-2 text-xs text-muted-foreground">
-					Comparaison de la visibilite de PlayVOD et de ses concurrents dans les reponses IA.
+					Comparaison de la visibilite de {brandName} et de ses concurrents dans les reponses IA.
 				</p>
 			</div>
 			<Table>

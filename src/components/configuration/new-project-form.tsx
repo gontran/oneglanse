@@ -95,7 +95,7 @@ export function NewProjectForm({ onCreate }: NewProjectFormProps) {
 						type="text"
 						value={name}
 						onChange={(e) => setName(e.target.value)}
-						placeholder="Ex: PlayVOD"
+						placeholder="Ex: Ma Marque"
 						className="w-full rounded-[var(--app-radius)] border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800 outline-none transition-[border-color,box-shadow] focus:border-gray-400 dark:border-gray-700 dark:bg-neutral-900 dark:text-gray-200"
 					/>
 				</div>

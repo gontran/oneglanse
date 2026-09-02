@@ -14,11 +14,13 @@ export function BrandPerceptionCard({
 	pricingPerception,
 	coreClaims,
 	differentiators,
+	brandName,
 }: {
 	bestKnownFor: string | null
 	pricingPerception: string
 	coreClaims: string[]
 	differentiators: string[]
+	brandName: string
 }) {
 	return (
 		<Card className="flex h-full min-w-0 flex-col p-5 lg:p-6">
@@ -27,7 +29,7 @@ export function BrandPerceptionCard({
 					Perception de marque
 				</h1>
 				<p className="mt-2 text-xs text-muted-foreground">
-					Ce que les IA disent le plus souvent de PlayVOD.
+					Ce que les IA disent le plus souvent de {brandName}.
 				</p>
 			</div>
 

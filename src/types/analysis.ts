@@ -151,6 +151,7 @@ export interface AuditResultDetail {
 	is_analysed: boolean
 	brand_mentioned: boolean | null
 	brand_position: number | null
+	brand_name: string | null
 	error_message: string | null
 	usage_data: Record<string, unknown> | null
 	cost_data: Record<string, unknown> | null

@@ -1,6 +1,5 @@
-import { Favicon } from "@/components/ui/favicon"
+import { AppLogo } from "@/components/ui/app-logo"
 import { isDatabaseMode, useAuth } from "@/lib/auth/auth-context"
-import { BRAND } from "@/lib/data/brand"
 import { Loader as Loader2 } from "lucide-react"
 import { useState } from "react"
 import { Link, Navigate, useNavigate } from "react-router-dom"
@@ -42,9 +41,9 @@ export function SignupPage() {
 		<div className="flex min-h-screen flex-col items-center justify-center bg-stone-50 px-4 dark:bg-neutral-950">
 			<div className="w-full max-w-sm space-y-6">
 				<div className="flex flex-col items-center gap-2">
-					<Favicon domain={BRAND.domain} name={BRAND.name} size="h-10 w-10" />
+					<AppLogo size="h-10 w-10" showText={false} />
 					<span className="text-lg font-bold tracking-tight text-gray-950 dark:text-gray-50">
-						PlayVOD
+						Audit Visibilite IA
 					</span>
 				</div>
 

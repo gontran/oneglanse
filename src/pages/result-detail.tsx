@@ -160,7 +160,7 @@ export function ResultDetailPage() {
 												</div>
 												<div>
 													<span className="text-[11px] font-medium uppercase tracking-wide text-gray-400">
-														PlayVOD present
+														{result.brand_name ?? "Marque"} present
 													</span>
 													<p className="text-gray-700 dark:text-gray-300">
 														{result.brand_mentioned === null

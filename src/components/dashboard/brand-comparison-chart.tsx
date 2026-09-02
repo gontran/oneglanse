@@ -94,7 +94,7 @@ export function BrandComparisonChart({
 						viewBox={`0 0 ${size} ${size}`}
 						className="overflow-visible"
 						role="img"
-						aria-label="Graphique radar comparant PlayVOD aux concurrents"
+						aria-label={`Graphique radar comparant ${brandName} aux concurrents`}
 					>
 						{/* Grid circles */}
 						{gridLevels.map((level) => {
