@@ -12,6 +12,7 @@ interface ProviderConfig {
 	model: string
 	envKey: string
 	endpoint: string
+	searchEndpoint: string
 	extractResponse: (data: Record<string, unknown>) => { text: string; citations: string[]; usage: Record<string, unknown> | null }
 }
 
@@ -22,6 +23,7 @@ const PROVIDERS: Record<string, ProviderConfig> = {
 		model: "sonar",
 		envKey: "PERPLEXITY_API_KEY",
 		endpoint: "https://api.perplexity.ai/chat/completions",
+		searchEndpoint: "https://api.perplexity.ai/chat/completions",
 		extractResponse: (data) => ({
 			text: (data?.choices?.[0]?.message?.content as string) ?? "",
 			citations: (data?.citations as string[]) ?? [],
@@ -34,9 +36,10 @@ const PROVIDERS: Record<string, ProviderConfig> = {
 		model: "gpt-4o",
 		envKey: "OPENAI_API_KEY",
 		endpoint: "https://api.openai.com/v1/chat/completions",
+		searchEndpoint: "https://api.openai.com/v1/responses",
 		extractResponse: (data) => ({
-			text: (data?.choices?.[0]?.message?.content as string) ?? "",
-			citations: [],
+			text: extractOpenAiResponsesText(data),
+			citations: extractOpenAiResponsesCitations(data),
 			usage: (data?.usage as Record<string, unknown>) ?? null,
 		}),
 	},
@@ -46,9 +49,10 @@ const PROVIDERS: Record<string, ProviderConfig> = {
 		model: "gemini-2.0-flash",
 		envKey: "GEMINI_API_KEY",
 		endpoint: "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent",
+		searchEndpoint: "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent",
 		extractResponse: (data) => ({
 			text: (data?.candidates?.[0]?.content?.parts?.[0]?.text as string) ?? "",
-			citations: [],
+			citations: extractGeminiCitations(data),
 			usage: (data?.usageMetadata as Record<string, unknown>) ?? null,
 		}),
 	},
@@ -61,15 +65,30 @@ function getProvider(id: string): ProviderConfig | null {
 function buildApiRequest(provider: ProviderConfig, apiKey: string, promptText: string): { url: string; headers: Record<string, string>; body: string } {
 	if (provider.id === "gemini") {
 		return {
-			url: `${provider.endpoint}?key=${apiKey}`,
+			url: `${provider.searchEndpoint}?key=${apiKey}`,
 			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify({
 				contents: [{ parts: [{ text: promptText }] }],
+				tools: [{ google_search: {} }],
+			}),
+		}
+	}
+	if (provider.id === "openai") {
+		return {
+			url: provider.searchEndpoint,
+			headers: {
+				Authorization: `Bearer ${apiKey}`,
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({
+				model: provider.model,
+				tools: [{ type: "web_search_preview" }],
+				input: promptText,
 			}),
 		}
 	}
 	return {
-		url: provider.endpoint,
+		url: provider.searchEndpoint,
 		headers: {
 			Authorization: `Bearer ${apiKey}`,
 			"Content-Type": "application/json",
@@ -77,6 +96,7 @@ function buildApiRequest(provider: ProviderConfig, apiKey: string, promptText: s
 		body: JSON.stringify({
 			model: provider.model,
 			messages: [{ role: "user", content: promptText }],
+			search_recency_filter: "month",
 		}),
 	}
 }
@@ -110,6 +130,68 @@ function extractAnalysisText(provider: ProviderConfig, data: Record<string, unkn
 		return (data?.candidates?.[0]?.content?.parts?.[0]?.text as string) ?? ""
 	}
 	return (data?.choices?.[0]?.message?.content as string) ?? ""
+}
+
+function extractOpenAiResponsesText(data: Record<string, unknown>): string {
+	const output = data?.output as Record<string, unknown>[] | undefined
+	if (!Array.isArray(output)) return ""
+	for (const item of output) {
+		if (item?.type === "message") {
+			const content = item?.content as Record<string, unknown>[] | undefined
+			if (Array.isArray(content)) {
+				for (const part of content) {
+					if (part?.type === "output_text") {
+						return (part?.text as string) ?? ""
+					}
+				}
+			}
+		}
+	}
+	return ""
+}
+
+function extractOpenAiResponsesCitations(data: Record<string, unknown>): string[] {
+	const citations: string[] = []
+	const output = data?.output as Record<string, unknown>[] | undefined
+	if (!Array.isArray(output)) return citations
+	for (const item of output) {
+		if (item?.type === "message") {
+			const content = item?.content as Record<string, unknown>[] | undefined
+			if (Array.isArray(content)) {
+				for (const part of content) {
+					const annotations = part?.annotations as Record<string, unknown>[] | undefined
+					if (Array.isArray(annotations)) {
+						for (const ann of annotations) {
+							if (ann?.type === "url_citation") {
+								const url = ann?.url as string | undefined
+								if (url) citations.push(url)
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	return citations
+}
+
+function extractGeminiCitations(data: Record<string, unknown>): string[] {
+	const citations: string[] = []
+	const candidates = data?.candidates as Record<string, unknown>[] | undefined
+	if (!Array.isArray(candidates)) return citations
+	for (const candidate of candidates) {
+		const groundingMetadata = candidate?.groundingMetadata as Record<string, unknown> | undefined
+		if (!groundingMetadata) continue
+		const chunks = groundingMetadata?.groundingChunks as Record<string, unknown>[] | undefined
+		if (!Array.isArray(chunks)) continue
+		for (const chunk of chunks) {
+			const web = chunk?.web as Record<string, unknown> | undefined
+			if (web?.uri) {
+				citations.push(web.uri as string)
+			}
+		}
+	}
+	return citations
 }
 
 Deno.serve(async (req: Request) => {
@@ -236,7 +318,7 @@ Deno.serve(async (req: Request) => {
 		}
 
 		const controller = new AbortController()
-		const timeout = setTimeout(() => controller.abort(), 30000)
+		const timeout = setTimeout(() => controller.abort(), 60000)
 
 		const apiReq = buildApiRequest(provider, apiKey, prompt.text)
 
